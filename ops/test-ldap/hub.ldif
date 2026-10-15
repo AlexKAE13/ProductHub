@@ -1,0 +1,68 @@
+# Тестовый каталог для проверки входа (не для боевого использования). Пароль у всех: Test1234
+dn: ou=people,dc=example,dc=local
+objectClass: organizationalUnit
+ou: people
+
+dn: ou=groups,dc=example,dc=local
+objectClass: organizationalUnit
+ou: groups
+
+dn: uid=kuznetsov,ou=people,dc=example,dc=local
+objectClass: inetOrgPerson
+uid: kuznetsov
+cn: Александр Кузнецов
+sn: Кузнецов
+mail: kuznetsov@example.local
+userPassword: Test1234
+
+dn: uid=moiseev,ou=people,dc=example,dc=local
+objectClass: inetOrgPerson
+uid: moiseev
+cn: Михаил Моисеев
+sn: Моисеев
+mail: moiseev@example.local
+userPassword: Test1234
+
+dn: uid=sales1,ou=people,dc=example,dc=local
+objectClass: inetOrgPerson
+uid: sales1
+cn: Тест Продажи
+sn: Продажи
+mail: sales1@example.local
+userPassword: Test1234
+
+dn: uid=admin1,ou=people,dc=example,dc=local
+objectClass: inetOrgPerson
+uid: admin1
+cn: Тест Администратор
+sn: Администратор
+mail: admin1@example.local
+userPassword: Test1234
+
+dn: uid=outsider,ou=people,dc=example,dc=local
+objectClass: inetOrgPerson
+uid: outsider
+cn: Посторонний
+sn: Посторонний
+mail: outsider@example.local
+userPassword: Test1234
+
+dn: cn=hub-product,ou=groups,dc=example,dc=local
+objectClass: groupOfNames
+cn: hub-product
+member: uid=kuznetsov,ou=people,dc=example,dc=local
+
+dn: cn=hub-head,ou=groups,dc=example,dc=local
+objectClass: groupOfNames
+cn: hub-head
+member: uid=moiseev,ou=people,dc=example,dc=local
+
+dn: cn=hub-sales,ou=groups,dc=example,dc=local
+objectClass: groupOfNames
+cn: hub-sales
+member: uid=sales1,ou=people,dc=example,dc=local
+
+dn: cn=hub-admin,ou=groups,dc=example,dc=local
+objectClass: groupOfNames
+cn: hub-admin
+member: uid=admin1,ou=people,dc=example,dc=local

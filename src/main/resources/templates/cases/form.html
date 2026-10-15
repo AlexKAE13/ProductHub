@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: page(~{::title}, ~{::main})}">
+<head>
+    <title th:text="${caseId != null} ? #{cases.edit} : #{cases.create}">Кейс</title>
+</head>
+<body>
+<main class="content wide">
+    <h1 th:text="${caseId != null} ? #{cases.edit} : #{cases.create}">Кейс</h1>
+    <form class="block editing" method="post"
+          th:action="${caseId != null} ? @{/cases/{id}/edit(id=${caseId})} : @{/cases}">
+        <div class="field"><label for="title" th:text="#{cases.col.title}">Название</label>
+            <input type="text" id="title" name="title" th:value="${form.title}" required>
+            <span class="error" th:if="${errors != null and errors.containsKey('title')}" th:text="#{${errors['title']}}"></span></div>
+        <div class="field-row">
+            <div class="field"><label for="country" th:text="#{cases.col.country}">Страна</label>
+                <input type="text" id="country" name="country" th:value="${form.country}" list="country-list" required>
+                <datalist id="country-list"><option th:each="c : ${countries}" th:value="${c}"></option></datalist>
+                <span class="error" th:if="${errors != null and errors.containsKey('country')}" th:text="#{${errors['country']}}"></span></div>
+            <div class="field"><label for="city" th:text="#{cases.field.city}">Город</label>
+                <input type="text" id="city" name="city" th:value="${form.city}"></div>
+            <div class="field"><label for="year" th:text="#{cases.col.year}">Год</label>
+                <input type="text" id="year" name="year" th:value="${form.year}" size="6">
+                <span class="error" th:if="${errors != null and errors.containsKey('year')}" th:text="#{${errors['year']}}"></span></div>
+            <div class="field"><label for="deploymentSize" th:text="#{cases.field.deploymentSize}">Масштаб</label>
+                <input type="text" id="deploymentSize" name="deploymentSize" th:value="${form.deploymentSize}" placeholder="500 точек доступа"></div>
+        </div>
+        <div class="field-row">
+            <div class="field"><label for="customerName" th:text="#{cases.field.customerName}">Заказчик</label>
+                <input type="text" id="customerName" name="customerName" th:value="${form.customerName}"></div>
+            <div class="field"><label for="ownerId" th:text="#{artifacts.col.owner}">Владелец</label>
+                <select id="ownerId" name="ownerId">
+                    <option th:each="o : ${owners}" th:value="${o.id}" th:text="${o.fullName}" th:selected="${o.id == form.ownerId}"></option></select></div>
+        </div>
+        <label class="check-line"><input type="checkbox" name="customerVisible" value="true" th:checked="${form.customerVisible}">
+            <span th:text="#{cases.customerVisible}">Можно называть заказчика</span></label>
+        <p class="muted small" th:text="#{cases.customerVisible.hint}"></p>
+        <label class="check-line"><input type="checkbox" name="publicationAllowed" value="true" th:checked="${form.publicationAllowed}">
+            <span th:text="#{cases.publicationAllowed}">Можно показывать партнерам (внешний контур)</span></label>
+        <div class="field" style="margin-top:10px"><label for="skus" th:text="#{firmware.skusHint}">SKU</label>
+            <textarea id="skus" name="skus" data-suggest="sku" autocomplete="off" rows="2" th:text="${form.skus}" required></textarea>
+            <span class="error" th:if="${errors != null and errors.containsKey('skus')}" th:text="#{${errors['skus']}}"></span></div>
+        <div class="field"><label th:text="#{artifacts.col.tags}">Теги</label>
+            <div class="tag-picker">
+                <label class="check" th:each="t : ${allTags}">
+                    <input type="checkbox" name="tagIds" th:value="${t.id}" th:checked="${form.tagIds != null and form.tagIds.contains(t.id)}">
+                    <span th:text="#{'tagCategory.' + ${t.category}} + ': ' + ${t.value}">тег</span>
+                </label>
+            </div>
+            <span class="muted small" th:text="#{sku.tags.hint}"></span></div>
+        <div class="field"><label for="summary" th:text="#{cases.field.summary}">Кратко</label>
+            <textarea id="summary" name="summary" rows="3" th:text="${form.summary}"></textarea></div>
+        <div class="field"><label for="challenge" th:text="#{cases.field.challenge}">Задача</label>
+            <textarea id="challenge" name="challenge" rows="3" th:text="${form.challenge}"></textarea></div>
+        <div class="field"><label for="solution" th:text="#{cases.field.solution}">Решение</label>
+            <textarea id="solution" name="solution" rows="3" th:text="${form.solution}"></textarea></div>
+        <div class="field"><label for="results" th:text="#{cases.field.results}">Результаты</label>
+            <textarea id="results" name="results" rows="3" th:text="${form.results}"></textarea></div>
+        <div class="form-actions">
+            <button type="submit" class="primary" th:text="#{common.save}">Сохранить</button>
+            <a class="btn" th:href="${caseId != null} ? @{/cases/{id}(id=${caseId})} : @{/cases}" th:text="#{common.cancel}">Отмена</a>
+        </div>
+    </form>
+</main>
+</body>
+</html>

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: page(~{::title}, ~{::main})}">
+<head>
+    <title th:text="#{feedback.manage.title}">Правки</title>
+</head>
+<body>
+<main class="content wide">
+    <div class="page-head">
+        <div>
+            <h1 th:text="#{feedback.manage.title}">Правки к интерфейсу</h1>
+            <p class="muted" th:text="#{feedback.manage.text}"></p>
+        </div>
+        <div class="actions">
+            <a class="button primary" th:href="@{/feedback/export(status=${fStatus},page=${fPage},author=${fAuthor})}"
+               th:text="#{feedback.manage.export}">Выгрузить файл</a>
+        </div>
+    </div>
+    <p class="muted small" th:if="${fStatus.isEmpty()}" th:text="#{feedback.manage.exportHint}"></p>
+
+    <form th:action="@{/feedback}" method="get" class="filters">
+        <select name="status" onchange="this.form.submit()" th:aria-label="#{feedback.manage.filter.status}">
+            <option value="" th:text="#{feedback.manage.filter.status} + ': ' + #{feedback.manage.filter.all}">Статус</option>
+            <option th:each="s : ${statuses}" th:value="${s}" th:text="#{'feedback.status.' + ${s}}" th:selected="${s.name() == fStatus}"></option>
+        </select>
+        <select name="page" onchange="this.form.submit()" th:aria-label="#{feedback.manage.filter.page}">
+            <option value="" th:text="#{feedback.manage.filter.page} + ': ' + #{feedback.manage.filter.all}">Страница</option>
+            <option th:each="p : ${pages}" th:value="${p}" th:text="${p}" th:selected="${p == fPage}"></option>
+        </select>
+    </form>
+
+    <p class="empty" th:if="${comments.isEmpty()}" th:text="#{feedback.manage.empty}">Комментариев нет</p>
+
+    <section class="block fb-item" th:each="c : ${comments}" th:classappend="${c.status() == 'DONE'} ? 'fb-resolved'">
+        <div class="fb-item-head">
+            <strong>№<span th:text="${c.id()}">1</span></strong>
+            <span class="tag" th:text="#{'feedback.kind.' + ${c.kind()}}">Ошибка</span>
+            <span class="st" th:classappend="'fbst-' + ${c.status()}" th:text="#{'feedback.status.' + ${c.status()}}">Новый</span>
+            <span class="muted" th:text="${c.authorName()} + ', ' + ${c.createdAt()}">Автор</span>
+            <a th:href="${c.pagePath() + (c.pageQuery() == null ? '' : c.pageQuery())}" th:text="${c.pageTitle() != null} ? ${c.pageTitle()} + ' (' + ${c.pagePath()} + ')' : ${c.pagePath()}">Страница</a>
+        </div>
+        <p class="pre" th:text="${c.body()}">Текст</p>
+        <p class="muted small" th:if="${c.onElement()}">
+            <span th:text="#{feedback.manage.element}">Элемент</span>:
+            <span th:if="${c.section() != null}" th:text="'\'' + ${c.section()} + '\' / '"></span><code th:text="${c.selector()}">sel</code>
+            <span th:if="${c.text() != null}" th:text="' - \'' + ${c.text()} + '\''"></span>
+        </p>
+        <p class="muted small" th:unless="${c.onElement()}" th:text="#{feedback.manage.wholePage}">Вся страница</p>
+        <ul class="fb-replies" th:if="${!c.replies().isEmpty()}">
+            <li th:each="r : ${c.replies()}"><strong th:text="${r.authorName()}">Имя</strong>: <span th:text="${r.body()}">Ответ</span></li>
+        </ul>
+        <form th:action="@{/feedback/comments/{id}/status(id=${c.id()})}" method="post" class="filters fb-status-form">
+            <select name="status" th:aria-label="#{feedback.manage.filter.status}">
+                <option th:each="s : ${statuses}" th:value="${s}" th:text="#{'feedback.status.' + ${s}}" th:selected="${s.name() == c.status()}"></option>
+            </select>
+            <input type="text" name="note" th:value="${c.resolutionNote()}" th:placeholder="#{feedback.manage.note}" maxlength="1000">
+            <button type="submit" th:text="#{feedback.manage.save}">Сохранить</button>
+        </form>
+        <form th:action="@{/feedback/comments/{id}/resolve(id=${c.id()})}" method="post" class="inline fb-resolve-form">
+            <input type="hidden" name="resolved" th:value="${c.status() != 'DONE'}">
+            <input type="hidden" name="back" th:value="'/feedback' + (${fStatus != '' or fPage != '' or fAuthor != ''} ? '?status=' + ${fStatus} + '&page=' + ${fPage} + '&author=' + ${fAuthor} : '')">
+            <button type="submit" class="fb-resolve" th:classappend="${c.status() == 'DONE'} ? 'is-done'"
+                    th:text="${c.status() == 'DONE'} ? #{feedback.reopen} : #{feedback.resolve}">Отметить решенным</button>
+        </form>
+    </section>
+</main>
+</body>
+</html>

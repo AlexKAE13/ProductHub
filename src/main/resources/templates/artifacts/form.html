@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: page(~{::title}, ~{::main})}">
+<head>
+    <title th:text="${artifactId != null} ? #{artifacts.edit} : #{artifacts.newLink}">Артефакт</title>
+</head>
+<body>
+<main class="content wide">
+    <h1 th:text="${artifactId != null} ? #{artifacts.edit} : #{artifacts.newLink}">Артефакт</h1>
+    <form class="block editing" method="post"
+          th:action="${artifactId != null} ? @{/artifacts/{id}/edit(id=${artifactId})} : @{/artifacts}">
+        <div class="field-row">
+            <div class="field"><label for="title" th:text="#{artifacts.col.title}">Название</label>
+                <input type="text" id="title" name="title" th:value="${form.title}" required>
+                <span class="error" th:if="${errors != null and errors.containsKey('title')}" th:text="#{${errors['title']}}"></span></div>
+            <div class="field"><label for="typeId" th:text="#{artifacts.col.type}">Тип</label>
+                <select id="typeId" name="typeId" required>
+                    <option th:each="t : ${types}" th:value="${t.id}" th:text="${t.name}" th:selected="${t.id == form.typeId}"></option></select>
+                <span class="error" th:if="${errors != null and errors.containsKey('typeId')}" th:text="#{${errors['typeId']}}"></span></div>
+        </div>
+        <div class="field-row">
+            <div class="field"><label for="language" th:text="#{artifacts.col.language}">Язык</label>
+                <select id="language" name="language">
+                    <option th:each="l : ${languages}" th:value="${l}" th:text="#{'language.' + ${l}}" th:selected="${l.name() == form.language}"></option></select></div>
+            <div class="field"><label for="status" th:text="#{artifacts.col.status}">Статус</label>
+                <select id="status" name="status">
+                    <option th:each="s : ${statuses}" th:value="${s}" th:text="#{'artifactStatus.' + ${s}}" th:selected="${s.name() == form.status}"></option></select></div>
+            <div class="field"><label for="ownerId" th:text="#{artifacts.col.owner}">Владелец</label>
+                <select id="ownerId" name="ownerId">
+                    <option th:each="o : ${owners}" th:value="${o.id}" th:text="${o.fullName}" th:selected="${o.id == form.ownerId}"></option></select></div>
+            <div class="field"><label for="contour" th:text="#{artifacts.col.contour}">Контур</label>
+                <select id="contour" name="contour">
+                    <option th:each="c : ${contours}" th:value="${c}" th:text="#{'contour.' + ${c}}" th:selected="${c.name() == form.contour}"></option></select></div>
+        </div>
+        <div class="field"><label for="externalUrl" th:text="#{artifacts.externalUrl}">Ссылка</label>
+            <input type="text" id="externalUrl" name="externalUrl" th:value="${form.externalUrl}" placeholder="https://">
+            <span class="error" th:if="${errors != null and errors.containsKey('externalUrl')}" th:text="#{${errors['externalUrl']}}"></span></div>
+        <div class="field"><label for="description" th:text="#{field.description}">Описание</label>
+            <textarea id="description" name="description" rows="3" th:text="${form.description}"></textarea></div>
+        <div class="field-row">
+            <div class="field"><label for="skus" th:text="#{artifacts.skusHint}">SKU через запятую</label>
+                <textarea id="skus" name="skus" data-suggest="sku" autocomplete="off" rows="2" th:text="${form.skus}"></textarea>
+                <span class="error" th:if="${errors != null and errors.containsKey('skus')}" th:text="#{${errors['skus']}}"></span></div>
+            <div class="field"><label for="lineId" th:text="#{artifacts.lineHint}">Для всей линейки</label>
+                <select id="lineId" name="lineId"><option value="" th:text="#{common.none}">-</option>
+                    <option th:each="l : ${lines}" th:value="${l.id}" th:text="${l.code}" th:selected="${l.id == form.lineId}"></option></select></div>
+            <div class="field" th:if="${artifactId != null}"><label for="reviewPeriodDays" th:text="#{artifacts.reviewPeriod}">Период ревью</label>
+                <input type="text" id="reviewPeriodDays" name="reviewPeriodDays" th:value="${form.reviewPeriodDays}" size="6">
+                <span class="error" th:if="${errors != null and errors.containsKey('reviewPeriodDays')}" th:text="#{${errors['reviewPeriodDays']}}"></span></div>
+        </div>
+        <div class="field"><label th:text="#{artifacts.col.tags}">Теги</label>
+            <div class="tag-picker">
+                <label class="check" th:each="t : ${allTags}">
+                    <input type="checkbox" name="tagIds" th:value="${t.id}" th:checked="${form.tagIds != null and form.tagIds.contains(t.id)}">
+                    <span th:text="#{'tagCategory.' + ${t.category}} + ': ' + ${t.value}">тег</span>
+                </label>
+            </div></div>
+        <span class="error" th:if="${errors != null and errors.containsKey('files')}" th:text="#{${errors['files']}}"></span>
+        <div class="form-actions">
+            <button type="submit" class="primary" th:text="#{common.save}">Сохранить</button>
+            <a class="btn" th:href="${artifactId != null} ? @{/artifacts/{id}(id=${artifactId})} : @{/artifacts}" th:text="#{common.cancel}">Отмена</a>
+        </div>
+    </form>
+</main>
+</body>
+</html>

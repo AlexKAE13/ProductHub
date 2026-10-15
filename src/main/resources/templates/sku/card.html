@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: page(~{::title}, ~{::main})}">
+<head>
+    <title th:text="${s.model}">WEP-550K</title>
+</head>
+<body>
+<main class="content wide card">
+
+    <!-- 1. Шапка -->
+    <section id="block-main" class="hero" th:fragment="block-main">
+        <div class="hero-top">
+            <div>
+                <div class="crumbs"><a th:href="@{/catalog}" th:text="#{menu.catalog}">Каталог</a> / <a th:href="@{/catalog(line=${s.line.code})}" th:text="${s.line.code}">WEP</a></div>
+                <h1>
+                    <span th:text="${s.model}">WEP-550K</span>
+                    <span class="lc" th:classappend="'lc-' + ${s.lifecycleStatus}"
+                          th:text="#{'lifecycle.' + ${s.lifecycleStatus}}">Статус</span>
+                </h1>
+                <p class="subtitle" th:if="${s.nameRu != null}" th:text="${s.nameRu}">Наименование RU</p>
+                <p class="muted" th:if="${s.nameEn != null}" th:text="${s.nameEn}">Name EN</p>
+            </div>
+            <div class="actions" th:if="${card.canEdit()}">
+                <button type="button" class="link-btn edit-only" th:text="#{sku.edit.main}"
+                        th:attr="hx-get=@{/skus/{id}/edit/main(id=${s.id})}" hx-target="#block-main" hx-swap="outerHTML">Основные данные</button>
+                <button type="button" id="editToggle" class="edit-toggle" th:text="#{common.edit}"
+                        th:attr="data-l-edit=#{common.edit},data-l-done=#{sku.edit.done}" aria-pressed="false">Править</button>
+                <details class="more edit-only">
+                    <summary th:title="#{sku.menu}" th:aria-label="#{sku.menu}">&middot;&middot;&middot;</summary>
+                    <div class="more-list">
+                        <a th:href="@{/skus/new(copyFrom=${s.id})}" th:text="#{sku.copy}">Создать копию</a>
+                        <form th:action="@{/skus/{id}/delete(id=${s.id})}" method="post"
+                              th:attr="onsubmit=|return confirm('${#messages.msg('sku.delete.confirm')}')|">
+                            <button type="submit" class="danger" th:text="#{sku.delete}">Удалить</button>
+                        </form>
+                    </div>
+                </details>
+            </div>
+        </div>
+        <dl class="facts">
+            <div><dt th:text="#{sku.category}">Категория</dt><dd th:text="${s.category}">Категория</dd></div>
+            <div><dt th:text="#{sku.owners}">Владельцы</dt><dd th:text="${s.ownerNames}">Владелец</dd></div>
+            <div th:if="${s.chip != null}"><dt th:text="#{sku.chip}">Чипсет</dt><dd th:text="${s.chip}">Чип</dd></div>
+            <div><dt th:text="#{sku.lastReview}">Последнее ревью</dt>
+                <dd th:text="${s.lastReviewDate != null} ? ${#temporals.format(s.lastReviewDate, 'dd.MM.yyyy')} : '-'">01.01.2026</dd></div>
+            <div><dt th:text="#{sku.completeness}">Заполненность</dt><dd><span id="completeness" th:insert="~{:: completeness-inner}"></span></dd></div>
+        </dl>
+        <p class="tag-line" th:if="${!card.tags().isEmpty()}">
+            <a class="tag" th:each="t : ${card.tags()}" th:href="@{/catalog(tag=${t.id})}" th:text="${t.value}"
+               th:title="#{'tagCategory.' + ${t.category}}">тег</a>
+        </p>
+        <p class="site-line" th:if="${s.siteSectionRu != null or s.siteSectionEn != null}">
+            <span th:text="#{sku.site.label} + ':'">На сайтах:</span>
+            <span th:if="${s.siteSectionRu != null}">RU - <span th:text="${s.siteSectionRu}"></span><span th:if="${s.siteSubsectionRu != null}" th:text="' / ' + ${s.siteSubsectionRu}"></span><span th:if="${s.siteStatusRu != null}" th:text="' (' + ${s.siteStatusRu} + ')'"></span></span>
+            <span th:if="${s.siteSectionRu != null and s.siteSectionEn != null}"> &middot; </span>
+            <span th:if="${s.siteSectionEn != null}">EN - <span th:text="${s.siteSectionEn}"></span><span th:if="${s.siteSubsectionEn != null}" th:text="' / ' + ${s.siteSubsectionEn}"></span><span th:if="${s.siteStatusEn != null}" th:text="' (' + ${s.siteStatusEn} + ')'"></span></span>
+        </p>
+    </section>
+
+    <div class="card-layout">
+        <div class="col-main">
+
+            <!-- 2. Ключевые особенности и описание -->
+            <section id="block-text" class="block" th:fragment="block-text" th:if="${card.can('DESCRIPTION')}">
+                <div class="block-head">
+                    <h2 th:text="#{sku.section.text}">Описание</h2>
+                    <button type="button" class="link-btn edit-only" th:if="${card.canEdit()}" th:text="#{common.edit}"
+                            th:attr="hx-get=@{/skus/{id}/edit/text(id=${s.id})}" hx-target="#block-text" hx-swap="outerHTML">Править</button>
+                </div>
+                <ul class="features" th:if="${!s.keyFeatureList.isEmpty()}">
+                    <li th:each="line : ${s.keyFeatureList}" th:text="${line}">Особенность</li>
+                </ul>
+                <p class="pre" th:if="${s.description != null}" th:text="${s.description}">Описание</p>
+                <p class="empty-note" th:if="${s.description == null and s.keyFeatureList.isEmpty()}" th:text="#{sku.noDescription}">Описание не заполнено.</p>
+            </section>
+
+            <!-- 3. Характеристики: только заполненные, пустые одной строкой -->
+            <section id="block-specs" class="block" th:fragment="block-specs" th:if="${card.can('SPECS')}">
+                <div class="block-head">
+                    <h2 th:text="#{sku.section.specs}">Характеристики</h2>
+                    <button type="button" class="link-btn edit-only" th:if="${card.canEditSpecs()}" th:text="#{common.edit}"
+                            th:attr="hx-get=@{/skus/{id}/edit/specs(id=${s.id})}" hx-target="#block-specs" hx-swap="outerHTML">Править</button>
+                </div>
+                <div th:each="g : ${card.specGroups()}">
+                    <h3 th:text="${g.name()}">Радио</h3>
+                    <dl class="specs-grid">
+                        <div th:each="r : ${g.rows()}">
+                            <dt th:text="${r.definition().labelRu}">Характеристика</dt>
+                            <dd th:text="${r.value()} + (${r.definition().unit != null} ? ' ' + ${r.definition().unit} : '')">значение</dd>
+                        </div>
+                    </dl>
+                </div>
+                <p class="empty-note" th:if="${card.specGroups().isEmpty()}" th:text="#{sku.noSpecsFilled}">Характеристики пока не заполнены.</p>
+                <p class="empty-note" th:if="${card.emptySpecs() > 0 and card.canEditSpecs()}">
+                    <span th:text="#{sku.specs.emptyNote(${card.emptySpecs()})}">Не заполнено полей: 12</span>
+                    <button type="button" class="link-btn edit-only" th:text="#{sku.specs.fillAction}"
+                            th:attr="hx-get=@{/skus/{id}/edit/specs(id=${s.id})}" hx-target="#block-specs" hx-swap="outerHTML">Заполнить</button>
+                </p>
+            </section>
+
+            <!-- 4. Прошивки -->
+            <th:block th:replace="~{sku/firmware :: block}"></th:block>
+
+            <!-- 5 и 6. Документация, сравнения и battle cards -->
+            <th:block th:replace="~{sku/materials :: docs-compare}"></th:block>
+
+            <!-- 7. Кейсы -->
+            <th:block th:replace="~{sku/cases :: block}"></th:block>
+
+            <!-- 9. Фото и видео -->
+            <th:block th:replace="~{sku/materials :: media}"></th:block>
+
+            <!-- 12. FAQ, вопросы и правки -->
+            <th:block th:replace="~{qa/block :: block}"></th:block>
+
+            <!-- 13. История изменений -->
+            <section id="block-history" class="block" th:if="${card.can('HISTORY')}" th:insert="~{:: history-inner}"></section>
+        </div>
+
+        <aside class="col-side">
+            <!-- 10. Жизненный цикл -->
+            <section id="block-lifecycle" class="block" th:fragment="block-lifecycle" th:if="${card.can('LIFECYCLE')}">
+                <div class="block-head">
+                    <h2 th:text="#{sku.section.lifecycle}">Жизненный цикл</h2>
+                    <div class="actions" th:if="${card.canEdit()}">
+                        <button type="button" class="link-btn edit-only" th:text="#{common.edit}"
+                                th:attr="hx-get=@{/skus/{id}/edit/lifecycle(id=${s.id})}" hx-target="#block-lifecycle" hx-swap="outerHTML">Править</button>
+                    </div>
+                </div>
+                <ol class="timeline" th:with="st=${s.lifecycleStatus.name()},done=${s.lifecycleStatus.name() == 'EOL'} ? 5 : (${s.lifecycleStatus.name() == 'EOL_ANNOUNCED'} ? 2 : (${s.lifecycleStatus.name() == 'DEVELOPMENT'} ? 0 : 1))">
+                    <li class="tl" th:each="f, it : ${ {'gaDate','eolAnnounceDate','lastOrderDate','lastShipDate','endOfSupportDate'} }"
+                        th:classappend="${it.index < done} ? 'done' : (${it.index == done} ? 'now')">
+                        <b th:text="#{'field.' + ${f}}">Поле</b><span th:text="${s[f] != null} ? ${s[f]} : '-'">2Q26</span>
+                    </li>
+                </ol>
+                <dl class="kv lc-kv">
+                    <dt class="tl-dup" th:text="#{sku.lifecycle.status}">Статус</dt>
+                    <dd class="tl-dup"><span class="lc" th:classappend="'lc-' + ${s.lifecycleStatus}" th:text="#{'lifecycle.' + ${s.lifecycleStatus}}">Статус</span></dd>
+                    <th:block th:each="f : ${ {'gaDate','eolAnnounceDate','lastOrderDate','lastShipDate','endOfSupportDate'} }">
+                        <dt class="tl-dup" th:text="#{'field.' + ${f}}">Поле</dt>
+                        <dd class="tl-dup" th:text="${s[f] != null} ? ${s[f]} : '-'">2Q26</dd>
+                    </th:block>
+                    <dt th:text="#{sku.lifecycle.successor}">Преемник</dt>
+                    <dd>
+                        <a th:if="${s.successor != null}" th:href="@{|/sku/${s.successor.model}|}" th:text="${s.successor.model}">WEP-550K</a>
+                        <span th:if="${s.successor == null}" class="muted" th:text="#{common.none}">-</span>
+                    </dd>
+                    <th:block th:if="${!card.predecessors().isEmpty()}">
+                        <dt th:text="#{sku.lifecycle.predecessors}">Предшественники</dt>
+                        <dd><span th:each="p, st : ${card.predecessors()}"><a th:href="@{|/sku/${p.model}|}" th:text="${p.model}">WEP-30L</a><span th:if="${!st.last}">, </span></span></dd>
+                    </th:block>
+                    <dt th:text="#{sku.nextReview}">Следующее ревью</dt>
+                    <dd>
+                        <span th:text="${s.nextReviewDate != null} ? ${#temporals.format(s.nextReviewDate, 'dd.MM.yyyy')} : '-'">-</span>
+                        <span class="overdue" th:if="${s.nextReviewDate != null and s.nextReviewDate.isBefore(today)}" th:text="#{catalog.reviewOverdue}">просрочено</span>
+                    </dd>
+                </dl>
+                <p th:if="${card.canEdit()}" class="edit-only" style="margin-top:10px">
+                    <button type="button" th:text="#{sku.reviewDone}"
+                            th:attr="hx-post=@{/skus/{id}/review(id=${s.id})}" hx-target="#block-lifecycle" hx-swap="outerHTML">Ревью проведено</button>
+                </p>
+            </section>
+
+            <!-- 8. Коммерческий блок -->
+            <section id="block-commercial" class="block" th:fragment="block-commercial" th:if="${card.can('COMMERCIAL')}">
+                <div class="block-head">
+                    <h2 th:text="#{sku.section.commercial}">Коммерческий блок</h2>
+                    <button type="button" class="link-btn edit-only" th:if="${card.canEdit()}" th:text="#{common.edit}"
+                            th:attr="hx-get=@{/skus/{id}/edit/commercial(id=${s.id})}" hx-target="#block-commercial" hx-swap="outerHTML">Править</button>
+                </div>
+                <p class="warn small" th:if="${card.commercialStale()}" th:text="#{sku.commercial.stale}">Данные устарели</p>
+                <dl class="kv" th:if="${s.price != null or s.availability != null}">
+                    <th:block th:if="${s.price != null}"><dt th:text="#{field.price}">Цена</dt><dd th:text="${#numbers.formatDecimal(s.price, 1, 'WHITESPACE', 2, 'COMMA')} + ' ' + ${s.currency}">100 RUB</dd></th:block>
+                    <th:block th:if="${s.priceList != null}"><dt th:text="#{field.priceList}">Прайс-лист</dt><dd th:text="#{'pricelist.' + ${s.priceList}}">Внутренний</dd></th:block>
+                    <th:block th:if="${s.availability != null}"><dt th:text="#{field.availability}">Наличие</dt><dd th:text="#{'availability.' + ${s.availability}}">В наличии</dd></th:block>
+                    <th:block th:if="${s.leadTimeDays != null}"><dt th:text="#{field.leadTimeDays}">Срок поставки</dt><dd th:text="${s.leadTimeDays} + ' дн.'">14</dd></th:block>
+                </dl>
+                <p class="empty-note" th:if="${s.price == null and s.availability == null and !card.commercialStale()}" th:text="#{sku.commercial.noData}">Нет данных</p>
+                <p class="muted small" th:if="${s.commercialUpdatedAt != null}"
+                   th:text="#{sku.commercial.updated(${#temporals.format(s.commercialUpdatedAt, 'dd.MM.yyyy')}, ${s.commercialUpdatedBy}, #{'source.' + ${s.commercialSource}})}">Обновлено</p>
+            </section>
+
+            <!-- 11. Планы по продукту (только внутренний контур) -->
+            <section id="block-plans" class="block" th:fragment="block-plans" th:if="${card.can('PLANS')}">
+                <div class="block-head">
+                    <h2 th:text="#{sku.section.plans}">Планы по продукту</h2>
+                    <button type="button" class="link-btn edit-only" th:if="${card.canEdit()}" th:text="#{common.edit}"
+                            th:attr="hx-get=@{/skus/{id}/edit/plans(id=${s.id})}" hx-target="#block-plans" hx-swap="outerHTML">Править</button>
+                </div>
+                <p class="pre" th:if="${s.plans != null}" th:text="${s.plans}">Планы</p>
+                <p class="empty-note" th:if="${s.plans == null}" th:text="#{sku.noPlans}">Планы не заполнены.</p>
+                <p class="muted small" th:text="#{sku.lifecycle.internalOnly}">Только для внутреннего контура</p>
+            </section>
+        </aside>
+    </div>
+
+    <!-- Определения фрагментов: на странице не выводятся (th:remove), используются как части ответов HTMX -->
+    <div th:remove="all">
+        <th:block th:fragment="completeness-inner"><span class="meter"><span class="meter-fill" th:style="'width:' + ${s.completeness} + '%'"></span></span> <span th:text="${s.completeness} + '%'">0%</span></th:block>
+
+        <th:block th:fragment="history-inner">
+            <details>
+                <summary><h2 class="inline" th:text="#{sku.section.history}">История изменений</h2></summary>
+                <p class="muted" th:if="${card.history().isEmpty()}" th:text="#{sku.history.empty}">Изменений пока нет.</p>
+                <table class="table dense" th:if="${!card.history().isEmpty()}">
+                    <tr th:each="h : ${card.history()}">
+                        <td class="nowrap muted" th:text="${#temporals.format(h.at, 'dd.MM.yyyy HH:mm')}">01.01.2026 10:00</td>
+                        <td th:text="${h.userLogin}">user</td>
+                        <td th:text="#{'sku.history.' + ${h.action}}">Изменение</td>
+                        <td>
+                            <span th:if="${h.field != null}" th:text="${#messages.msgOrNull('field.' + h.field)} ?: ${h.field}">Поле</span>
+                        </td>
+                        <td>
+                            <span class="muted" th:text="${h.oldValue != null} ? ${h.oldValue} : '-'">старое</span>
+                            <span> &rarr; </span>
+                            <span th:text="${h.newValue != null} ? ${h.newValue} : '-'">новое</span>
+                        </td>
+                        <td class="muted" th:text="${h.note}">пометка</td>
+                    </tr>
+                </table>
+            </details>
+        </th:block>
+
+        <th:block th:fragment="oob">
+            <span id="completeness" hx-swap-oob="true" th:insert="~{:: completeness-inner}"></span>
+            <section id="block-history" class="block" hx-swap-oob="true" th:if="${card.can('HISTORY')}" th:insert="~{:: history-inner}"></section>
+        </th:block>
+
+        <th:block th:fragment="saved-main"><th:block th:replace="~{:: block-main}"></th:block><th:block th:replace="~{:: oob}"></th:block></th:block>
+        <th:block th:fragment="saved-text"><th:block th:replace="~{:: block-text}"></th:block><th:block th:replace="~{:: oob}"></th:block></th:block>
+        <th:block th:fragment="saved-specs"><th:block th:replace="~{:: block-specs}"></th:block><th:block th:replace="~{:: oob}"></th:block></th:block>
+        <th:block th:fragment="saved-lifecycle"><th:block th:replace="~{:: block-lifecycle}"></th:block><th:block th:replace="~{:: oob}"></th:block></th:block>
+        <th:block th:fragment="saved-commercial"><th:block th:replace="~{:: block-commercial}"></th:block><th:block th:replace="~{:: oob}"></th:block></th:block>
+        <th:block th:fragment="saved-plans"><th:block th:replace="~{:: block-plans}"></th:block><th:block th:replace="~{:: oob}"></th:block></th:block>
+    </div>
+</main>
+</body>
+</html>

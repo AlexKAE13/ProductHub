@@ -1,0 +1,49 @@
+# Настройки prod берутся из переменных окружения (SPEC.md 8.2). Пример значений: .env.example
+spring:
+  datasource:
+    url: ${PRODUCTHUB_DB_URL}
+    username: ${PRODUCTHUB_DB_USER}
+    password: ${PRODUCTHUB_DB_PASSWORD}
+  thymeleaf:
+    cache: true
+
+producthub:
+  files:
+    dir: ${PRODUCTHUB_FILES_DIR:/data/files}
+  search:
+    dir: ${PRODUCTHUB_SEARCH_DIR:/data/index}
+  import:
+    seed-dir: ${PRODUCTHUB_SEED_DIR:/data/seed}
+    on-first-start: false
+  # Вход через AD/LDAP. Какие группы каталога дают какие роли, задается в group-roles
+  # (по умолчанию ниже, переопределяется файлом config/application.yml рядом с приложением).
+  ldap:
+    enabled: ${PRODUCTHUB_LDAP_ENABLED:false}
+    url: ${PRODUCTHUB_LDAP_URL:}
+    base: ${PRODUCTHUB_LDAP_BASE:}
+    manager-dn: ${PRODUCTHUB_LDAP_MANAGER_DN:}
+    manager-password: ${PRODUCTHUB_LDAP_MANAGER_PASSWORD:}
+    user-search-base: ${PRODUCTHUB_LDAP_USER_SEARCH_BASE:}
+    user-search-filter: ${PRODUCTHUB_LDAP_USER_SEARCH_FILTER:(uid={0})}
+    login-attribute: ${PRODUCTHUB_LDAP_LOGIN_ATTRIBUTE:uid}
+    name-attribute: ${PRODUCTHUB_LDAP_NAME_ATTRIBUTE:cn}
+    mail-attribute: ${PRODUCTHUB_LDAP_MAIL_ATTRIBUTE:mail}
+    group-search-base: ${PRODUCTHUB_LDAP_GROUP_SEARCH_BASE:}
+    group-search-filter: ${PRODUCTHUB_LDAP_GROUP_SEARCH_FILTER:(member={0})}
+    group-roles:
+      hub-product: PRODUCT
+      hub-service: SERVICE_CENTER
+      hub-sales: SALES
+      hub-rnd: RND
+      hub-head: HEAD
+      hub-admin: ADMIN
+
+# Журнал в файл с ротацией: до 20 МБ на файл, хранится 30 дней, всего не больше 1 ГБ
+logging:
+  file:
+    name: ${PRODUCTHUB_LOG_FILE:/data/logs/product-hub.log}
+  logback:
+    rollingpolicy:
+      max-file-size: 20MB
+      max-history: 30
+      total-size-cap: 1GB

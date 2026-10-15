@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- Строка материала. Параметр: item (SkuMaterialsService.Item) -->
+<tr th:fragment="row(item)" th:classappend="${item.outdated} ? 'faded'">
+    <td><span class="ficon" th:text="${item.main != null and #strings.contains(item.main.fileName, '.')} ? ${#strings.toUpperCase(#strings.substringAfter(item.main.fileName, '.'))} : 'URL'" aria-hidden="true">PDF</span><a th:href="@{/artifacts/{id}(id=${item.artifact.id})}" th:text="${item.artifact.title}">Название</a>
+        <span class="tag" th:each="t : ${item.competitors}" th:text="${t.value}">Huawei</span></td>
+    <td th:text="#{'language.' + ${item.artifact.language}}">RU</td>
+    <td><span class="st" th:classappend="'st-' + ${item.artifact.status}" th:text="#{'artifactStatus.' + ${item.artifact.status}}">Актуален</span></td>
+    <td class="nowrap" th:text="${#temporals.format(item.artifact.updatedAt, 'dd.MM.yyyy')}">01.01.2026</td>
+    <td th:text="${item.artifact.owner.fullName}">Владелец</td>
+    <td class="nowrap">
+        <a th:if="${item.main != null}" th:href="@{/artifacts/files/{id}(id=${item.main.id})}" th:text="#{artifacts.download}">Скачать</a>
+        <a th:if="${item.preview != null}" target="_blank" th:href="@{/artifacts/files/{id}(id=${item.preview.id}, inline=true)}" th:text="#{artifacts.preview}">Предпросмотр</a>
+        <a th:if="${item.preview == null and item.main != null and item.main.inlineSafe}" target="_blank"
+           th:href="@{/artifacts/files/{id}(id=${item.main.id}, inline=true)}" th:text="#{artifacts.preview}">Предпросмотр</a>
+        <a th:if="${item.main == null and item.artifact.externalUrl != null}" th:href="${item.artifact.externalUrl}" target="_blank" rel="noopener noreferrer" th:text="#{artifacts.openLink}">Ссылка</a>
+    </td>
+</tr>
+
+<!-- Блоки 5 (документация) и 6 (сравнения и battle cards) с фильтром языка. -->
+<div id="materials" th:fragment="docs-compare">
+    <section class="block" id="block-docs">
+        <div class="block-head">
+            <h2 th:text="#{sku.section.docs}">Документация и материалы</h2>
+            <div class="lang-filter" role="group">
+                <button type="button" th:each="l : ${ {'ALL','RU','EN'} }" th:classappend="${materials.lang == l} ? 'active'"
+                        th:text="${l == 'ALL'} ? #{common.all} : ${l}"
+                        th:attr="hx-get=@{/skus/{id}/materials(id=${s.id}, lang=${l})}" hx-target="#materials" hx-swap="outerHTML">Все</button>
+            </div>
+        </div>
+        <p class="muted" th:if="${materials.docs.isEmpty()}" th:text="#{sku.docs.empty}">Материалов пока нет.</p>
+        <div th:each="g : ${materials.docs}">
+            <h3 th:text="${g.type.name}">Тип</h3>
+            <table class="table dense materials" th:if="${!g.actual.isEmpty()}">
+                <th:block th:each="item : ${g.actual}"><tr th:replace="~{:: row(${item})}"></tr></th:block>
+            </table>
+            <details class="outdated" th:if="${!g.outdated.isEmpty()}">
+                <summary th:text="#{sku.docs.outdated(${g.outdated.size()})}">Устаревшие</summary>
+                <table class="table dense materials">
+                    <th:block th:each="item : ${g.outdated}"><tr th:replace="~{:: row(${item})}"></tr></th:block>
+                </table>
+            </details>
+        </div>
+    </section>
+
+    <section class="block" id="block-compare">
+        <div class="block-head"><h2 th:text="#{sku.section.compare}">Сравнения и battle cards</h2></div>
+        <p class="muted" th:if="${materials.compare.actual.isEmpty() and materials.compare.outdated.isEmpty()}" th:text="#{sku.compare.empty}">Нет материалов.</p>
+        <table class="table dense materials" th:if="${!materials.compare.actual.isEmpty()}">
+            <th:block th:each="item : ${materials.compare.actual}"><tr th:replace="~{:: row(${item})}"></tr></th:block>
+        </table>
+        <details class="outdated" th:if="${!materials.compare.outdated.isEmpty()}">
+            <summary th:text="#{sku.docs.outdated(${materials.compare.outdated.size()})}">Устаревшие</summary>
+            <table class="table dense materials">
+                <th:block th:each="item : ${materials.compare.outdated}"><tr th:replace="~{:: row(${item})}"></tr></th:block>
+            </table>
+        </details>
+    </section>
+</div>
+
+<!-- Блок 9: фото и видео -->
+<section class="block" id="block-media" th:fragment="media">
+    <div class="block-head"><h2 th:text="#{sku.section.media}">Фото и видео</h2></div>
+    <p class="muted" th:if="${materials.media.isEmpty()}" th:text="#{sku.media.empty}">Фото и видео нет.</p>
+    <div class="media-grid">
+        <figure th:each="item : ${materials.media}" class="media-item">
+            <a th:if="${item.main != null and item.main.image}" th:href="@{/artifacts/files/{id}(id=${item.main.id})}">
+                <img th:src="@{/artifacts/files/{id}(id=${item.main.id}, inline=true)}" loading="lazy" th:alt="${item.artifact.title}">
+            </a>
+            <a th:if="${item.main != null and !item.main.image}" th:href="@{/artifacts/files/{id}(id=${item.main.id})}" th:text="${item.main.fileName}">video.mp4</a>
+            <a th:if="${item.main == null and item.artifact.externalUrl != null}" th:href="${item.artifact.externalUrl}" target="_blank" rel="noopener noreferrer" th:text="${item.artifact.title}">Видео</a>
+            <figcaption><a th:href="@{/artifacts/{id}(id=${item.artifact.id})}" th:text="${item.artifact.title}">Название</a></figcaption>
+        </figure>
+    </div>
+</section>
+</body>
+</html>

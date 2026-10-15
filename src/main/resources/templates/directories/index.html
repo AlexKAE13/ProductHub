@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: page(~{::title}, ~{::main})}">
+<head>
+    <title th:text="#{directories.title}">Справочники</title>
+</head>
+<body>
+<main class="content wide">
+    <h1 th:text="#{directories.title}">Справочники</h1>
+
+    <section class="block" th:if="${canImport}">
+        <h2 th:text="#{directories.reindex}">Поисковый индекс</h2>
+        <p class="muted" th:text="#{directories.reindex.text}"></p>
+        <p th:if="${reindexed != null}" th:text="#{directories.reindex.done(${reindexed})}"></p>
+        <form th:action="@{/directories/reindex}" method="post">
+            <button type="submit" th:text="#{directories.reindex.run}">Переиндексировать</button>
+        </form>
+    </section>
+
+    <section class="block">
+        <h2 th:text="#{directories.import}">Импорт</h2>
+        <p class="muted" th:text="#{directories.import.text}"></p>
+        <form th:if="${canImport}" th:action="@{/directories/import}" method="post">
+            <button type="submit" class="primary" th:text="#{directories.import.run}">Запустить импорт</button>
+        </form>
+        <p class="muted" th:if="${!canImport}" th:text="#{directories.import.adminOnly}"></p>
+
+        <div th:if="${lastRun != null}" class="notice">
+            <strong th:text="#{directories.import.last}">Результат</strong>
+            <pre class="log" th:text="${lastRun.log}"></pre>
+        </div>
+
+        <table class="table dense" th:if="${!runs.isEmpty()}">
+            <caption th:text="#{directories.import.history}">Журнал импортов</caption>
+            <thead><tr>
+                <th th:text="#{directories.import.col.at}">Когда</th>
+                <th th:text="#{directories.import.col.by}">Кто</th>
+                <th th:text="#{directories.import.col.created}">Создано</th>
+                <th th:text="#{directories.import.col.updated}">Обновлено</th>
+                <th th:text="#{directories.import.col.skipped}">Пропущено</th>
+                <th th:text="#{directories.import.col.errors}">Ошибок</th>
+                <th th:text="#{directories.import.log}">Журнал</th>
+            </tr></thead>
+            <tbody>
+            <tr th:each="r : ${runs}">
+                <td class="nowrap" th:text="${#temporals.format(r.startedAt, 'dd.MM.yyyy HH:mm')}">01.01.2026</td>
+                <td th:text="${r.startedBy}">admin</td>
+                <td class="num" th:text="${r.created}">0</td>
+                <td class="num" th:text="${r.updated}">0</td>
+                <td class="num" th:text="${r.skipped}">0</td>
+                <td class="num" th:text="${r.errors}">0</td>
+                <td><details th:if="${r.log != null}"><summary th:text="#{common.show}">Показать</summary><pre class="log" th:text="${r.log}"></pre></details></td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section class="block" id="tags">
+        <h2 th:text="#{directories.tags}">Теги</h2>
+        <p class="muted" th:text="#{directories.tags.hint}"></p>
+        <p class="error" th:if="${tagError != null}">
+            <span th:text="#{${tagError}}">Такой тег уже есть</span>
+            <strong th:if="${tagConflictValue != null}" th:text="'(' + #{'tagCategory.' + ${tagConflictCategory}} + ': ' + ${tagConflictValue} + ')'"></strong>
+        </p>
+        <p class="notice" th:if="${tagDeleted != null}" th:text="#{directories.tags.deleted(${tagDeleted})}">Тег удален</p>
+        <form th:if="${canManage}" th:action="@{/directories/tags}" method="post" class="filters">
+            <label><span th:text="#{directories.tags.category}">Категория</span>
+                <select name="category"><option th:each="c : ${tagCategories}" th:value="${c}" th:text="#{'tagCategory.' + ${c}}"></option></select></label>
+            <label><span th:text="#{directories.tags.value}">Значение</span><input type="text" name="value" required></label>
+            <label><span th:text="#{directories.tags.valueEn}">EN</span><input type="text" name="valueEn"></label>
+            <label class="grow"><span th:text="#{directories.tags.aliases}">Синонимы через запятую</span><input type="text" name="aliases"></label>
+            <button type="submit" class="primary" th:text="#{common.create}">Создать</button>
+        </form>
+        <table class="table dense">
+            <thead><tr>
+                <th th:text="#{directories.tags.category}">Категория</th><th th:text="#{directories.tags.value}">Значение</th>
+                <th th:text="#{directories.tags.valueEn}">EN</th><th th:text="#{directories.tags.aliases}">Синонимы</th><th></th>
+            </tr></thead>
+            <tbody>
+            <tr th:each="t : ${tags}" th:classappend="${!t.active} ? 'faded'">
+                <td th:text="#{'tagCategory.' + ${t.category}}">Конкурент</td>
+                <td th:text="${t.value}">Huawei</td>
+                <td th:text="${t.valueEn}">Huawei</td>
+                <td class="muted" th:text="${t.aliases}">синонимы</td>
+                <td class="right">
+                    <form th:if="${canManage}" th:action="@{/directories/tags/{id}/active(id=${t.id})}" method="post" class="inline">
+                        <input type="hidden" name="active" th:value="${!t.active}">
+                        <button type="submit" th:text="${t.active} ? #{directories.tags.disable} : #{directories.tags.enable}">Отключить</button>
+                    </form>
+                    <form th:if="${canManage}" th:action="@{/directories/tags/{id}/delete(id=${t.id})}" method="post" class="inline"
+                          th:with="u=${tagUsage.get(t.id)}"
+                          th:attr="data-confirm=${u == null or u.total() == 0} ? #{directories.tags.delete.confirm(${t.value})} : #{directories.tags.delete.confirmUsed(${t.value}, ${u.artifacts}, ${u.skus}, ${u.cases})}">
+                        <button type="submit" class="danger" th:text="#{directories.tags.delete}">Удалить</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section class="block">
+        <h2 th:text="#{directories.types}">Типы артефактов</h2>
+        <table class="table dense">
+            <thead><tr>
+                <th th:text="#{directories.types.name}">Тип</th><th th:text="#{directories.types.importance}">Важность</th>
+                <th th:text="#{artifacts.col.contour}">Контур</th><th th:text="#{directories.types.block}">Блок карточки</th>
+                <th th:text="#{artifacts.reviewPeriod}">Период ревью</th>
+                <th th:text="#{directories.types.producer}">Производитель</th><th th:text="#{directories.types.consumer}">Потребитель</th>
+            </tr></thead>
+            <tbody>
+            <tr th:each="t : ${artifactTypes}">
+                <td th:text="${t.name}">Даташит</td><td class="num" th:text="${t.importance}">5</td>
+                <td th:text="#{'contourShort.' + ${t.defaultContour}}">Внутренний</td>
+                <td th:text="#{'cardBlock.' + ${t.cardBlock}}">Документация</td>
+                <td class="num" th:text="${t.reviewPeriodDays}">90</td>
+                <td th:text="${t.producer}">Производитель</td><td th:text="${t.consumer}">Потребитель</td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section class="block">
+        <h2 th:text="#{directories.fileRules}">Правила разбора имен файлов</h2>
+        <p class="muted" th:text="#{directories.fileRules.hint}"></p>
+        <table class="table dense">
+            <thead><tr><th>Regexp</th><th th:text="#{directories.types.name}">Тип</th><th th:text="#{artifacts.col.contour}">Контур</th></tr></thead>
+            <tbody>
+            <tr th:each="r : ${fileRules.rules()}"><td><code th:text="${r.pattern}">regexp</code></td><td th:text="${r.type}">Тип</td><td th:text="${r.contour}">-</td></tr>
+            </tbody>
+        </table>
+        <p class="muted small"><span th:text="#{directories.fileRules.ignore}">Игнорируются:</span> <code th:each="i : ${fileRules.ignore()}" th:text="${i} + ' '">x</code></p>
+        <p class="muted small"><span th:text="#{directories.fileRules.language}">Язык определяется по суффиксу:</span> <code th:text="${fileRules.languagePattern()}">regexp</code></p>
+    </section>
+
+    <section class="block" id="checks" th:if="${canImport}">
+        <h2 th:text="#{directories.checks}">Ежедневные проверки</h2>
+        <p class="muted" th:text="#{directories.checks.text}"></p>
+        <p class="notice" th:if="${staleArtifacts != null}" th:text="#{directories.checks.result(${staleArtifacts}, ${reviewSkus})}">Готово</p>
+        <form th:action="@{/directories/daily-checks}" method="post">
+            <button type="submit" th:text="#{directories.checks.run}">Запустить проверки сейчас</button>
+        </form>
+    </section>
+
+    <section class="block">
+        <h2 th:text="#{directories.lines}">Линейки</h2>
+        <table class="table dense">
+            <thead><tr>
+                <th th:text="#{directories.lines.code}">Код</th>
+                <th th:text="#{directories.lines.name}">Название</th>
+                <th th:text="#{directories.lines.family}">Семейство</th>
+            </tr></thead>
+            <tbody>
+            <tr th:each="l : ${lines}">
+                <td th:text="${l.code}">WEP</td>
+                <td th:text="${l.name}">Название</td>
+                <td th:text="${l.family}">Wi-Fi</td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section class="block">
+        <h2 th:text="#{directories.specs}">Шаблоны характеристик</h2>
+        <p class="muted" th:text="#{directories.specs.hint}"></p>
+        <table class="table dense">
+            <thead><tr>
+                <th th:text="#{directories.specs.group}">Группа</th>
+                <th th:text="#{directories.specs.label}">Характеристика</th>
+                <th th:text="#{directories.specs.categories}">Категории</th>
+                <th th:text="#{directories.specs.editableBy}">Правит</th>
+            </tr></thead>
+            <tbody>
+            <tr th:each="d : ${specs}">
+                <td th:text="${d.group}">Радио</td>
+                <td th:text="${d.labelRu} + (${d.unit != null} ? ', ' + ${d.unit} : '')">Характеристика</td>
+                <td th:text="${#strings.replace(d.appliesToCategories, ',', ', ')}">Категории</td>
+                <td th:text="#{'role.' + ${d.editableBy}}">Роль</td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+</main>
+</body>
+</html>

@@ -1,0 +1,14 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:producthub-test;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;DB_CLOSE_DELAY=-1
+  jpa:
+    properties:
+      hibernate:
+        generate_statistics: true
+producthub:
+  import:
+    folder-roots: "${java.io.tmpdir}"
+  search:
+    dir: ""
+  files:
+    dir: target/test-files

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: page(~{::title}, ~{::main})}">
+<head>
+    <title th:text="#{catalog.title}">Каталог</title>
+</head>
+<body>
+<main class="content wide">
+    <div class="page-head">
+        <h1 th:text="#{catalog.title}">Каталог</h1>
+        <a class="btn primary" th:if="${canCreate}" th:href="@{/skus/new}" th:text="#{catalog.create}">Создать SKU</a>
+    </div>
+
+    <form id="filters" class="filters" th:action="@{/catalog}" method="get"
+          hx-get="/catalog" hx-target="#results" hx-push-url="true" hx-swap="innerHTML"
+          hx-trigger="change, submit">
+        <input type="search" id="q" name="q" class="search" th:value="${filter.q}" autocomplete="off"
+               hx-get="/catalog" hx-include="#filters" hx-target="#results" hx-push-url="true" hx-swap="innerHTML"
+               hx-trigger="input changed delay:150ms, search"
+               th:placeholder="#{catalog.filter.q.placeholder}" th:aria-label="#{catalog.filter.q}">
+        <select name="family" th:classappend="${filter.family != null and !filter.family.isEmpty()} ? 'on'" th:aria-label="#{catalog.filter.family}">
+            <option value="" hidden th:text="#{catalog.filter.family}">Семейство</option>
+            <option th:each="f : ${families}" th:value="${f}" th:text="${f}" th:selected="${f == filter.family}"></option>
+        </select>
+        <select name="line" th:classappend="${filter.line != null and !filter.line.isEmpty()} ? 'on'" th:aria-label="#{catalog.filter.line}">
+            <option value="" hidden th:text="#{catalog.filter.line}">Линейка</option>
+            <option th:each="l : ${lines}" th:value="${l.code}" th:text="${l.code}" th:attr="data-family=${l.family}" th:selected="${l.code == filter.line}"></option>
+        </select>
+        <select name="category" th:classappend="${filter.category != null and !filter.category.isEmpty()} ? 'on'" th:aria-label="#{catalog.filter.category}">
+            <option value="" hidden th:text="#{catalog.filter.category}">Категория</option>
+            <option th:each="c : ${categories}" th:value="${c}" th:text="${c}" th:selected="${c == filter.category}"></option>
+        </select>
+        <select name="status" th:classappend="${filter.status != null and !filter.status.isEmpty()} ? 'on'" th:aria-label="#{catalog.filter.status}">
+            <option value="" hidden th:text="#{catalog.filter.status}">Статус ЖЦ</option>
+            <option th:each="st : ${statuses}" th:value="${st}" th:text="#{'lifecycle.' + ${st}}" th:selected="${st.name() == filter.status}"></option>
+        </select>
+        <select name="owner" th:classappend="${filter.owner != null} ? 'on'" th:aria-label="#{catalog.filter.owner}">
+            <option value="" hidden th:text="#{catalog.filter.owner}">Владелец</option>
+            <option th:each="o : ${owners}" th:value="${o.id}" th:text="${o.fullName}" th:selected="${o.id == filter.owner}"></option>
+        </select>
+        <select name="tag" th:classappend="${filter.tag != null} ? 'on'" th:aria-label="#{artifacts.filter.tag}">
+            <option value="" hidden th:text="#{artifacts.filter.tag}">Тег</option>
+            <option th:each="t : ${allTags}" th:value="${t.id}" th:text="#{'tagCategory.' + ${t.category}} + ': ' + ${t.value}" th:selected="${t.id == filter.tag}"></option>
+        </select>
+        <label class="check"><input type="checkbox" name="reviewDue" value="true" th:checked="${filter.reviewDue}">
+            <span th:text="#{catalog.filter.reviewDue}">Требует ревью</span></label>
+        <label class="check"><input type="checkbox" name="includeEol" value="true" th:checked="${filter.includeEol}">
+            <span th:text="#{catalog.filter.includeEol}">Показывать EOL</span></label>
+        <input type="hidden" name="sort" th:value="${filter.sort}">
+        <input type="hidden" name="dir" th:value="${filter.dir}">
+        <noscript><button type="submit" th:text="#{common.show}">Показать</button></noscript>
+    </form>
+
+    <div id="results" th:fragment="results">
+        <p class="result-count" th:text="#{catalog.found(${page.total})}">Найдено</p>
+        <table class="table" th:if="${!page.items.isEmpty()}">
+            <thead>
+            <tr>
+                <th th:each="col : ${ {'model','name','line','status','firmware','owner','completeness'} }" th:classappend="'col-' + ${col}">
+                    <span th:if="${col == 'firmware'}" th:text="#{catalog.col.firmware}">Прошивка</span>
+                    <a th:unless="${col == 'firmware'}" th:with="nextDir=${filter.sort == col and filter.dir == 'asc'} ? 'desc' : 'asc'"
+                       th:href="@{/catalog(family=${filter.family},line=${filter.line},category=${filter.category},status=${filter.status},owner=${filter.owner},tag=${filter.tag},reviewDue=${filter.reviewDue ? true : null},includeEol=${filter.includeEol ? true : null},q=${filter.q},sort=${col},dir=${nextDir})}"
+                       th:attr="hx-get=@{/catalog(family=${filter.family},line=${filter.line},category=${filter.category},status=${filter.status},owner=${filter.owner},tag=${filter.tag},reviewDue=${filter.reviewDue ? true : null},includeEol=${filter.includeEol ? true : null},q=${filter.q},sort=${col},dir=${nextDir})}"
+                       hx-target="#results" hx-push-url="true" hx-swap="innerHTML"
+                       th:text="#{'catalog.col.' + ${col}} + (${filter.sort == col} ? (${filter.dir == 'asc'} ? ' ▲' : ' ▼') : '')">Колонка</a>
+                </th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="s : ${page.items}">
+                <td class="nowrap"><a th:href="@{|/sku/${s.model}|}" th:text="${s.model}"><strong>WEP-550K</strong></a></td>
+                <td>
+                    <span th:text="${s.nameRu != null} ? ${s.nameRu} : ${s.category}">Наименование</span>
+                    <span class="sub" th:if="${s.nameRu != null}" th:text="${s.category}">Категория</span>
+                </td>
+                <td class="col-line" th:text="${s.line.code}">WEP</td>
+                <td class="nowrap"><span class="lc" th:classappend="'lc-' + ${s.lifecycleStatus}"
+                          th:text="#{'lifecycle.' + ${s.lifecycleStatus}}">Статус</span>
+                    <span class="overdue" th:if="${s.nextReviewDate != null and s.nextReviewDate.isBefore(today)}"
+                          th:title="#{catalog.reviewOverdue}" th:text="#{catalog.reviewOverdueShort}">ревью</span></td>
+                <td class="nowrap col-firmware"><span th:if="${currentFirmware.get(s.id) != null}" th:text="${currentFirmware.get(s.id).version}">1.2.0</span><span class="muted" th:if="${currentFirmware.get(s.id) == null}" th:text="#{common.none}">-</span></td>
+                <td class="owners col-owner" th:attr="data-owners=${s.ownerNames}" th:text="${s.ownerNames}">Владелец</td>
+                <td class="nowrap col-completeness"><span class="meter"><span class="meter-fill" th:style="'width:' + ${s.completeness} + '%'"></span></span>
+                    <span class="muted small" th:text="${s.completeness} + '%'">0%</span></td>
+            </tr>
+            </tbody>
+        </table>
+        <p th:if="${page.items.isEmpty()}" class="muted" th:text="#{catalog.empty}">Ничего не найдено</p>
+
+        <div class="pager" th:if="${page.totalPages() > 1}">
+            <a th:if="${page.hasPrev()}" class="btn"
+               th:href="@{/catalog(family=${filter.family},line=${filter.line},category=${filter.category},status=${filter.status},owner=${filter.owner},tag=${filter.tag},reviewDue=${filter.reviewDue ? true : null},includeEol=${filter.includeEol ? true : null},q=${filter.q},sort=${filter.sort},dir=${filter.dir},page=${page.page() - 1})}"
+               th:attr="hx-get=@{/catalog(family=${filter.family},line=${filter.line},category=${filter.category},status=${filter.status},owner=${filter.owner},tag=${filter.tag},reviewDue=${filter.reviewDue ? true : null},includeEol=${filter.includeEol ? true : null},q=${filter.q},sort=${filter.sort},dir=${filter.dir},page=${page.page() - 1})}"
+               hx-target="#results" hx-push-url="true" hx-swap="innerHTML" th:text="#{catalog.prev}">Назад</a>
+            <span class="muted" th:text="#{catalog.page(${page.page() + 1}, ${page.totalPages()})}">Страница 1 из 6</span>
+            <a th:if="${page.hasNext()}" class="btn"
+               th:href="@{/catalog(family=${filter.family},line=${filter.line},category=${filter.category},status=${filter.status},owner=${filter.owner},tag=${filter.tag},reviewDue=${filter.reviewDue ? true : null},includeEol=${filter.includeEol ? true : null},q=${filter.q},sort=${filter.sort},dir=${filter.dir},page=${page.page() + 1})}"
+               th:attr="hx-get=@{/catalog(family=${filter.family},line=${filter.line},category=${filter.category},status=${filter.status},owner=${filter.owner},tag=${filter.tag},reviewDue=${filter.reviewDue ? true : null},includeEol=${filter.includeEol ? true : null},q=${filter.q},sort=${filter.sort},dir=${filter.dir},page=${page.page() + 1})}"
+               hx-target="#results" hx-push-url="true" hx-swap="innerHTML" th:text="#{catalog.next}">Вперед</a>
+        </div>
+    </div>
+</main>
+</body>
+</html>

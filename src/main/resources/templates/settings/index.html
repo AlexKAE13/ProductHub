@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: page(~{::title}, ~{::main})}">
+<head>
+    <title th:text="#{settings.title}">Настройки</title>
+</head>
+<body>
+<main class="content narrow">
+    <h1 th:text="#{settings.title}">Настройки</h1>
+    <p class="muted" th:text="#{settings.hint}">Личные настройки интерфейса.</p>
+    <p class="notice" th:if="${saved != null}" th:text="#{settings.saved}">Сохранено.</p>
+
+    <form th:action="@{/settings}" method="post" id="settingsForm" th:attr="data-save-label=#{common.save}">
+        <section class="block">
+            <h2 th:text="#{settings.look}">Оформление</h2>
+            <div class="themes">
+                <label class="theme-card" th:each="t : ${themes}">
+                    <input type="radio" name="uiTheme" th:value="${t}" th:checked="${t == form.uiTheme}">
+                    <div class="pv" th:classappend="${t.name() == 'MODERN'} ? 'modern' : 'classic'"></div>
+                    <b th:text="#{'settings.look.' + ${t}}">Классическое</b>
+                    <div class="muted small" th:text="#{'settings.look.' + ${t} + '.hint'}">Описание</div>
+                </label>
+            </div>
+
+            <div class="look-modern" id="lookModern" th:hidden="${form.uiTheme.name() != 'MODERN'}">
+                <div class="setting">
+                    <div><b th:text="#{settings.mode}">Тема</b><p th:text="#{settings.mode.hint}"></p></div>
+                    <div class="seg-row">
+                        <label class="seg-opt" th:each="m : ${modes}">
+                            <input type="radio" name="colorMode" th:value="${m}" th:checked="${m == form.colorMode}">
+                            <span th:text="#{'settings.mode.' + ${m}}">Авто</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="setting">
+                    <div><b th:text="#{settings.palette}">Цветовая схема</b><p th:text="#{settings.palette.hint}"></p></div>
+                    <div class="swatch-row">
+                        <label class="swatch" th:each="p : ${palettes}" th:title="#{'settings.palette.' + ${p}}">
+                            <input type="radio" name="palette" th:value="${p}" th:checked="${p == form.palette}">
+                            <span th:attr="data-palette=${p.css()}"></span>
+                            <small th:text="#{'settings.palette.' + ${p}}">Eltex</small>
+                        </label>
+                    </div>
+                </div>
+                <div class="setting setting-wide">
+                    <div class="setting-line">
+                        <div><b th:text="#{settings.background}">Фон</b><p th:text="#{settings.background.hint}"></p></div>
+                        <div class="seg-row">
+                            <label class="seg-opt" th:each="b : ${backgrounds}">
+                                <input type="radio" name="background" th:value="${b}" th:checked="${b == form.background}">
+                                <span th:text="#{'settings.background.' + ${b}}">Градиент</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div id="wallBox" th:hidden="${form.background.name() != 'PHOTO'}">
+                        <div class="wall-row">
+                            <label class="wall" th:each="w : ${builtInWalls}" th:title="#{'settings.wallpaper.' + ${w}}">
+                                <input type="radio" name="wallpaper" th:value="${w}" th:checked="${w == form.wallpaper}">
+                                <span th:style="'background-image:url(/img/wallpapers/' + ${w} + '.svg)'"></span>
+                            </label>
+                            <label class="wall" th:if="${look.wallpaperKey != null}" th:title="#{settings.wallpaper.custom}">
+                                <input type="radio" name="wallpaper" value="custom" th:checked="${form.wallpaper == 'custom'}">
+                                <span th:style="'background-image:url(/settings/wallpaper?v=' + ${look.wallpaperKey.substring(0, 8)} + ')'"></span>
+                            </label>
+                            <label class="wall wall-add" for="wallFile"><span th:text="#{settings.wall.add}">+ Свои</span></label>
+                        </div>
+                        <div class="range-row">
+                            <label><span th:text="#{settings.wall.blur}">Размытие</span>
+                                <input type="range" name="wallBlur" min="0" max="40" step="1" th:value="${form.wallBlur}"><output th:text="${form.wallBlur}">18</output></label>
+                            <label><span th:text="#{settings.wall.dim}">Затемнение</span>
+                                <input type="range" name="wallDim" min="0" max="80" step="1" th:value="${form.wallDim}"><output th:text="${form.wallDim} + '%'">0%</output></label>
+                        </div>
+                        <p class="muted small" th:text="#{settings.wall.hint}"></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="block">
+            <h2 th:text="#{settings.menu}">Меню</h2>
+            <div class="setting">
+                <div><b th:text="#{settings.menu.title}">Расположение меню</b><p th:text="#{settings.menu.hint}"></p></div>
+                <div class="seg-row">
+                    <label class="seg-opt" th:each="l : ${layouts}" th:title="#{'settings.menu.' + ${l} + '.hint'}">
+                        <input type="radio" name="menuLayout" th:value="${l}" th:checked="${l == form.menuLayout}">
+                        <span th:text="#{'settings.menu.' + ${l}}">Сверху</span>
+                    </label>
+                </div>
+            </div>
+            <label class="setting check-line">
+                <div><b th:text="#{settings.sidebarCollapsed}">Сайдбар свернут</b><p th:text="#{settings.sidebarCollapsed.hint}"></p></div>
+                <input type="checkbox" name="sidebarCollapsed" value="true" th:checked="${form.sidebarCollapsed}">
+            </label>
+            <div class="setting">
+                <div><b th:text="#{settings.density}">Плотность таблиц</b><p th:text="#{settings.density.hint}"></p></div>
+                <div class="seg-row">
+                    <label class="seg-opt" th:each="d : ${densities}" th:title="#{'settings.density.' + ${d} + '.hint'}">
+                        <input type="radio" name="density" th:value="${d}" th:checked="${d == form.density}">
+                        <span th:text="#{'settings.density.' + ${d}}">Обычная</span>
+                    </label>
+                </div>
+            </div>
+            <div class="setting">
+                <div><b th:text="#{settings.start}">После входа открывать</b><p th:text="#{settings.start.hint}"></p></div>
+                <select name="startPage" aria-label="Стартовая страница">
+                    <option th:each="p : ${startPages}" th:value="${p}" th:text="#{'settings.start.' + ${p}}" th:selected="${p == form.startPage}"></option>
+                </select>
+            </div>
+        </section>
+
+        <section class="block">
+            <h2 th:text="#{settings.catalog}">Каталог по умолчанию</h2>
+            <label class="setting check-line">
+                <div><b th:text="#{settings.catalogOnlyMine}">Только мои SKU</b><p th:text="#{settings.catalogOnlyMine.hint}"></p></div>
+                <input type="checkbox" name="catalogOnlyMine" value="true" th:checked="${form.catalogOnlyMine}">
+            </label>
+            <label class="setting check-line">
+                <div><b th:text="#{settings.catalogIncludeEol}">Показывать снятые с производства</b></div>
+                <input type="checkbox" name="catalogIncludeEol" value="true" th:checked="${form.catalogIncludeEol}">
+            </label>
+        </section>
+
+        <div class="form-actions">
+            <button type="submit" class="primary" th:text="#{common.save}">Сохранить</button>
+        </div>
+    </form>
+
+    <section class="block" id="wallUpload" th:hidden="${form.uiTheme.name() != 'MODERN' or form.background.name() != 'PHOTO'}">
+        <h2 th:text="#{settings.wall.upload}">Свои обои</h2>
+        <p class="error" th:if="${wallError != null}" th:text="#{${wallError}}">Ошибка</p>
+        <form th:action="@{/settings/wallpaper}" method="post" enctype="multipart/form-data" class="actions">
+            <input type="file" name="file" id="wallFile" accept="image/jpeg,image/png" required>
+            <button type="submit" th:text="#{settings.wall.send}">Загрузить</button>
+        </form>
+        <form th:if="${look.wallpaperKey != null}" th:action="@{/settings/wallpaper/delete}" method="post" class="inline">
+            <button type="submit" class="link-btn danger" th:text="#{settings.wall.remove}">Удалить мои обои</button>
+        </form>
+        <p class="muted small" th:text="#{settings.wall.limits}"></p>
+    </section>
+    <script th:src="@{/js/settings.js}" defer></script>
+</main>
+</body>
+</html>

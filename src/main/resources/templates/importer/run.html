@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: page(~{::title}, ~{::main})}">
+<head>
+    <title th:text="#{run.title}">Результат импорта</title>
+</head>
+<body>
+<main class="content wide">
+    <h1 th:text="#{run.title}">Результат импорта</h1>
+    <p class="notice" th:if="${token != null}" th:text="#{run.dryRunNote}">Записи не созданы.</p>
+    <dl class="props">
+        <div><dt th:text="#{directories.import.col.created}">Создано</dt><dd th:text="${run.created}">0</dd></div>
+        <div><dt th:text="#{run.versions}">Новых версий</dt><dd th:text="${run.updated}">0</dd></div>
+        <div><dt th:text="#{directories.import.col.skipped}">Пропущено</dt><dd th:text="${run.skipped}">0</dd></div>
+        <div><dt th:text="#{directories.import.col.errors}">Ошибок</dt><dd th:text="${run.errors}">0</dd></div>
+    </dl>
+    <pre class="log" th:text="${run.log}"></pre>
+    <div class="form-actions">
+        <a class="btn" th:if="${token != null}" th:href="@{/artifacts/import/{t}(t=${token})}" th:text="#{run.backToPreview}">Вернуться к предпросмотру</a>
+        <a class="btn primary" th:href="@{/artifacts}" th:text="#{artifacts.title}">Артефакты</a>
+    </div>
+</main>
+</body>
+</html>

@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout :: page(~{::title}, ~{::main})}">
+<head>
+    <title th:text="#{home.title}">Главная</title>
+</head>
+<body>
+<main class="content">
+    <img class="home-hero" th:src="@{/img/welcome.webp}" th:alt="#{home.hero.alt}" width="1280" height="720">
+    <h1 th:text="#{home.welcome(${#authentication.principal.fullName})}">Добро пожаловать</h1>
+    <p th:text="#{app.tagline}">Единая база знаний</p>
+    <p class="muted">
+        <span th:text="#{home.roles(${#strings.listJoin(#authentication.authorities.![authority.substring(5)], ', ')})}">Роли</span>
+    </p>
+    <p th:text="#{home.intro}">Описание</p>
+    <p class="muted" th:text="#{home.stage}">Каркас</p>
+</main>
+</body>
+</html>

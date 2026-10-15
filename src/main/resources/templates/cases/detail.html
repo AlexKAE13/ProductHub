@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: page(~{::title}, ~{::main})}">
+<head>
+    <title th:text="${d.caseStudy.title}">Кейс</title>
+</head>
+<body>
+<main class="content wide">
+    <div class="page-head">
+        <div>
+            <div class="crumbs"><a th:href="@{/cases}" th:text="#{menu.cases}">Кейсы</a></div>
+            <h1 th:text="${d.caseStudy.title}">Название</h1>
+            <p class="muted" th:text="${d.caseStudy.country} + (${d.caseStudy.city != null} ? ', ' + ${d.caseStudy.city} : '') + (${d.caseStudy.year != null} ? ' - ' + ${d.caseStudy.year} : '')">Страна</p>
+        </div>
+        <div class="actions" th:if="${d.canEdit}">
+            <a class="btn" th:href="@{/cases/{id}/edit(id=${d.caseStudy.id})}" th:text="#{common.edit}">Править</a>
+            <details class="more">
+                <summary th:title="#{sku.menu}" th:aria-label="#{sku.menu}">&middot;&middot;&middot;</summary>
+                <div class="more-list">
+                    <form th:action="@{/cases/{id}/delete(id=${d.caseStudy.id})}" method="post"
+                          th:attr="onsubmit=|return confirm('${#messages.msg('cases.delete.confirm')}')|">
+                        <button type="submit" class="danger" th:text="#{sku.delete}">Удалить</button>
+                    </form>
+                </div>
+            </details>
+        </div>
+    </div>
+    <p class="tag-line" th:if="${!d.tags.isEmpty()}"><span class="tag" th:each="t : ${d.tags}" th:text="${t.value}" th:title="#{'tagCategory.' + ${t.category}}">тег</span></p>
+
+    <div class="card-layout">
+        <div class="col-main">
+            <section class="block" th:each="part : ${ {'summary','challenge','solution','results'} }" th:if="${d.caseStudy[part] != null}">
+                <div class="block-head"><h2 th:text="#{'cases.field.' + ${part}}">Раздел</h2></div>
+                <p class="pre" th:text="${d.caseStudy[part]}">Текст</p>
+            </section>
+            <section class="block">
+                <div class="block-head"><h2 th:text="#{cases.attachments}">Вложения</h2></div>
+                <p class="error" th:if="${attachmentError != null}" th:text="#{${attachmentError}}"></p>
+                <p class="empty-note" th:if="${d.attachments.isEmpty()}" th:text="#{cases.attachments.empty}">Вложений нет.</p>
+                <div class="file-row" th:each="a : ${d.attachments}">
+                    <a th:href="@{/artifacts/{id}(id=${a.artifact.id})}" th:text="${a.main != null} ? ${a.main.fileName} : ${a.artifact.title}">file.pdf</a>
+                    <a th:if="${a.main != null}" th:href="@{/artifacts/files/{id}(id=${a.main.id})}" th:text="#{artifacts.download}">Скачать</a>
+                    <form th:if="${d.canEdit}" th:action="@{/cases/{id}/attachments/{aid}/delete(id=${d.caseStudy.id}, aid=${a.artifact.id})}" method="post" class="inline">
+                        <button type="submit" class="link-btn danger" th:text="#{sku.delete}">Удалить</button>
+                    </form>
+                </div>
+                <form th:if="${d.canEdit}" th:action="@{/cases/{id}/attachments(id=${d.caseStudy.id})}" method="post" enctype="multipart/form-data" class="filters" style="margin-top:10px">
+                    <input type="file" name="files" multiple required>
+                    <button type="submit" th:text="#{cases.attachments.add}">Добавить файлы</button>
+                </form>
+            </section>
+            <section class="block" th:if="${!d.history.isEmpty()}">
+                <details>
+                    <summary><h2 class="inline" th:text="#{sku.section.history}">История изменений</h2></summary>
+                    <table class="table dense">
+                        <tr th:each="h : ${d.history}">
+                            <td class="nowrap muted" th:text="${#temporals.format(h.at, 'dd.MM.yyyy HH:mm')}">01.01.2026</td>
+                            <td th:text="${h.userLogin}">user</td>
+                            <td th:text="#{'sku.history.' + ${h.action}}">Изменение</td>
+                            <td th:text="${#messages.msgOrNull('cases.field.' + h.field)} ?: ${h.field}">Поле</td>
+                            <td><span class="muted" th:text="${h.oldValue != null} ? ${h.oldValue} : '-'">-</span> &rarr; <span th:text="${h.newValue != null} ? ${h.newValue} : '-'">-</span></td>
+                        </tr>
+                    </table>
+                </details>
+            </section>
+        </div>
+        <aside class="col-side">
+            <section class="block">
+                <dl class="kv">
+                    <dt th:text="#{cases.field.customerName}">Заказчик</dt>
+                    <dd>
+                        <span th:if="${d.customerName != null}" th:text="${d.customerName}">Заказчик</span>
+                        <span class="muted" th:if="${d.customerHidden}" th:text="#{cases.customer.hidden}">скрыт</span>
+                        <span class="muted" th:if="${d.customerName == null and !d.customerHidden}" th:text="#{common.none}">-</span>
+                    </dd>
+                    <dt th:text="#{cases.field.deploymentSize}">Масштаб</dt>
+                    <dd th:text="${d.caseStudy.deploymentSize != null} ? ${d.caseStudy.deploymentSize} : '-'">100 точек</dd>
+                    <dt th:text="#{artifacts.col.owner}">Владелец</dt>
+                    <dd th:text="${d.caseStudy.owner.fullName}">Владелец</dd>
+                    <dt th:text="#{cases.field.publicationAllowed}">Публикация вовне</dt>
+                    <dd th:text="${d.caseStudy.publicationAllowed} ? #{common.yes} : #{common.no}">Нет</dd>
+                </dl>
+            </section>
+            <section class="block">
+                <div class="block-head"><h2 th:text="#{firmware.col.skus}">SKU</h2></div>
+                <p th:each="s : ${d.skus}"><a th:href="@{|/sku/${s.model}|}" th:text="${s.model}">SKU</a></p>
+            </section>
+        </aside>
+    </div>
+</main>
+</body>
+</html>

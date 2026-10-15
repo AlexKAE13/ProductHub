@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: page(~{::title}, ~{::main})}">
+<head>
+    <title th:text="#{error.title.403}">Ошибка</title>
+</head>
+<body>
+<main class="content">
+    <h1 th:text="#{error.title.403}">Ошибка</h1>
+    <p th:text="#{error.text.403}">Описание</p>
+    <p><a th:href="@{/}" th:text="#{error.toHome}">На главную</a></p>
+</main>
+</body>
+</html>

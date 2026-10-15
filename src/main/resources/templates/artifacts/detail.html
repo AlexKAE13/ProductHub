@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: page(~{::title}, ~{::main})}">
+<head>
+    <title th:text="${d.artifact.title}">Артефакт</title>
+</head>
+<body>
+<main class="content wide">
+    <p class="notice" th:if="${message != null}" th:text="#{${message}}">Готово</p>
+    <div class="error-box" th:if="${warnings != null and !warnings.isEmpty()}">
+        <p class="warn" th:each="w : ${warnings}" th:text="${w}">Предупреждение</p>
+    </div>
+
+    <div class="page-head">
+        <div>
+            <h1>
+                <span th:text="${d.artifact.title}">Название</span>
+                <span class="st" th:classappend="'st-' + ${d.artifact.status}" th:text="#{'artifactStatus.' + ${d.artifact.status}}">Актуален</span>
+            </h1>
+            <div class="muted" th:text="${d.artifact.type.name} + ' / ' + #{'language.' + ${d.artifact.language}}">Тип</div>
+        </div>
+        <div class="actions" th:if="${d.canEdit}">
+            <a class="btn" th:href="@{/artifacts/{id}/edit(id=${d.artifact.id})}" th:text="#{common.edit}">Править</a>
+            <form th:action="@{/artifacts/{id}/review(id=${d.artifact.id})}" method="post" class="inline">
+                <button type="submit" th:text="#{artifacts.confirmActual}">Подтвердить актуальность</button></form>
+            <form th:action="@{/artifacts/{id}/delete(id=${d.artifact.id})}" method="post" class="inline"
+                  th:attr="onsubmit=|return confirm('${#messages.msg('artifacts.delete.confirm')}')|">
+                <button type="submit" class="danger" th:text="#{sku.delete}">Удалить</button></form>
+        </div>
+    </div>
+
+    <section class="block">
+        <dl class="props">
+            <div><dt th:text="#{artifacts.col.owner}">Владелец</dt><dd th:text="${d.artifact.owner.fullName}">Владелец</dd></div>
+            <div><dt th:text="#{artifacts.col.contour}">Контур</dt><dd th:text="#{'contour.' + ${d.artifact.contour}}">Внутренний</dd></div>
+            <div><dt th:text="#{artifacts.lastReviewed}">Последнее ревью</dt>
+                <dd><span th:text="${#temporals.format(d.artifact.lastReviewedAt, 'dd.MM.yyyy')}">01.01.2026</span>
+                    <span class="overdue" th:if="${d.reviewDue}" th:text="#{artifacts.reviewDue}">нужно ревью</span></dd></div>
+            <div><dt th:text="#{artifacts.reviewPeriod}">Период ревью, дней</dt><dd th:text="${d.artifact.reviewPeriodDays}">90</dd></div>
+            <div th:if="${d.artifact.line != null}"><dt th:text="#{field.line}">Линейка</dt>
+                <dd th:text="${d.artifact.line.code} + ' (' + #{artifacts.wholeLine(${d.artifact.line.code})} + ')'">WEP</dd></div>
+            <div th:if="${d.artifact.externalUrl != null}"><dt th:text="#{artifacts.externalUrl}">Ссылка</dt>
+                <dd><a th:href="${d.artifact.externalUrl}" target="_blank" rel="noopener noreferrer" th:text="${d.artifact.externalUrl}">url</a></dd></div>
+        </dl>
+        <p class="pre" th:if="${d.artifact.description != null}" th:text="${d.artifact.description}">Описание</p>
+        <p>
+            <span class="muted" th:text="#{artifacts.col.sku} + ':'">SKU:</span>
+            <span th:each="s, st : ${d.skus}"><a th:href="@{|/sku/${s.model}|}" th:text="${s.model}">SKU</a><span th:if="${!st.last}">, </span></span>
+            <span class="muted" th:if="${d.skus.isEmpty()}" th:text="#{common.none}">-</span>
+        </p>
+        <p>
+            <span class="muted" th:text="#{artifacts.col.tags} + ':'">Теги:</span>
+            <span class="tag" th:each="t : ${d.tags}" th:text="#{'tagCategory.' + ${t.category}} + ': ' + ${t.value}">тег</span>
+            <span class="muted" th:if="${d.tags.isEmpty()}" th:text="#{common.none}">-</span>
+        </p>
+    </section>
+
+    <section class="block">
+        <div class="block-head"><h2 th:text="#{artifacts.currentVersion}">Текущая версия</h2></div>
+        <p class="muted" th:if="${d.currentFiles().isEmpty()}" th:text="#{artifacts.noFile}">Файла нет, материал хранится как ссылка.</p>
+        <div th:each="f : ${d.currentFiles()}" class="file-row">
+            <span class="tag" th:text="#{'fileRole.' + ${f.role}}">Основной</span>
+            <strong th:text="${f.fileName}">file.pdf</strong>
+            <span class="muted" th:text="${#numbers.formatDecimal(f.sizeBytes / 1048576.0, 1, 'WHITESPACE', 2, 'COMMA')} + ' МБ'">1 МБ</span>
+            <a th:href="@{/artifacts/files/{id}(id=${f.id})}" th:text="#{artifacts.download}">Скачать</a>
+            <a th:if="${f.inlineSafe}" target="_blank"
+               th:href="@{/artifacts/files/{id}(id=${f.id}, inline=true)}" th:text="#{artifacts.preview}">Предпросмотр</a>
+        </div>
+        <div class="preview" th:if="${d.previewFile() != null and d.previewFile().mimeType == 'application/pdf'}">
+            <iframe th:src="@{/artifacts/files/{id}(id=${d.previewFile().id}, inline=true)}" title="Предпросмотр PDF" loading="lazy"></iframe>
+        </div>
+        <img th:if="${d.previewFile() != null and d.previewFile().mimeType != 'application/pdf'}"
+             th:src="@{/artifacts/files/{id}(id=${d.previewFile().id}, inline=true)}" class="preview-img" alt="">
+    </section>
+
+    <section class="block" th:if="${d.canEdit}">
+        <div class="block-head"><h2 th:text="#{artifacts.newVersion}">Загрузить новую версию</h2></div>
+        <p class="muted small" th:text="#{artifacts.newVersion.hint}"></p>
+        <th:block th:if="${versionErrors != null}"><p class="error" th:each="e : ${versionErrors.values()}" th:text="#{${e}}"></p></th:block>
+        <form th:action="@{/artifacts/{id}/versions(id=${d.artifact.id})}" method="post" enctype="multipart/form-data">
+            <div class="field-row">
+                <div class="field"><label for="files" th:text="#{artifacts.files}">Файл</label><input type="file" id="files" name="files" multiple required></div>
+                <div class="field"><label for="comment" th:text="#{artifacts.version.comment}">Комментарий</label><input type="text" id="comment" name="comment"></div>
+            </div>
+            <button type="submit" class="primary" th:text="#{artifacts.newVersion.submit}">Загрузить</button>
+        </form>
+    </section>
+
+    <section class="block">
+        <div class="block-head"><h2 th:text="#{artifacts.versions}">История версий</h2></div>
+        <table class="table dense">
+            <tr th:each="v : ${d.versions}">
+                <td class="nowrap"><strong th:text="'v' + ${v.versionNo}">v1</strong>
+                    <span class="tag" th:if="${v.id == d.artifact.currentVersion?.id}" th:text="#{artifacts.current}">текущая</span></td>
+                <td class="nowrap" th:text="${#temporals.format(v.uploadedAt, 'dd.MM.yyyy HH:mm')}">01.01.2026</td>
+                <td th:text="${v.uploadedBy}">user</td>
+                <td class="muted" th:text="${v.comment}">комментарий</td>
+                <td>
+                    <span th:each="f : ${d.filesByVersion.get(v.id)}"><a th:href="@{/artifacts/files/{id}(id=${f.id})}" th:text="${f.fileName}">файл</a> </span>
+                </td>
+            </tr>
+        </table>
+    </section>
+
+    <th:block th:replace="~{qa/block :: block}"></th:block>
+
+    <section class="block" th:if="${!d.history.isEmpty()}">
+        <details>
+            <summary><h2 class="inline" th:text="#{sku.section.history}">История изменений</h2></summary>
+            <table class="table dense">
+                <tr th:each="h : ${d.history}">
+                    <td class="nowrap" th:text="${#temporals.format(h.at, 'dd.MM.yyyy HH:mm')}">01.01.2026</td>
+                    <td th:text="${h.userLogin}">user</td>
+                    <td th:text="#{'sku.history.' + ${h.action}}">Изменение</td>
+                    <td th:text="${#messages.msgOrNull('artifacts.field.' + h.field)} ?: ${h.field}">Поле</td>
+                    <td><span class="muted" th:text="${h.oldValue != null} ? ${h.oldValue} : '-'">-</span> &rarr; <span th:text="${h.newValue != null} ? ${h.newValue} : '-'">-</span></td>
+                    <td class="muted" th:text="${h.note}"></td>
+                </tr>
+            </table>
+        </details>
+    </section>
+</main>
+</body>
+</html>

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: page(~{::title}, ~{::main})}">
+<head>
+    <title th:text="#{folder.title}">Импорт папки</title>
+</head>
+<body>
+<main class="content">
+    <h1 th:text="#{folder.title}">Импорт папки</h1>
+    <p class="muted" th:text="#{folder.hint}"></p>
+    <p class="muted small" th:if="${roots != null}"><span th:text="#{folder.roots}">Разрешенные папки:</span>
+        <code th:each="r : ${roots}" th:text="${r}">/seed</code></p>
+    <form th:action="@{/artifacts/import/scan}" method="post">
+        <div class="field"><label for="path" th:text="#{folder.path}">Путь к папке</label>
+            <input type="text" id="path" name="path" th:value="${path}" required placeholder="/Users/.../Battle Cards">
+            <span class="error" th:if="${errors != null and errors.containsKey('path')}" th:text="#{${errors['path']}}"></span></div>
+        <div class="form-actions">
+            <button type="submit" class="primary" th:text="#{folder.scan}">Сканировать</button>
+            <a class="btn" th:href="@{/artifacts}" th:text="#{common.cancel}">Отмена</a>
+        </div>
+    </form>
+</main>
+</body>
+</html>

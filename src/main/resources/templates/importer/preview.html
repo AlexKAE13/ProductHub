@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: page(~{::title}, ~{::main})}">
+<head>
+    <title th:text="#{preview.title}">Предпросмотр импорта</title>
+</head>
+<body>
+<main class="content wide">
+    <h1 th:text="#{preview.title}">Предпросмотр импорта</h1>
+    <p class="muted" th:text="#{preview.source(${plan.source})}">Источник</p>
+    <p th:text="#{preview.summary(${plan.createCount}, ${plan.versionCount}, ${plan.skipCount}, ${plan.skipped.size()})}">Итого</p>
+
+    <form th:action="@{/artifacts/import/{t}/confirm(t=${plan.token})}" method="post">
+        <div class="form-actions">
+            <button type="submit" class="primary" th:text="#{preview.confirm}">Подтвердить и импортировать</button>
+            <button type="submit" name="dryRun" value="true" th:text="#{preview.dryRun}">Проверить без записи (dry-run)</button>
+            <a class="btn" th:href="@{/artifacts}" th:text="#{common.cancel}">Отмена</a>
+        </div>
+        <div class="table-scroll">
+        <table class="table dense preview">
+            <thead><tr>
+                <th>+</th>
+                <th th:text="#{preview.col.file}">Файл</th>
+                <th th:text="#{artifacts.col.title}">Название</th>
+                <th th:text="#{artifacts.col.type}">Тип</th>
+                <th th:text="#{artifacts.col.language}">Язык</th>
+                <th th:text="#{preview.col.sku}">SKU</th>
+                <th th:text="#{field.line}">Линейка</th>
+                <th th:text="#{artifacts.col.tags}">Теги</th>
+                <th th:text="#{artifacts.col.contour}">Контур</th>
+                <th th:text="#{artifacts.col.owner}">Владелец</th>
+                <th th:text="#{preview.col.action}">Что будет</th>
+            </tr></thead>
+            <tbody>
+            <tr th:each="r, i : ${plan.rows}" th:classappend="${r.action.name() == 'SKIP'} ? 'faded'">
+                <td><input type="checkbox" th:name="|rows[${i.index}].include|" value="true" th:checked="${r.include}" th:disabled="${r.action.name() == 'SKIP'}"></td>
+                <td class="small">
+                    <div th:each="f : ${r.files}"><span th:text="${f.relativePath}">file</span> <span class="tag" th:text="#{'fileRole.' + ${f.role}}">ОСН</span></div>
+                </td>
+                <td><input type="text" th:name="|rows[${i.index}].title|" th:value="${r.title}" size="28" th:disabled="${r.action.name() == 'SKIP'}"></td>
+                <td><select th:name="|rows[${i.index}].type|" th:disabled="${r.action.name() == 'SKIP'}">
+                    <option th:each="t : ${types}" th:value="${t.name}" th:text="${t.name}" th:selected="${t.name == r.type}"></option></select></td>
+                <td><select th:name="|rows[${i.index}].language|" th:disabled="${r.action.name() == 'SKIP'}">
+                    <option th:each="l : ${languages}" th:value="${l}" th:text="#{'language.' + ${l}}" th:selected="${l.name() == r.language}"></option></select></td>
+                <td><input type="text" th:name="|rows[${i.index}].skus|" th:value="${r.skus}" size="14" data-suggest="sku" autocomplete="off" th:disabled="${r.action.name() == 'SKIP'}">
+                    <span class="muted small" th:if="${r.skus != null and !r.skus.isEmpty() and r.skuFound}" th:text="#{preview.skuFound}">найден</span></td>
+                <td><input type="text" th:name="|rows[${i.index}].line|" th:value="${r.line}" size="6" data-suggest="line" autocomplete="off" th:disabled="${r.action.name() == 'SKIP'}"></td>
+                <td><input type="text" th:name="|rows[${i.index}].tags|" th:value="${r.tags}" size="16" th:disabled="${r.action.name() == 'SKIP'}"></td>
+                <td><select th:name="|rows[${i.index}].contour|" th:disabled="${r.action.name() == 'SKIP'}">
+                    <option th:each="c : ${contours}" th:value="${c}" th:text="#{'contourShort.' + ${c}}" th:selected="${c.name() == r.contour}"></option></select></td>
+                <td><select th:name="|rows[${i.index}].ownerId|" th:disabled="${r.action.name() == 'SKIP'}">
+                    <option th:each="o : ${owners}" th:value="${o.id}" th:text="${o.fullName}" th:selected="${o.id == r.ownerId}"></option></select>
+                    <input type="hidden" th:name="|rows[${i.index}].status|" th:value="${r.status}"></td>
+                <td class="small">
+                    <strong th:text="#{'preview.action.' + ${r.action}}">Создать</strong>
+                    <div class="muted" th:if="${r.note != null}" th:text="${r.note}">примечание</div>
+                    <div class="warn-text" th:each="w : ${r.warnings}" th:text="${w}">предупреждение</div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        </div>
+    </form>
+
+    <section class="block" th:if="${!plan.skipped.isEmpty()}">
+        <details>
+            <summary><h2 class="inline" th:text="#{preview.skipped(${plan.skipped.size()})}">Пропущенные файлы</h2></summary>
+            <table class="table dense">
+                <tr th:each="s : ${plan.skipped}"><td th:text="${s.path}">file</td><td class="muted" th:text="${s.reason}">причина</td></tr>
+            </table>
+        </details>
+    </section>
+</main>
+</body>
+</html>

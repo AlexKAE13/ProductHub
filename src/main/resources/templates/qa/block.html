@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- Подсказки "Возможно, ответ уже есть". Параметр модели: similar -->
+<div id="similar" th:fragment="similar">
+    <div class="similar" th:if="${similar != null and !similar.isEmpty()}">
+        <strong th:text="#{qa.similar.title}">Возможно, ответ уже есть</strong>
+        <div class="similar-item" th:each="s : ${similar}">
+            <div class="similar-q" th:text="${s.question().text}">Вопрос</div>
+            <div class="pre" th:text="${s.question().answer}">Ответ</div>
+            <a class="small" th:if="${s.targetUrl() != null}" th:href="${s.targetUrl()}" th:text="#{qa.similar.open}">Открыть объект</a>
+        </div>
+    </div>
+</div>
+
+<!-- Ответ на вопрос или решение по правке. Параметры: q (вопрос), back (куда вернуться) -->
+<div class="answer-form" th:fragment="answer-form(q, back)">
+    <form th:if="${q.kind.name() == 'QUESTION'}" th:action="@{/questions/{id}/answer(id=${q.id})}" method="post">
+        <input type="hidden" name="back" th:value="${back}">
+        <textarea name="answer" rows="3" required th:placeholder="#{qa.answer.placeholder}"></textarea>
+        <div class="form-actions">
+            <button type="submit" class="primary" th:text="#{qa.answer.submit}">Ответить</button>
+            <label class="check-line"><input type="checkbox" name="publishToFaq" value="true" checked>
+                <span th:text="#{qa.publishToFaq}">Показать в FAQ</span></label>
+        </div>
+    </form>
+    <form th:if="${q.kind.name() == 'EDIT_PROPOSAL'}" method="post">
+        <input type="hidden" name="back" th:value="${back}">
+        <input type="text" name="comment" th:placeholder="#{qa.comment.placeholder}">
+        <div class="form-actions">
+            <button type="submit" class="primary" th:formaction="@{/questions/{id}/accept(id=${q.id})}" th:text="#{qa.accept}">Принять</button>
+            <button type="submit" th:formaction="@{/questions/{id}/reject(id=${q.id})}" th:text="#{qa.reject}">Отклонить</button>
+        </div>
+        <p class="muted small" th:text="#{qa.accept.hint}"></p>
+    </form>
+</div>
+
+<!-- Блок 12: FAQ, открытые вопросы и форма. Параметры модели: qa (QaView), qaMessage, qaError, qaText -->
+<section class="block" id="block-qa" th:fragment="block" th:if="${qa.canAsk()}">
+    <div class="block-head"><h2 th:text="#{qa.title}">Вопросы и правки</h2></div>
+    <p class="notice" th:if="${qaMessage != null}" th:text="#{${qaMessage}}">Отправлено</p>
+    <p class="error" th:if="${qaError != null and qaMessage == null}" th:text="#{${qaError}}"></p>
+
+    <div th:if="${!qa.faq().isEmpty()}">
+        <h3 th:text="#{qa.faq}">FAQ</h3>
+        <details class="faq-item" th:each="f : ${qa.faq()}">
+            <summary th:text="${f.text}">Вопрос</summary>
+            <p class="pre" th:text="${f.answer}">Ответ</p>
+            <p class="muted small" th:text="#{qa.answeredBy(${f.answeredBy != null} ? ${f.answeredBy.fullName} : '-', ${#temporals.format(f.answeredAt, 'dd.MM.yyyy')})}">Ответил</p>
+        </details>
+    </div>
+
+    <div th:if="${!qa.open().isEmpty()}">
+        <h3 th:text="#{qa.open}">Открытые вопросы</h3>
+        <div class="qa-item" th:each="o : ${qa.open()}">
+            <div>
+                <span class="tag" th:text="#{'qaKind.' + ${o.kind}}">вопрос</span>
+                <span class="tag" th:if="${o.technical}" th:text="#{qa.technical}">технический</span>
+                <span class="st st-IN_PROGRESS" th:text="#{'qaStatus.' + ${o.status}}">Новый</span>
+            </div>
+            <p class="pre" th:text="${o.text}">Текст</p>
+            <p class="muted small" th:text="${o.author.fullName} + ', ' + ${#temporals.format(o.createdAt, 'dd.MM.yyyy HH:mm')}">Автор</p>
+            <th:block th:if="${qa.answerable().contains(o.id)}"><div th:replace="~{:: answer-form(${o}, ${qa.backUrl()})}"></div></th:block>
+        </div>
+    </div>
+
+    <form class="ask-form" th:attr="hx-post=@{/questions}" hx-target="#block-qa" hx-swap="outerHTML">
+        <h3 th:text="#{qa.ask}">Задать вопрос или предложить правку</h3>
+        <input type="hidden" name="targetType" th:value="${qa.targetType()}">
+        <input type="hidden" name="targetId" th:value="${qa.targetId()}">
+        <div class="choice-inline">
+            <label class="check-line"><input type="radio" name="kind" value="QUESTION" checked><span th:text="#{qa.kind.question}">Вопрос</span></label>
+            <label class="check-line"><input type="radio" name="kind" value="EDIT_PROPOSAL"><span th:text="#{qa.kind.edit}">Правка</span></label>
+        </div>
+        <textarea name="text" rows="3" th:text="${qaText}" th:placeholder="#{qa.text.placeholder}"
+                  th:attr="hx-get=@{/questions/similar}" hx-trigger="input changed delay:400ms" hx-target="#similar"
+                  hx-include="closest form"></textarea>
+        <div id="similar"></div>
+        <div class="form-actions">
+            <button type="submit" class="primary" th:text="#{qa.submit}">Отправить</button>
+            <label class="check-line"><input type="checkbox" name="technical" value="true"><span th:text="#{qa.technical.label}">Технический вопрос</span></label>
+        </div>
+    </form>
+</section>
+</body>
+</html>

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: page(~{::title}, ~{::main})}">
+<head>
+    <title th:text="#{firmware.title}">Прошивки</title>
+</head>
+<body>
+<main class="content wide">
+    <div class="page-head">
+        <h1 th:text="#{firmware.title}">Прошивки</h1>
+        <div class="actions">
+            <a class="btn primary" th:if="${canPublish}" th:href="@{/firmware/new}" th:text="#{firmware.publish}">Опубликовать прошивку</a>
+        </div>
+    </div>
+    <form id="filters" class="filters" th:action="@{/firmware}" method="get"
+          hx-get="/firmware" hx-target="#results" hx-push-url="true" hx-swap="innerHTML" hx-trigger="change, submit">
+        <input type="search" id="q" name="q" class="search" th:value="${filter.q}" autocomplete="off"
+               hx-get="/firmware" hx-include="#filters" hx-target="#results" hx-push-url="true" hx-swap="innerHTML"
+               hx-trigger="input changed delay:150ms, search"
+               th:placeholder="#{firmware.filter.q}" th:aria-label="#{firmware.filter.q}">
+        <input type="text" name="sku" th:value="${filter.sku}" placeholder="SKU" style="width:150px" th:aria-label="SKU">
+        <select name="line" th:classappend="${filter.line != null} ? 'on'" th:aria-label="#{catalog.filter.line}">
+            <option value="" hidden th:text="#{catalog.filter.line}">Линейка</option>
+            <option th:each="l : ${lines}" th:value="${l.id}" th:text="${l.code}" th:selected="${l.id == filter.line}"></option>
+        </select>
+        <select name="status" th:classappend="${filter.status != null and !filter.status.isEmpty()} ? 'on'" th:aria-label="#{artifacts.filter.status}">
+            <option value="" hidden th:text="#{artifacts.filter.status}">Статус</option>
+            <option th:each="s : ${statuses}" th:value="${s}" th:text="#{'firmwareStatus.' + ${s}}" th:selected="${s.name() == filter.status}"></option>
+        </select>
+        <noscript><button type="submit" th:text="#{common.show}">Показать</button></noscript>
+    </form>
+
+    <div id="results" th:fragment="results">
+        <p class="result-count" th:text="#{catalog.found(${page.total})}">Найдено</p>
+        <table class="table" th:if="${!page.items.isEmpty()}">
+            <thead><tr>
+                <th th:text="#{firmware.col.version}">Версия</th>
+                <th th:text="#{artifacts.col.status}">Статус</th>
+                <th th:text="#{firmware.col.date}">Дата</th>
+                <th th:text="#{firmware.col.skus}">Совместимые SKU</th>
+                <th class="col-publisher" th:text="#{firmware.col.publisher}">Опубликовал</th>
+                <th></th>
+            </tr></thead>
+            <tbody>
+            <tr th:each="f : ${page.items}" th:classappend="${f.status.name() == 'WITHDRAWN'} ? 'faded'">
+                <td class="nowrap"><a th:href="@{/firmware/{id}(id=${f.id})}" th:text="${f.version}">1.2.0</a></td>
+                <td><span class="st" th:classappend="'st-' + ${f.status}" th:text="#{'firmwareStatus.' + ${f.status}}">Релиз</span></td>
+                <td class="nowrap" th:text="${#temporals.format(f.releaseDate, 'dd.MM.yyyy')}">01.01.2026</td>
+                <td>
+                    <span th:each="s, st : ${skusByFirmware.get(f.id)}" th:if="${st.index < 3}"><a th:href="@{|/sku/${s.model}|}" th:text="${s.model}">SKU</a><span th:if="${!st.last and st.index < 2}">, </span></span>
+                    <span class="muted" th:if="${skusByFirmware.get(f.id) != null and skusByFirmware.get(f.id).size() > 3}" th:text="'+' + ${skusByFirmware.get(f.id).size() - 3}"></span>
+                </td>
+                <td class="muted col-publisher" th:text="${f.publishedBy}">user</td>
+                <td class="nowrap right">
+                    <a th:if="${f.hasFile()}" th:href="@{/firmware/{id}/download(id=${f.id})}" th:text="#{artifacts.download}">Скачать</a>
+                    <a th:if="${!f.hasFile() and f.externalUrl != null}" th:href="${f.externalUrl}" target="_blank" rel="noopener noreferrer" th:text="#{artifacts.openLink}">Ссылка</a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        <p th:if="${page.items.isEmpty()}" class="muted" th:text="#{catalog.empty}">Ничего не найдено</p>
+        <div class="pager" th:if="${page.totalPages() > 1}">
+            <a th:if="${page.hasPrev()}" class="btn" th:href="@{/firmware(sku=${filter.sku},line=${filter.line},status=${filter.status},q=${filter.q},page=${page.page() - 1})}" th:text="#{catalog.prev}">Назад</a>
+            <span class="muted" th:text="#{catalog.page(${page.page() + 1}, ${page.totalPages()})}">Страница</span>
+            <a th:if="${page.hasNext()}" class="btn" th:href="@{/firmware(sku=${filter.sku},line=${filter.line},status=${filter.status},q=${filter.q},page=${page.page() + 1})}" th:text="#{catalog.next}">Вперед</a>
+        </div>
+    </div>
+</main>
+</body>
+</html>

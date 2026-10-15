@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: page(~{::title}, ~{::main})}">
+<head>
+    <title th:text="#{artifacts.title}">Артефакты</title>
+</head>
+<body>
+<main class="content wide">
+    <div class="page-head">
+        <h1 th:text="#{artifacts.title}">Артефакты</h1>
+        <div class="actions">
+            <a class="btn primary" th:if="${canEdit}" th:href="@{/artifacts/upload}" th:text="#{artifacts.upload}">Загрузить файлы</a>
+            <a class="btn" th:if="${canEdit}" th:href="@{/artifacts/new}" th:text="#{artifacts.newLink}">Добавить ссылку</a>
+            <a class="btn" th:if="${canManage and @folderImportPolicy.enabled()}" th:href="@{/artifacts/import}" th:text="#{artifacts.importFolder}">Импорт папки</a>
+        </div>
+    </div>
+    <p class="notice" th:if="${message != null}"
+       th:text="${messageArg != null} ? #{${message}(${messageArg})} : #{${message}}">Готово</p>
+    <p class="error" th:if="${bulkError != null}" th:text="#{${bulkError}}"></p>
+
+    <form id="filters" class="filters" th:action="@{/artifacts}" method="get"
+          hx-get="/artifacts" hx-target="#results" hx-push-url="true" hx-swap="innerHTML" hx-trigger="change, submit">
+        <input type="search" id="q" name="q" class="search" th:value="${filter.q}" autocomplete="off"
+               hx-get="/artifacts" hx-include="#filters" hx-target="#results" hx-push-url="true" hx-swap="innerHTML"
+               hx-trigger="input changed delay:150ms, search"
+               th:placeholder="#{artifacts.filter.q}" th:aria-label="#{artifacts.filter.q}">
+        <select name="type" th:classappend="${filter.type != null} ? 'on'" th:aria-label="#{artifacts.filter.type}">
+            <option value="" hidden th:text="#{artifacts.filter.type}">Тип</option>
+            <option th:each="t : ${types}" th:value="${t.id}" th:text="${t.name}" th:selected="${t.id == filter.type}"></option></select>
+        <select name="language" th:classappend="${filter.language != null and !filter.language.isEmpty()} ? 'on'" th:aria-label="#{artifacts.filter.language}">
+            <option value="" hidden th:text="#{artifacts.filter.language}">Язык</option>
+            <option th:each="l : ${languages}" th:value="${l}" th:text="#{'language.' + ${l}}" th:selected="${l.name() == filter.language}"></option></select>
+        <select name="status" th:classappend="${filter.status != null and !filter.status.isEmpty()} ? 'on'" th:aria-label="#{artifacts.filter.status}">
+            <option value="" hidden th:text="#{artifacts.filter.status}">Статус</option>
+            <option th:each="s : ${statuses}" th:value="${s}" th:text="#{'artifactStatus.' + ${s}}" th:selected="${s.name() == filter.status}"></option></select>
+        <select name="tag" th:classappend="${filter.tag != null} ? 'on'" th:aria-label="#{artifacts.filter.tag}">
+            <option value="" hidden th:text="#{artifacts.filter.tag}">Тег</option>
+            <option th:each="t : ${allTags}" th:value="${t.id}" th:text="#{'tagCategory.' + ${t.category}} + ': ' + ${t.value}" th:selected="${t.id == filter.tag}"></option></select>
+        <details class="more-filters-box" th:open="${(filter.owner != null) or (filter.line != null) or (filter.sku != null and !filter.sku.isEmpty()) or (filter.contour != null and !filter.contour.isEmpty()) or filter.reviewDue}">
+            <summary th:text="#{catalog.filter.more}">Еще фильтры</summary>
+            <div class="more-filters">
+                <select name="owner" th:classappend="${filter.owner != null} ? 'on'" th:aria-label="#{artifacts.filter.owner}">
+                    <option value="" hidden th:text="#{artifacts.filter.owner}">Владелец</option>
+                    <option th:each="o : ${owners}" th:value="${o.id}" th:text="${o.fullName}" th:selected="${o.id == filter.owner}"></option></select>
+                <select name="family" th:classappend="${filter.family != null and !filter.family.isEmpty()} ? 'on'" th:aria-label="#{catalog.filter.family}">
+                    <option value="" hidden th:text="#{catalog.filter.family}">Семейство</option>
+                    <option th:each="f : ${families}" th:value="${f}" th:text="${f}" th:selected="${f == filter.family}"></option></select>
+                <select name="line" th:classappend="${filter.line != null} ? 'on'" th:aria-label="#{artifacts.filter.line}">
+                    <option value="" hidden th:text="#{artifacts.filter.line}">Линейка</option>
+                    <option th:each="l : ${lines}" th:value="${l.id}" th:text="${l.code}" th:attr="data-family=${l.family}" th:selected="${l.id == filter.line}"></option></select>
+                <select name="contour" th:classappend="${filter.contour != null and !filter.contour.isEmpty()} ? 'on'" th:aria-label="#{artifacts.filter.contour}">
+                    <option value="" hidden th:text="#{artifacts.filter.contour}">Контур</option>
+                    <option th:each="c : ${contours}" th:value="${c}" th:text="#{'contourShort.' + ${c}}" th:selected="${c.name() == filter.contour}"></option></select>
+                <input type="text" name="sku" th:value="${filter.sku}" data-suggest="sku" data-single autocomplete="off" size="12" placeholder="SKU" th:aria-label="#{artifacts.filter.sku}" style="width:130px">
+                <label class="check"><input type="checkbox" name="reviewDue" value="true" th:checked="${filter.reviewDue}">
+                    <span th:text="#{artifacts.filter.reviewDue}">Требует ревью</span></label>
+            </div>
+        </details>
+        <noscript><button type="submit" th:text="#{common.show}">Показать</button></noscript>
+    </form>
+
+    <div id="results" th:fragment="results">
+        <form th:action="@{/artifacts/bulk}" method="post" id="bulkForm">
+            <div class="result-row">
+                <p class="result-count" th:text="#{catalog.found(${view.page().total()})}">Найдено</p>
+                <div class="bulk" id="bulkBar" th:if="${canManage and !view.page().items().isEmpty()}">
+                    <strong class="bulk-count"><span th:text="#{artifacts.bulk.selected}">Выбрано:</span> <span id="bulkCount">0</span></strong>
+                    <button type="button" class="link-btn" id="bulkSelectAll" th:text="#{artifacts.bulk.selectAll(${view.page().items().size()})}">Выбрать все на странице</button>
+                    <button type="button" class="link-btn" id="bulkClear" th:text="#{artifacts.bulk.clear}">Снять выделение</button>
+                    <span class="bulk-sep" aria-hidden="true"></span>
+                    <span class="bulk-label" th:text="#{artifacts.bulk.statusLabel}">Статус:</span>
+                    <button type="button" class="btn bulk-quick" data-quick="STATUS:ACTUAL" th:text="#{artifacts.bulk.quick.ACTUAL}">Пометить актуальными</button>
+                    <button type="button" class="btn bulk-quick" data-quick="STATUS:OUTDATED" th:text="#{artifacts.bulk.quick.OUTDATED}">Пометить устаревшими</button>
+                    <button type="button" class="btn bulk-quick danger" data-quick="DELETE:1" th:attr="data-confirm-text=#{artifacts.bulk.delete.confirm}"
+                            th:text="#{artifacts.bulk.delete}">Удалить</button>
+                    <details class="bulk-more">
+                        <summary class="btn" th:text="#{artifacts.bulk.more}">Другие действия</summary>
+                        <fieldset class="bulk-more-body" id="bulkMore">
+                            <select name="action" id="bulkAction">
+                                <option value="STATUS" th:text="#{artifacts.bulk.status}">Сменить статус</option>
+                                <option value="ADD_TAG" th:text="#{artifacts.bulk.tag}">Добавить тег</option>
+                                <option value="ADD_SKU" th:text="#{artifacts.bulk.sku}">Привязать к SKU</option>
+                            </select>
+                            <select name="value" id="bulkStatus" data-for="STATUS">
+                                <option th:each="st : ${statuses}" th:value="${st}" th:text="#{'artifactStatus.' + ${st}}"></option>
+                            </select>
+                            <select name="value" id="bulkTag" data-for="ADD_TAG" hidden disabled>
+                                <option th:each="t : ${allTags}" th:value="${t.id}" th:text="#{'tagCategory.' + ${t.category}} + ': ' + ${t.value}"></option>
+                            </select>
+                            <input type="text" name="value" id="bulkSku" data-for="ADD_SKU" th:placeholder="#{artifacts.bulk.hint.sku}" hidden disabled required>
+                            <button type="submit" class="primary" th:text="#{common.apply}">Применить</button>
+                        </fieldset>
+                    </details>
+                </div>
+            </div>
+            <table class="table" th:if="${!view.page().items().isEmpty()}">
+                <thead><tr>
+                    <th th:if="${canManage}" class="bulk-cell"><input type="checkbox" id="bulkAll" class="bulk-box" th:aria-label="#{artifacts.bulk.selectAllPage}" th:title="#{artifacts.bulk.selectAllPage}"></th>
+                    <th th:text="#{artifacts.col.title}">Название</th>
+                    <th th:text="#{artifacts.col.language}">Язык</th>
+                    <th th:text="#{artifacts.col.status}">Статус</th>
+                    <th th:text="#{artifacts.col.sku}">SKU</th>
+                    <th class="col-tags" th:text="#{artifacts.col.tags}">Теги</th>
+                    <th class="col-updated" th:text="#{artifacts.col.updated}">Обновлен</th>
+                    <th></th>
+                </tr></thead>
+                <tbody>
+                <tr th:each="a : ${view.page().items()}" th:classappend="${a.status.name() == 'OUTDATED' or a.status.name() == 'EOL'} ? 'faded'">
+                    <td th:if="${canManage}" class="bulk-cell"><input type="checkbox" name="ids" th:value="${a.id}" class="bulk-check bulk-box"></td>
+                    <td><a th:href="@{/artifacts/{id}(id=${a.id})}" th:text="${a.title}">Название</a>
+                        <span class="overdue" th:if="${a.reviewDueAt.isBefore(now)}" th:text="#{artifacts.reviewDue}">нужно ревью</span>
+                        <span class="sub" th:text="${a.type.name}">Тип</span></td>
+                    <td th:text="#{'language.' + ${a.language}}">RU</td>
+                    <td><span class="st" th:classappend="'st-' + ${a.status}" th:text="#{'artifactStatus.' + ${a.status}}">Актуален</span></td>
+                    <td>
+                        <span th:each="s, st : ${view.skus().get(a.id)}" th:if="${st.index < 2}"><a th:href="@{|/sku/${s.model}|}" th:text="${s.model}">SKU</a><span th:if="${!st.last and st.index < 1}">, </span></span>
+                        <span class="muted" th:if="${view.skus().get(a.id) != null and view.skus().get(a.id).size() > 2}" th:text="'+' + ${view.skus().get(a.id).size() - 2}"></span>
+                        <span class="muted" th:if="${a.line != null}" th:text="#{artifacts.wholeLine(${a.line.code})}"></span>
+                    </td>
+                    <td class="col-tags"><span class="tag" th:each="t : ${view.tags().get(a.id)}" th:text="${t.value}">тег</span></td>
+                    <td class="nowrap muted col-updated" th:text="${#temporals.format(a.updatedAt, 'dd.MM.yyyy')}">01.01.2026</td>
+                    <td class="nowrap right">
+                        <a th:if="${view.mainFiles().get(a.id) != null}" th:href="@{/artifacts/files/{f}(f=${view.mainFiles().get(a.id).id})}" th:text="#{artifacts.download}">Скачать</a>
+                        <a th:if="${view.mainFiles().get(a.id) != null and view.mainFiles().get(a.id).inlineSafe}" target="_blank"
+                           th:href="@{/artifacts/files/{f}(f=${view.mainFiles().get(a.id).id}, inline=true)}" th:text="#{artifacts.preview}">Предпросмотр</a>
+                        <a th:if="${a.externalUrl != null}" th:href="${a.externalUrl}" target="_blank" rel="noopener noreferrer" th:text="#{artifacts.openLink}">Ссылка</a>
+                        <!-- не вложенная форма: таблица уже внутри формы массовых действий, поэтому кнопка шлет запрос на свой адрес -->
+                        <button th:if="${canEdit}" type="submit" class="link-btn danger" formmethod="post"
+                                th:attr="formaction=@{/artifacts/{id}/delete(id=${a.id})},data-confirm=#{artifacts.delete.confirmNamed(${a.title})}"
+                                th:text="#{artifacts.delete.short}">Удалить</button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </form>
+        <p th:if="${view.page().items().isEmpty()}" class="muted" th:text="#{catalog.empty}">Ничего не найдено</p>
+
+        <div class="pager" th:if="${view.page().totalPages() > 1}">
+            <a th:if="${view.page().hasPrev()}" class="btn"
+               th:href="@{/artifacts(type=${filter.type},language=${filter.language},status=${filter.status},owner=${filter.owner},sku=${filter.sku},line=${filter.line},family=${filter.family},tag=${filter.tag},contour=${filter.contour},reviewDue=${filter.reviewDue ? true : null},q=${filter.q},sort=${filter.sort},dir=${filter.dir},page=${view.page().page() - 1})}"
+               th:attr="hx-get=@{/artifacts(type=${filter.type},language=${filter.language},status=${filter.status},owner=${filter.owner},sku=${filter.sku},line=${filter.line},family=${filter.family},tag=${filter.tag},contour=${filter.contour},reviewDue=${filter.reviewDue ? true : null},q=${filter.q},sort=${filter.sort},dir=${filter.dir},page=${view.page().page() - 1})}"
+               hx-target="#results" hx-push-url="true" hx-swap="innerHTML" th:text="#{catalog.prev}">Назад</a>
+            <span class="muted" th:text="#{catalog.page(${view.page().page() + 1}, ${view.page().totalPages()})}">Страница</span>
+            <a th:if="${view.page().hasNext()}" class="btn"
+               th:href="@{/artifacts(type=${filter.type},language=${filter.language},status=${filter.status},owner=${filter.owner},sku=${filter.sku},line=${filter.line},family=${filter.family},tag=${filter.tag},contour=${filter.contour},reviewDue=${filter.reviewDue ? true : null},q=${filter.q},sort=${filter.sort},dir=${filter.dir},page=${view.page().page() + 1})}"
+               th:attr="hx-get=@{/artifacts(type=${filter.type},language=${filter.language},status=${filter.status},owner=${filter.owner},sku=${filter.sku},line=${filter.line},family=${filter.family},tag=${filter.tag},contour=${filter.contour},reviewDue=${filter.reviewDue ? true : null},q=${filter.q},sort=${filter.sort},dir=${filter.dir},page=${view.page().page() + 1})}"
+               hx-target="#results" hx-push-url="true" hx-swap="innerHTML" th:text="#{catalog.next}">Вперед</a>
+        </div>
+    </div>
+    <script th:src="@{/js/bulk.js}" defer></script>
+</main>
+</body>
+</html>

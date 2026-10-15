@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: page(~{::title}, ~{::main})}">
+<head>
+    <title th:text="#{sku.new.title}">Новый SKU</title>
+</head>
+<body>
+<main class="content wide">
+    <h1 th:text="#{sku.new.title}">Новый SKU</h1>
+    <p class="muted" th:if="${copyModel != null}" th:text="#{sku.new.copyOf(${copyModel})}"></p>
+    <p class="muted" th:if="${copyModel == null}" th:text="#{sku.new.hint}"></p>
+    <form th:action="@{/skus}" method="post" class="block editing">
+        <input type="hidden" name="copyFromId" th:value="${form.copyFromId}">
+        <div th:replace="~{sku/edit :: identity}"></div>
+        <div th:replace="~{sku/edit :: tag-picker}"></div>
+        <p class="muted small" th:text="#{field.hint.lifecycleDate}"></p>
+        <div class="field-row">
+            <div class="field">
+                <label for="lifecycleStatus" th:text="#{field.lifecycleStatus}">Статус ЖЦ</label>
+                <select id="lifecycleStatus" name="lifecycleStatus" required>
+                    <option th:each="st : ${statuses}" th:value="${st}" th:text="#{'lifecycle.' + ${st}}" th:selected="${st.name() == form.lifecycleStatus}"></option>
+                </select>
+                <span class="error" th:if="${errors.containsKey('lifecycleStatus')}" th:text="#{${errors['lifecycleStatus']}}"></span>
+            </div>
+            <div th:replace="~{sku/edit :: lifecycleDate('gaDate')}"></div>
+            <div th:replace="~{sku/edit :: lifecycleDate('eolAnnounceDate')}"></div>
+            <div th:replace="~{sku/edit :: lifecycleDate('lastOrderDate')}"></div>
+            <div th:replace="~{sku/edit :: lifecycleDate('lastShipDate')}"></div>
+            <div th:replace="~{sku/edit :: lifecycleDate('endOfSupportDate')}"></div>
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="primary" th:text="#{common.create}">Создать</button>
+            <a class="btn" th:href="@{/catalog}" th:text="#{common.cancel}">Отмена</a>
+        </div>
+    </form>
+</main>
+</body>
+</html>

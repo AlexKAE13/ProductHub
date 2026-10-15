@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<body>
+<!-- Блок 4: текущая RELEASE-прошивка крупно, остальные свернуты. Параметр модели: fw (SkuFirmware) -->
+<section class="block" id="block-firmware" th:fragment="block">
+    <div class="block-head">
+        <h2 th:text="#{sku.section.firmware}">Прошивки</h2>
+        <a class="link-btn edit-only" th:if="${fw.canPublish()}" th:href="@{/firmware/new(sku=${s.model})}" th:text="#{firmware.publish}">Опубликовать</a>
+    </div>
+    <div class="fw-current" th:if="${fw.current() != null}">
+        <div class="fw-version">
+            <span th:text="${fw.current().version}">1.2.0</span>
+            <span class="st" th:classappend="'st-' + ${fw.current().status}" th:text="#{'firmwareStatus.' + ${fw.current().status}}">Релиз</span>
+        </div>
+        <div class="muted" th:text="#{firmware.currentFrom(${#temporals.format(fw.current().releaseDate, 'dd.MM.yyyy')})}">от 01.01.2026</div>
+        <div class="fw-actions">
+            <a class="btn primary" th:if="${fw.current().hasFile()}" th:href="@{/firmware/{id}/download(id=${fw.current().id})}" th:text="#{artifacts.download}">Скачать</a>
+            <a class="btn" th:if="${!fw.current().hasFile() and fw.current().externalUrl != null}" th:href="${fw.current().externalUrl}" target="_blank" rel="noopener noreferrer" th:text="#{artifacts.openLink}">Ссылка</a>
+            <a class="btn" th:href="@{/firmware/{id}(id=${fw.current().id})}" th:text="#{firmware.releaseNotes}">Release notes</a>
+        </div>
+    </div>
+    <p class="empty-note" th:if="${fw.current() == null}" th:text="#{firmware.noRelease}">Релизных прошивок нет.</p>
+    <details class="outdated" th:if="${!fw.others().isEmpty()}">
+        <summary th:text="#{firmware.others(${fw.others().size()})}">Другие версии</summary>
+        <table class="table dense">
+            <tr th:each="f : ${fw.others()}" th:classappend="${f.status.name() == 'WITHDRAWN'} ? 'faded'">
+                <td><a th:href="@{/firmware/{id}(id=${f.id})}" th:text="${f.version}">1.1.0</a></td>
+                <td><span class="st" th:classappend="'st-' + ${f.status}" th:text="#{'firmwareStatus.' + ${f.status}}">Бета</span></td>
+                <td class="nowrap muted" th:text="${#temporals.format(f.releaseDate, 'dd.MM.yyyy')}">01.01.2026</td>
+                <td class="nowrap right"><a th:if="${f.hasFile()}" th:href="@{/firmware/{id}/download(id=${f.id})}" th:text="#{artifacts.download}">Скачать</a></td>
+            </tr>
+        </table>
+    </details>
+</section>
+</body>
+</html>

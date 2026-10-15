@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Product HUB - скелетоны, классический вид</title>
+<link rel="stylesheet" href="../src/main/resources/static/css/app.css">
+<style>
+/* Скелетоны классического вида: плоские серые плашки без градиентов, спокойное мерцание (только прозрачность) */
+.sk { display: block; background: #e9ecef; border-radius: 4px; flex: none; animation: sk-pulse 1.6s ease-in-out infinite; }
+.sk.l { height: 12px; } .sk.t { height: 24px; width: 200px; } .sk.btn { height: 32px; width: 110px; border-radius: 6px; }
+.sk.p { height: 20px; width: 96px; border-radius: 10px; } .sk.f { height: 32px; border-radius: 6px; } .sk.c { width: 22px; height: 22px; border-radius: 50%; }
+.sk.b { height: 6px; width: 80px; border-radius: 3px; }
+.sk-stack { display: flex; flex-direction: column; gap: 8px; }
+.sk-line { display: flex; align-items: center; gap: 10px; }
+.sk-tr td { padding: 12px 10px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+.sk-grid { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 24px; align-items: start; }
+.sk-cols { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+.sk-card { border: 1px solid var(--line); border-radius: 6px; padding: 12px; margin-bottom: 8px; background: #fff; }
+.demo-bar { position: fixed; bottom: 14px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; padding: 6px; background: #fff; border: 1px solid var(--line-strong); border-radius: 8px; z-index: 5; }
+.demo-bar button { height: 30px; padding: 0 12px; cursor: pointer; }
+.demo-bar button.on { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+.view { display: none; } .view.on { display: block; }
+@keyframes sk-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
+@media (prefers-reduced-motion: reduce) { .sk { animation: none; } }
+</style>
+</head>
+<body>
+<div class="app"><div class="app-main">
+<header class="topbar"><a class="brand" href="#">Product HUB</a>
+  <nav class="menu"><a class="active" href="#">Каталог</a><a href="#">Артефакты</a><a href="#">Прошивки</a><a href="#">Кейсы</a><a href="#">Задачи</a><a href="#">Дашборд</a><a href="#">Справочники</a><a href="#">Правки</a><a href="#">Настройки</a></nav></header>
+
+<main class="content wide">
+
+<!-- Каталог -->
+<div class="view on" id="v-catalog" aria-busy="true">
+  <div class="page-head"><div class="sk-stack"><span class="sk t"></span><span class="sk l" style="width:170px"></span></div><div class="actions"><span class="sk btn"></span><span class="sk btn" style="width:130px"></span></div></div>
+  <div class="filters"><span class="sk f" style="width:230px"></span><span class="sk f" style="flex:1"></span></div>
+  <div class="filters"><span class="sk f" style="width:120px"></span><span class="sk f" style="width:130px"></span><span class="sk f" style="width:170px"></span><span class="sk f" style="width:120px"></span><span class="sk f" style="width:90px"></span></div>
+  <table class="table"><thead><tr>
+    <th><span class="sk l" style="width:60px"></span></th><th><span class="sk l" style="width:110px"></span></th><th><span class="sk l" style="width:60px"></span></th><th><span class="sk l" style="width:80px"></span></th><th><span class="sk l" style="width:70px"></span></th><th><span class="sk l" style="width:70px"></span></th><th class="num"><span class="sk l" style="width:90px;margin-left:auto"></span></th></tr></thead>
+  <tbody id="rows"></tbody></table>
+</div>
+
+<!-- Карточка SKU -->
+<div class="view" id="v-card" aria-busy="true">
+  <div class="page-head"><div class="sk-stack"><span class="sk l" style="width:140px"></span><span class="sk-line"><span class="sk t" style="width:230px;height:30px"></span><span class="sk p"></span></span><span class="sk l" style="width:340px"></span><span class="sk l" style="width:220px"></span></div><div class="actions"><span class="sk btn" style="width:90px"></span><span class="sk btn" style="width:140px"></span></div></div>
+  <div class="sk-line" style="gap:36px;padding:12px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin-bottom:18px">
+    <div class="sk-stack"><span class="sk l" style="width:60px"></span><span class="sk l" style="width:150px"></span></div><div class="sk-stack"><span class="sk l" style="width:60px"></span><span class="sk l" style="width:110px"></span></div><div class="sk-stack"><span class="sk l" style="width:60px"></span><span class="sk l" style="width:90px"></span></div><div class="sk-stack"><span class="sk l" style="width:60px"></span><span class="sk l" style="width:110px"></span></div></div>
+  <div class="sk-grid"><div>
+    <section class="block"><div class="sk-stack"><span class="sk t" style="width:120px;height:20px"></span><span class="sk l"></span><span class="sk l"></span><span class="sk l" style="width:70%"></span></div></section>
+    <section class="block"><div class="sk-stack"><span class="sk t" style="width:170px;height:20px"></span><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px 28px"><span class="sk l"></span><span class="sk l"></span><span class="sk l"></span><span class="sk l"></span><span class="sk l"></span><span class="sk l"></span></div></div></section>
+    <section class="block"><div class="sk-stack"><span class="sk t" style="width:230px;height:20px"></span><span class="sk-line"><span class="sk" style="width:30px;height:36px"></span><span class="sk-stack" style="flex:1"><span class="sk l" style="width:50%"></span><span class="sk l" style="width:28%"></span></span><span class="sk p"></span></span><span class="sk-line"><span class="sk" style="width:30px;height:36px"></span><span class="sk-stack" style="flex:1"><span class="sk l" style="width:45%"></span><span class="sk l" style="width:25%"></span></span><span class="sk p"></span></span></div></section>
+  </div><aside>
+    <section class="block"><div class="sk-stack"><span class="sk t" style="width:150px;height:20px"></span><span class="sk l" style="width:80%"></span><span class="sk l" style="width:60%"></span><span class="sk l" style="width:70%"></span><span class="sk l" style="width:55%"></span></div></section>
+    <section class="block"><div class="sk-stack"><span class="sk t" style="width:170px;height:20px"></span><span class="sk" style="height:50px"></span></div></section>
+  </aside></div>
+</div>
+
+<!-- Доска задач -->
+<div class="view" id="v-tasks" aria-busy="true">
+  <div class="page-head"><div class="sk-stack"><span class="sk t" style="width:120px"></span><span class="sk l" style="width:160px"></span></div><div class="actions"><span class="sk btn" style="width:140px"></span></div></div>
+  <div class="filters"><span class="sk f" style="width:170px"></span><span class="sk f" style="width:100px"></span><span class="sk f" style="width:100px"></span><span class="sk f" style="width:120px"></span></div>
+  <div class="sk-cols" id="cols"></div>
+</div>
+
+</main></div></div>
+
+<div class="demo-bar"><button class="on" data-v="catalog">Каталог</button><button data-v="card">Карточка SKU</button><button data-v="tasks">Доска</button></div>
+<script>
+document.getElementById('rows').innerHTML = Array.from({ length: 10 }, () => `<tr class="sk-tr"><td><span class="sk l" style="width:80px"></span></td><td><div class="sk-stack"><span class="sk l"></span><span class="sk l" style="width:60%"></span></div></td><td><span class="sk l" style="width:40px"></span></td><td><span class="sk p"></span></td><td><span class="sk l" style="width:50px"></span></td><td><span class="sk l" style="width:70px"></span></td><td class="num"><span class="sk b" style="margin-left:auto"></span></td></tr>`).join('');
+document.getElementById('cols').innerHTML = [4, 2, 1, 3].map(n => `<div><div class="sk-line" style="justify-content:space-between;margin-bottom:10px"><span class="sk l" style="width:80px"></span><span class="sk c" style="width:20px;height:20px"></span></div>${Array.from({ length: n }, () => `<div class="sk-card"><div class="sk-stack"><span class="sk l"></span><span class="sk l" style="width:70%"></span><span class="sk p" style="width:80px;height:18px"></span><span class="sk-line" style="justify-content:space-between"><span class="sk l" style="width:45%"></span><span class="sk c"></span></span></div></div>`).join('')}</div>`).join('');
+document.querySelector('.demo-bar').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return;
+  document.querySelectorAll('.demo-bar button').forEach(x => x.classList.toggle('on', x === b));
+  document.querySelectorAll('.view').forEach(v => v.classList.toggle('on', v.id === 'v-' + b.dataset.v)); });
+</script>
+</body>
+</html>

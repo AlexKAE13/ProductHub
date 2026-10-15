@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: page(~{::title}, ~{::main})}">
+<head>
+    <title th:text="#{cases.title}">Кейсы</title>
+</head>
+<body>
+<main class="content wide">
+    <div class="page-head">
+        <h1 th:text="#{cases.title}">Кейсы</h1>
+        <div class="actions">
+            <a class="btn primary" th:if="${canEdit}" th:href="@{/cases/new}" th:text="#{cases.create}">Добавить кейс</a>
+        </div>
+    </div>
+    <form id="filters" class="filters" th:action="@{/cases}" method="get"
+          hx-get="/cases" hx-target="#results" hx-push-url="true" hx-swap="innerHTML" hx-trigger="change, submit">
+        <input type="search" id="q" name="q" class="search" th:value="${filter.q}" autocomplete="off"
+               hx-get="/cases" hx-include="#filters" hx-target="#results" hx-push-url="true" hx-swap="innerHTML"
+               hx-trigger="input changed delay:150ms, search"
+               th:placeholder="#{cases.filter.q}" th:aria-label="#{cases.filter.q}">
+        <select name="country" th:classappend="${filter.country != null and !filter.country.isEmpty()} ? 'on'" th:aria-label="#{cases.col.country}">
+            <option value="" hidden th:text="#{cases.col.country}">Страна</option>
+            <option th:each="c : ${countries}" th:value="${c}" th:text="${c}" th:selected="${c == filter.country}"></option>
+        </select>
+        <select name="year" th:classappend="${filter.year != null} ? 'on'" th:aria-label="#{cases.col.year}">
+            <option value="" hidden th:text="#{cases.col.year}">Год</option>
+            <option th:each="y : ${years}" th:value="${y}" th:text="${y}" th:selected="${y == filter.year}"></option>
+        </select>
+        <select name="tag" th:classappend="${filter.tag != null} ? 'on'" th:aria-label="#{artifacts.filter.tag}">
+            <option value="" hidden th:text="#{artifacts.filter.tag}">Тег</option>
+            <option th:each="t : ${allTags}" th:value="${t.id}" th:text="#{'tagCategory.' + ${t.category}} + ': ' + ${t.value}" th:selected="${t.id == filter.tag}"></option>
+        </select>
+        <input type="text" name="sku" th:value="${filter.sku}" data-suggest="sku" data-single autocomplete="off" placeholder="SKU" style="width:150px" th:aria-label="SKU">
+        <noscript><button type="submit" th:text="#{common.show}">Показать</button></noscript>
+    </form>
+
+    <div id="results" th:fragment="results">
+        <p class="result-count" th:text="#{catalog.found(${page.total})}">Найдено</p>
+        <table class="table" th:if="${!page.items.isEmpty()}">
+            <thead><tr>
+                <th th:text="#{cases.col.title}">Кейс</th>
+                <th th:text="#{cases.col.country}">Страна</th>
+                <th class="col-size" th:text="#{cases.col.size}">Масштаб</th>
+                <th th:text="#{cases.col.year}">Год</th>
+                <th th:text="#{firmware.col.skus}">SKU</th>
+                <th class="col-tags" th:text="#{artifacts.col.tags}">Теги</th>
+            </tr></thead>
+            <tbody>
+            <tr th:each="c : ${page.items}">
+                <td><a th:href="@{/cases/{id}(id=${c.id})}" th:text="${c.title}">Название</a>
+                    <span class="sub" th:if="${c.summary != null}" th:text="${#strings.abbreviate(c.summary, 90)}">Описание</span></td>
+                <td th:text="${c.country} + (${c.city != null} ? ', ' + ${c.city} : '')">Страна</td>
+                <td class="col-size" th:text="${c.deploymentSize}">Масштаб</td>
+                <td th:text="${c.year}">2026</td>
+                <td>
+                    <span th:each="s, st : ${data.skus().get(c.id)}" th:if="${st.index < 3}"><a th:href="@{|/sku/${s.model}|}" th:text="${s.model}">SKU</a><span th:if="${!st.last and st.index < 2}">, </span></span>
+                    <span class="muted" th:if="${data.skus().get(c.id) != null and data.skus().get(c.id).size() > 3}" th:text="'+' + ${data.skus().get(c.id).size() - 3}"></span>
+                </td>
+                <td class="col-tags"><span class="tag" th:each="t : ${data.tags().get(c.id)}" th:text="${t.value}">тег</span></td>
+            </tr>
+            </tbody>
+        </table>
+        <p th:if="${page.items.isEmpty()}" class="muted" th:text="#{cases.empty}">Кейсов пока нет.</p>
+        <div class="pager" th:if="${page.totalPages() > 1}">
+            <a th:if="${page.hasPrev()}" class="btn" th:href="@{/cases(country=${filter.country},year=${filter.year},tag=${filter.tag},sku=${filter.sku},q=${filter.q},page=${page.page() - 1})}" th:text="#{catalog.prev}">Назад</a>
+            <span class="muted" th:text="#{catalog.page(${page.page() + 1}, ${page.totalPages()})}">Страница</span>
+            <a th:if="${page.hasNext()}" class="btn" th:href="@{/cases(country=${filter.country},year=${filter.year},tag=${filter.tag},sku=${filter.sku},q=${filter.q},page=${page.page() + 1})}" th:text="#{catalog.next}">Вперед</a>
+        </div>
+    </div>
+</main>
+</body>
+</html>

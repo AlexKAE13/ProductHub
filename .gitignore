@@ -1,0 +1,11 @@
+target/
+target.nosync/
+data/
+data-perf/
+.idea/
+*.iml
+.vscode/
+.DS_Store
+*.log
+.env
+backups/

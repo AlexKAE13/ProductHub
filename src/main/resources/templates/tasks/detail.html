@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: page(~{::title}, ~{::main})}">
+<head>
+    <title th:text="${t.title}">Задача</title>
+</head>
+<body>
+<main class="content wide">
+    <p class="error" th:if="${ruleError != null}" th:text="#{${ruleError}}"></p>
+    <p class="error" th:if="${qaError != null}" th:text="#{${qaError}}"></p>
+    <div class="page-head">
+        <div>
+            <div class="crumbs"><a th:href="@{/tasks}" th:text="#{menu.tasks}">Задачи</a></div>
+            <h1 th:text="${t.title}">Название</h1>
+            <p class="muted"><span class="tag" th:text="#{'taskType.' + ${t.type}}">Тип</span>
+                <span class="st st-IN_PROGRESS" th:text="#{'taskStatus.' + ${t.status}}">Новые</span></p>
+        </div>
+        <div class="actions" th:if="${canMove}">
+            <form th:action="@{/tasks/{id}/move(id=${t.id})}" method="post" class="inline">
+                <select name="status" onchange="this.form.submit()" th:aria-label="#{artifacts.col.status}">
+                    <option th:each="s : ${statuses}" th:value="${s}" th:text="#{'taskStatus.' + ${s}}" th:selected="${s == t.status}"></option>
+                </select>
+            </form>
+        </div>
+    </div>
+    <div class="card-layout">
+        <div class="col-main">
+            <section class="block" th:if="${t.description != null}">
+                <div class="block-head"><h2 th:text="#{tasks.description}">Описание</h2></div>
+                <p class="pre" th:text="${t.description}">Описание</p>
+            </section>
+            <section class="block" th:if="${question != null}">
+                <div class="block-head"><h2 th:text="#{qa.question.title}">Вопрос</h2></div>
+                <p><span class="tag" th:text="#{'qaKind.' + ${question.kind}}">вопрос</span>
+                    <span class="tag" th:if="${question.technical}" th:text="#{qa.technical}">технический</span>
+                    <span class="st st-IN_PROGRESS" th:text="#{'qaStatus.' + ${question.status}}">Новый</span></p>
+                <p class="pre" th:text="${question.text}">Текст</p>
+                <p class="muted small" th:text="${question.author.fullName} + ', ' + ${#temporals.format(question.createdAt, 'dd.MM.yyyy HH:mm')}">Автор</p>
+                <div th:if="${question.answer != null}">
+                    <h3 th:text="#{qa.col.answer}">Ответ</h3>
+                    <p class="pre" th:text="${question.answer}">Ответ</p>
+                </div>
+                <th:block th:if="${canAnswer and (question.status.name() == 'NEW' or question.status.name() == 'IN_PROGRESS')}">
+                    <div th:replace="~{qa/block :: answer-form(${question}, '/tasks/' + ${t.id})}"></div>
+                </th:block>
+            </section>
+        </div>
+        <aside class="col-side">
+            <section class="block">
+                <dl class="kv">
+                    <dt th:text="#{tasks.assignee}">Исполнитель</dt><dd th:text="${t.assignee.fullName}">Исполнитель</dd>
+                    <dt th:text="#{tasks.createdBy}">Создал</dt><dd th:text="${t.createdBy}">SYSTEM</dd>
+                    <dt th:text="#{tasks.dueDate}">Срок</dt>
+                    <dd><span th:text="${t.dueDate != null} ? ${#temporals.format(t.dueDate, 'dd.MM.yyyy')} : '-'">-</span>
+                        <span class="overdue" th:if="${t.isOverdue(today)}" th:text="#{tasks.overdue}">просрочено</span></dd>
+                    <dt th:text="#{tasks.priority}">Приоритет</dt><dd th:text="#{'taskPriority.' + ${t.priority}}">Обычный</dd>
+                    <dt th:text="#{tasks.related}">Объект</dt>
+                    <dd><a th:if="${t.relatedUrl != null}" th:href="${t.relatedUrl}" th:text="${t.relatedLabel}">объект</a>
+                        <span class="muted" th:if="${t.relatedUrl == null}" th:text="#{common.none}">-</span></dd>
+                    <dt th:text="#{tasks.created}">Создана</dt><dd th:text="${#temporals.format(t.createdAt, 'dd.MM.yyyy HH:mm')}">дата</dd>
+                    <dt th:if="${t.sourceEvent != null}" th:text="#{tasks.source}">Источник</dt><dd th:if="${t.sourceEvent != null}" th:text="${t.sourceEvent}">событие</dd>
+                </dl>
+                <form th:if="${canAssign}" th:action="@{/tasks/{id}/assign(id=${t.id})}" method="post" style="margin-top:12px">
+                    <div class="field"><label for="assigneeId" th:text="#{tasks.reassign}">Переназначить</label>
+                        <select id="assigneeId" name="assigneeId" onchange="this.form.submit()">
+                            <option th:each="u : ${assignees}" th:value="${u.id}" th:text="${u.fullName}" th:selected="${u.id == t.assignee.id}"></option>
+                        </select></div>
+                </form>
+            </section>
+        </aside>
+    </div>
+</main>
+</body>
+</html>

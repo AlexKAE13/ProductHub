@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: page(~{::title}, ~{::main})}">
+<head>
+    <title th:text="#{tasks.create}">Новая задача</title>
+</head>
+<body>
+<main class="content wide">
+    <h1 th:text="#{tasks.create}">Новая задача</h1>
+    <form class="block editing" th:action="@{/tasks}" method="post">
+        <div class="field"><label for="title" th:text="#{tasks.title}">Название</label>
+            <input type="text" id="title" name="title" th:value="${form.title}" required>
+            <span class="error" th:if="${errors != null and errors.containsKey('title')}" th:text="#{${errors['title']}}"></span></div>
+        <div class="field-row">
+            <div class="field"><label for="type" th:text="#{tasks.filter.type}">Тип</label>
+                <select id="type" name="type">
+                    <option th:each="t : ${types}" th:value="${t}" th:text="#{'taskType.' + ${t}}" th:selected="${t.name() == form.type}"></option></select></div>
+            <div class="field"><label for="assigneeId" th:text="#{tasks.assignee}">Исполнитель</label>
+                <select id="assigneeId" name="assigneeId" th:disabled="${!canPickAssignee}">
+                    <option th:each="u : ${assignees}" th:value="${u.id}" th:text="${u.fullName}" th:selected="${u.id == form.assigneeId}"></option></select>
+                <span class="error" th:if="${errors != null and errors.containsKey('assigneeId')}" th:text="#{${errors['assigneeId']}}"></span></div>
+            <div class="field"><label for="dueDate" th:text="#{tasks.dueDate}">Срок</label>
+                <input type="date" id="dueDate" name="dueDate" th:value="${form.dueDate}">
+                <span class="error" th:if="${errors != null and errors.containsKey('dueDate')}" th:text="#{${errors['dueDate']}}"></span></div>
+            <div class="field"><label for="priority" th:text="#{tasks.priority}">Приоритет</label>
+                <select id="priority" name="priority">
+                    <option th:each="p : ${priorities}" th:value="${p}" th:text="#{'taskPriority.' + ${p}}" th:selected="${p.name() == form.priority}"></option></select></div>
+        </div>
+        <div class="field"><label for="sku" th:text="#{tasks.skuOptional}">SKU (необязательно)</label>
+            <input type="text" id="sku" name="sku" data-suggest="sku" data-single autocomplete="off" th:value="${form.sku}" style="max-width:260px">
+            <span class="error" th:if="${errors != null and errors.containsKey('sku')}" th:text="#{${errors['sku']}}"></span></div>
+        <div class="field"><label for="description" th:text="#{tasks.description}">Описание</label>
+            <textarea id="description" name="description" rows="4" th:text="${form.description}"></textarea></div>
+        <div class="form-actions">
+            <button type="submit" class="primary" th:text="#{common.create}">Создать</button>
+            <a class="btn" th:href="@{/tasks}" th:text="#{common.cancel}">Отмена</a>
+        </div>
+    </form>
+</main>
+</body>
+</html>

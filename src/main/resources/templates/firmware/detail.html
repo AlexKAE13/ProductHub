@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: page(~{::title}, ~{::main})}">
+<head>
+    <title th:text="'Прошивка ' + ${d.firmware.version}">Прошивка</title>
+</head>
+<body>
+<main class="content wide">
+    <div class="error-box" th:if="${warnings != null and !warnings.isEmpty()}">
+        <p class="warn" th:each="w : ${warnings}" th:text="${w}">Предупреждение</p>
+    </div>
+    <div class="page-head">
+        <div>
+            <div class="crumbs"><a th:href="@{/firmware}" th:text="#{menu.firmware}">Прошивки</a></div>
+            <h1>
+                <span th:text="${d.firmware.version}">1.2.0</span>
+                <span class="st" th:classappend="'st-' + ${d.firmware.status}" th:text="#{'firmwareStatus.' + ${d.firmware.status}}">Релиз</span>
+            </h1>
+            <p class="muted" th:text="#{firmware.releasedOn(${#temporals.format(d.firmware.releaseDate, 'dd.MM.yyyy')}, ${d.firmware.publishedBy})}">Дата</p>
+        </div>
+        <div class="actions" th:if="${d.canEdit}">
+            <a class="btn" th:href="@{/firmware/{id}/edit(id=${d.firmware.id})}" th:text="#{common.edit}">Править</a>
+            <form th:action="@{/firmware/{id}/status(id=${d.firmware.id})}" method="post" class="inline">
+                <select name="status" onchange="this.form.submit()" th:aria-label="#{artifacts.col.status}">
+                    <option th:each="s : ${statuses}" th:value="${s}" th:text="#{'firmwareStatus.' + ${s}}" th:selected="${s == d.firmware.status}"></option>
+                </select>
+            </form>
+            <details class="more">
+                <summary th:title="#{sku.menu}" th:aria-label="#{sku.menu}">&middot;&middot;&middot;</summary>
+                <div class="more-list">
+                    <form th:action="@{/firmware/{id}/delete(id=${d.firmware.id})}" method="post"
+                          th:attr="onsubmit=|return confirm('${#messages.msg('firmware.delete.confirm')}')|">
+                        <button type="submit" class="danger" th:text="#{sku.delete}">Удалить</button>
+                    </form>
+                </div>
+            </details>
+        </div>
+    </div>
+
+    <div class="card-layout">
+        <div class="col-main">
+            <section class="block">
+                <div class="block-head"><h2 th:text="#{firmware.file}">Файл</h2></div>
+                <div class="file-row" th:if="${d.firmware.hasFile()}">
+                    <strong th:text="${d.firmware.fileName}">firmware.bin</strong>
+                    <span class="muted" th:text="${#numbers.formatDecimal(d.firmware.sizeBytes / 1048576.0, 1, 'WHITESPACE', 2, 'COMMA')} + ' МБ'">10 МБ</span>
+                    <a class="btn primary" th:href="@{/firmware/{id}/download(id=${d.firmware.id})}" th:text="#{artifacts.download}">Скачать</a>
+                </div>
+                <p th:if="${d.firmware.externalUrl != null}"><a th:href="${d.firmware.externalUrl}" target="_blank" rel="noopener noreferrer" th:text="${d.firmware.externalUrl}">url</a></p>
+                <p class="muted small" th:if="${d.firmware.sha256 != null}" th:text="'SHA-256: ' + ${d.firmware.sha256}">sha</p>
+            </section>
+            <section class="block">
+                <div class="block-head"><h2 th:text="#{firmware.notes}">Release notes</h2></div>
+                <p class="pre" th:if="${d.firmware.releaseNotes != null}" th:text="${d.firmware.releaseNotes}">Заметки</p>
+                <p class="empty-note" th:if="${d.firmware.releaseNotes == null}" th:text="#{firmware.notes.empty}">Release notes не заполнены.</p>
+            </section>
+            <th:block th:replace="~{qa/block :: block}"></th:block>
+            <section class="block" th:if="${!d.history.isEmpty()}">
+                <details>
+                    <summary><h2 class="inline" th:text="#{sku.section.history}">История изменений</h2></summary>
+                    <table class="table dense">
+                        <tr th:each="h : ${d.history}">
+                            <td class="nowrap muted" th:text="${#temporals.format(h.at, 'dd.MM.yyyy HH:mm')}">01.01.2026</td>
+                            <td th:text="${h.userLogin}">user</td>
+                            <td th:text="#{'sku.history.' + ${h.action}}">Изменение</td>
+                            <td th:text="${#messages.msgOrNull('firmware.field.' + h.field)} ?: ${h.field}">Поле</td>
+                            <td><span class="muted" th:text="${h.oldValue != null} ? ${h.oldValue} : '-'">-</span> &rarr; <span th:text="${h.newValue != null} ? ${h.newValue} : '-'">-</span></td>
+                        </tr>
+                    </table>
+                </details>
+            </section>
+        </div>
+        <aside class="col-side">
+            <section class="block">
+                <div class="block-head"><h2 th:text="#{firmware.col.skus}">Совместимые SKU</h2></div>
+                <p th:each="s : ${d.skus}"><a th:href="@{|/sku/${s.model}|}" th:text="${s.model}">SKU</a></p>
+            </section>
+            <section class="block">
+                <dl class="kv">
+                    <dt th:text="#{firmware.public}">Внешний контур</dt>
+                    <dd th:text="${d.firmware.publicRelease} ? #{common.yes} : #{common.no}">Нет</dd>
+                </dl>
+            </section>
+        </aside>
+    </div>
+</main>
+</body>
+</html>

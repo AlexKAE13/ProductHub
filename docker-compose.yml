@@ -1,0 +1,52 @@
+# Product HUB: приложение + PostgreSQL. Запуск: docker compose up -d --build
+# Настройки лежат в файле .env (пример: .env.example).
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: producthub
+      POSTGRES_USER: producthub
+      POSTGRES_PASSWORD: ${PRODUCTHUB_DB_PASSWORD:?Задайте PRODUCTHUB_DB_PASSWORD в файле .env}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U producthub -d producthub"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PRODUCTHUB_DB_URL: jdbc:postgresql://db:5432/producthub
+      PRODUCTHUB_DB_USER: producthub
+      PRODUCTHUB_DB_PASSWORD: ${PRODUCTHUB_DB_PASSWORD}
+      PRODUCTHUB_LDAP_ENABLED: ${PRODUCTHUB_LDAP_ENABLED:-false}
+      PRODUCTHUB_LDAP_URL: ${PRODUCTHUB_LDAP_URL:-}
+      PRODUCTHUB_LDAP_BASE: ${PRODUCTHUB_LDAP_BASE:-}
+      PRODUCTHUB_LDAP_MANAGER_DN: ${PRODUCTHUB_LDAP_MANAGER_DN:-}
+      PRODUCTHUB_LDAP_MANAGER_PASSWORD: ${PRODUCTHUB_LDAP_MANAGER_PASSWORD:-}
+      PRODUCTHUB_LDAP_USER_SEARCH_BASE: ${PRODUCTHUB_LDAP_USER_SEARCH_BASE:-}
+      PRODUCTHUB_LDAP_USER_SEARCH_FILTER: ${PRODUCTHUB_LDAP_USER_SEARCH_FILTER:-(uid={0})}
+      PRODUCTHUB_LDAP_LOGIN_ATTRIBUTE: ${PRODUCTHUB_LDAP_LOGIN_ATTRIBUTE:-uid}
+      PRODUCTHUB_LDAP_NAME_ATTRIBUTE: ${PRODUCTHUB_LDAP_NAME_ATTRIBUTE:-cn}
+      PRODUCTHUB_LDAP_MAIL_ATTRIBUTE: ${PRODUCTHUB_LDAP_MAIL_ATTRIBUTE:-mail}
+      PRODUCTHUB_LDAP_GROUP_SEARCH_BASE: ${PRODUCTHUB_LDAP_GROUP_SEARCH_BASE:-}
+      PRODUCTHUB_LDAP_GROUP_SEARCH_FILTER: ${PRODUCTHUB_LDAP_GROUP_SEARCH_FILTER:-(member={0})}
+    volumes:
+      - app-data:/data
+      # Исходные данные для импорта (реестры и каталоги), только чтение. Папку seed положите рядом с этим файлом
+      - ./seed:/data/seed:ro
+      # Необязательно: файл config/application.yml с сопоставлением групп AD ролям (см. docs/deploy.md)
+      - ./config:/app/config:ro
+    ports:
+      - "${PRODUCTHUB_PORT:-8080}:8080"
+
+volumes:
+  db-data:
+  app-data:

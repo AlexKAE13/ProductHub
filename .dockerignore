@@ -1,0 +1,10 @@
+target
+target.nosync
+data
+data-perf
+archive
+.git
+.idea
+*.md
+!README.md
+seed

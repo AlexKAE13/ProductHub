@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Каталог - макет Product HUB</title><link rel="stylesheet" href="glass.css"></head>
+<body><svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="catalog" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></symbol>
+<symbol id="artifacts" viewBox="0 0 24 24"><path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z"/><polyline points="14 2 14 7 19 7"/></symbol>
+<symbol id="firmware" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2.5"/><rect x="9.5" y="9.5" width="5" height="5" rx="1"/><path d="M9 2v3M15 2v3M9 19v3M15 19v3M19 9h3M19 14h3M2 9h3M2 14h3"/></symbol>
+<symbol id="cases" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2.5"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 13h18"/></symbol>
+<symbol id="tasks" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="8 12.5 11 15.5 16.5 9"/></symbol>
+<symbol id="dashboard" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></symbol>
+<symbol id="directories" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></symbol>
+<symbol id="settings" viewBox="0 0 24 24"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></symbol>
+<symbol id="search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></symbol>
+<symbol id="chev" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></symbol>
+<symbol id="left" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></symbol>
+<symbol id="plus" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></symbol>
+<symbol id="dots" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/></symbol>
+<symbol id="download" viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M4 20h16"/></symbol>
+<symbol id="warn" viewBox="0 0 24 24"><path d="M12 3 2 20h20z"/><line x1="12" y1="10" x2="12" y2="14"/><circle cx="12" cy="17" r=".6"/></symbol>
+</defs></svg>
+<div class="stage"><div class="window">
+<aside class="sidebar">
+  <div class="lights"><i></i><i></i><i></i></div>
+  <div class="brand"><div class="brand-mark">P</div>Product HUB</div>
+  <div class="nav-label">База знаний</div><nav class="nav"><a href="#" class="active"><svg class="i"><use href="#catalog"/></svg><span>Каталог</span></a><a href="#"><svg class="i"><use href="#artifacts"/></svg><span>Артефакты</span></a><a href="#"><svg class="i"><use href="#firmware"/></svg><span>Прошивки</span></a><a href="#"><svg class="i"><use href="#cases"/></svg><span>Кейсы</span></a></nav>
+  <div class="nav-label">Работа</div><nav class="nav"><a href="#"><svg class="i"><use href="#tasks"/></svg><span>Задачи</span><span class="count">3</span></a><a href="#"><svg class="i"><use href="#dashboard"/></svg><span>Дашборд</span></a></nav>
+  <div class="nav-label">Система</div><nav class="nav"><a href="#"><svg class="i"><use href="#directories"/></svg><span>Справочники</span></a><a href="#"><svg class="i"><use href="#settings"/></svg><span>Настройки</span></a></nav>
+  <div class="grow-fill"></div>
+  <div class="user"><div class="avatar">АК</div><div><b>Александр Кузнецов</b><small>Продакт-менеджер</small></div></div>
+  <a class="collapse" href="#"><svg class="i"><use href="#left"/></svg><span>Свернуть</span></a>
+</aside>
+<main class="content">
+<div class="toolbar-top"><div class="ttl"><h1>Каталог</h1><div class="sub">271 SKU · обновлено сегодня в 13:48</div></div><span class="spacer"></span>
+<span class="field search"><svg class="i"><use href="#search"/></svg>Поиск по HUB<kbd>⌘K</kbd></span><a class="btn" href="#"><svg class="i"><use href="#download"/></svg>Экспорт</a><a class="btn primary" href="#"><svg class="i"><use href="#plus"/></svg>Создать SKU</a></div>
+<div class="scroll">
+
+<div class="hero"><h1>Каталог</h1></div>
+<section class="glass filters">
+  <div class="seg"><span class="on">Все</span><span>Wi-Fi</span><span>PON</span><span>MES</span><span>ESR</span><span>VoIP</span></div>
+  <span class="field grow"><svg class="i"><use href="#search"/></svg>Артикул или наименование</span>
+</section>
+<section class="glass filters">
+  <span class="select">Линейка<svg class="i chev"><use href="#chev"/></svg></span><span class="select">Категория<svg class="i chev"><use href="#chev"/></svg></span><span class="select on">Статус ЖЦ<svg class="i chev"><use href="#chev"/></svg></span><span class="select">Владелец<svg class="i chev"><use href="#chev"/></svg></span><span class="select">Тег<svg class="i chev"><use href="#chev"/></svg></span>
+  <span class="spacer"></span>
+  <label class="check"><span class="toggle"></span>Требует ревью</label>
+  <label class="check"><span class="toggle on"></span>Показывать снятые (EOL)</label>
+</section>
+
+<section class="glass" style="padding:6px 8px 4px">
+<table class="table">
+<thead><tr><th>Артикул</th><th>Наименование</th><th>Линейка</th><th>Статус ЖЦ</th><th>Прошивка</th><th>Владелец</th><th class="num">Заполненность</th></tr></thead>
+<tbody>
+<tr><td><a class="model" href="sku-card.html">WEP-550K</a></td><td>Точка доступа Wi-Fi 6, внутренняя<span class="sub">Точка доступа внутренняя</span></td><td>WEP</td><td><span class="pill new">Новинка</span></td><td>2.4.1</td><td>Кузнецов</td><td class="num"><span class="meter"><i style="width:31%"></i></span> <span class="muted small">31%</span></td></tr>
+<tr><td><a class="model" href="sku-card.html">WEP-500K</a></td><td>Точка доступа Wi-Fi 6E<span class="sub">Точка доступа внутренняя</span></td><td>WEP</td><td><span class="pill dev">Разработка</span></td><td>-</td><td>Кузнецов</td><td class="num"><span class="meter"><i style="width:24%"></i></span> <span class="muted small">24%</span></td></tr>
+<tr class=sel><td><a class="model" href="sku-card.html">WEP-3ax</a></td><td>Точка доступа Wi-Fi 6, внутренняя<span class="sub">Точка доступа внутренняя</span></td><td>WEP</td><td><span class="pill prod">Серийный выпуск</span></td><td>2.2.0</td><td>Кузнецов</td><td class="num"><span class="meter"><i style="width:58%"></i></span> <span class="muted small">58%</span></td></tr>
+<tr><td><a class="model" href="sku-card.html">WEP-30L</a></td><td>Точка доступа Wi-Fi 5, внутренняя<span class="sub">Точка доступа внутренняя</span></td><td>WEP</td><td><span class="pill prod">Серийный выпуск</span> <span class="pill bad" style="margin-left:6px">ревью</span></td><td>1.28.3</td><td>Кузнецов</td><td class="num"><span class="meter"><i style="width:64%"></i></span> <span class="muted small">64%</span></td></tr>
+<tr><td><a class="model" href="sku-card.html">WOP-50L</a></td><td>Точка доступа Wi-Fi 6, уличная<span class="sub">Точка доступа уличная</span></td><td>WOP</td><td><span class="pill dev">Разработка</span></td><td>-</td><td>Смит</td><td class="num"><span class="meter"><i style="width:22%"></i></span> <span class="muted small">22%</span></td></tr>
+<tr><td><a class="model" href="sku-card.html">WOP-30L</a></td><td>Точка доступа Wi-Fi 5, уличная<span class="sub">Точка доступа уличная</span></td><td>WOP</td><td><span class="pill prod">Серийный выпуск</span></td><td>1.28.3</td><td>Смит</td><td class="num"><span class="meter"><i style="width:61%"></i></span> <span class="muted small">61%</span></td></tr>
+<tr><td><a class="model" href="sku-card.html">WLC-3200</a></td><td>Контроллер Wi-Fi<span class="sub">Контроллер</span></td><td>WLC</td><td><span class="pill prod">Серийный выпуск</span></td><td>1.14.0</td><td>Кузнецов</td><td class="num"><span class="meter"><i style="width:47%"></i></span> <span class="muted small">47%</span></td></tr>
+<tr><td><a class="model" href="sku-card.html">WLC-15</a></td><td>Контроллер Wi-Fi<span class="sub">Контроллер</span></td><td>WLC</td><td><span class="pill prod">Серийный выпуск</span></td><td>1.14.0</td><td>Кузнецов</td><td class="num"><span class="meter"><i style="width:39%"></i></span> <span class="muted small">39%</span></td></tr>
+<tr><td><a class="model" href="sku-card.html">WB-3P-LR5</a></td><td>Мост дальнего действия, 5 ГГц<span class="sub">Беспроводной мост</span></td><td>LR</td><td><span class="pill eol-soon">Анонс EOL</span> <span class="pill bad" style="margin-left:6px">ревью</span></td><td>3.1.2</td><td>Смит</td><td class="num"><span class="meter"><i style="width:52%"></i></span> <span class="muted small">52%</span></td></tr>
+<tr><td><a class="model" href="sku-card.html">WB-3P-PTP5</a></td><td>Мост точка-точка, 5 ГГц<span class="sub">Беспроводной мост</span></td><td>PTP</td><td><span class="pill prod">Серийный выпуск</span></td><td>3.1.2</td><td>Смит</td><td class="num"><span class="meter"><i style="width:49%"></i></span> <span class="muted small">49%</span></td></tr>
+<tr><td><a class="model" href="sku-card.html">LTP-16N</a></td><td>OLT GPON, 16 портов<span class="sub">OLT</span></td><td>LTP</td><td><span class="pill new">Новинка</span></td><td>3.52.1</td><td>Кузнецов</td><td class="num"><span class="meter"><i style="width:44%"></i></span> <span class="muted small">44%</span></td></tr>
+<tr><td><a class="model" href="sku-card.html">LTP-8N</a></td><td>OLT GPON, 8 портов<span class="sub">OLT</span></td><td>LTP</td><td><span class="pill prod">Серийный выпуск</span></td><td>3.52.1</td><td>Кузнецов</td><td class="num"><span class="meter"><i style="width:41%"></i></span> <span class="muted small">41%</span></td></tr>
+<tr><td><a class="model" href="sku-card.html">NTU-RG-5440G-Wac</a></td><td>ONT GPON с Wi-Fi 5<span class="sub">ONT</span></td><td>NTU</td><td><span class="pill prod">Серийный выпуск</span></td><td>4.0.8</td><td>Смит</td><td class="num"><span class="meter"><i style="width:37%"></i></span> <span class="muted small">37%</span></td></tr>
+<tr><td><a class="model" href="sku-card.html">NTU-52W</a></td><td>ONT GPON с Wi-Fi<span class="sub">ONT</span></td><td>NTU</td><td><span class="pill prod">Серийный выпуск</span></td><td>4.0.8</td><td>Смит</td><td class="num"><span class="meter"><i style="width:33%"></i></span> <span class="muted small">33%</span></td></tr>
+</tbody></table>
+<div class="pager"><span>Показано 14 из 271</span><div class="pages"><a class="btn sm" href="#">Назад</a><span class="btn sm" style="background:#fff">1</span><a class="btn sm" href="#">2</a><a class="btn sm" href="#">3</a><a class="btn sm" href="#">Вперед</a></div></div>
+</section>
+
+</div></main>
+</div></div></body></html>

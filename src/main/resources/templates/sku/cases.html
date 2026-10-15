@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<body>
+<!-- Блок 7: кейсы SKU. Параметр модели: cs (SkuCases) -->
+<section class="block" id="block-cases" th:fragment="block">
+    <div class="block-head">
+        <h2 th:text="#{sku.section.cases}">Кейсы</h2>
+        <a class="link-btn edit-only" th:if="${cs.canCreate()}" th:href="@{/cases/new(sku=${s.model})}" th:text="#{cases.create}">Добавить кейс</a>
+    </div>
+    <p class="empty-note" th:if="${cs.isEmpty()}" th:text="#{sku.cases.empty}">Кейсов нет.</p>
+    <div class="case-grid">
+        <a class="case-card" th:each="c : ${cs.cases()}" th:href="@{/cases/{id}(id=${c.id})}">
+            <strong th:text="${c.title}">Название</strong>
+            <span class="muted small" th:text="${c.country} + (${c.city != null} ? ', ' + ${c.city} : '') + (${c.year != null} ? ' - ' + ${c.year} : '')">Страна</span>
+            <span class="small" th:if="${c.deploymentSize != null}" th:text="${c.deploymentSize}">500 точек</span>
+            <span class="case-tags"><span class="tag" th:each="t : ${cs.tags().get(c.id)}" th:text="${t.value}">тег</span></span>
+        </a>
+    </div>
+</section>
+</body>
+</html>

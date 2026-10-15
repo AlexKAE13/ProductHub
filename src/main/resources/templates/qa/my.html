@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: page(~{::title}, ~{::main})}">
+<head>
+    <title th:text="#{qa.my.title}">Мои вопросы</title>
+</head>
+<body>
+<main class="content wide">
+    <div class="page-head">
+        <h1 th:text="#{menu.tasks}">Задачи</h1>
+    </div>
+    <nav class="tabs">
+        <a th:href="@{/tasks}" th:text="#{tasks.tab.board}">Доска</a>
+        <a class="active" th:href="@{/questions/my}" th:text="#{qa.my.title}">Мои вопросы</a>
+    </nav>
+    <p class="empty-note" th:if="${questions.isEmpty()}" th:text="#{qa.my.empty}">Вы пока ничего не спрашивали.</p>
+    <table class="table" th:if="${!questions.isEmpty()}">
+        <thead><tr>
+            <th th:text="#{qa.col.question}">Вопрос</th>
+            <th th:text="#{qa.col.about}">Объект</th>
+            <th th:text="#{artifacts.col.status}">Статус</th>
+            <th th:text="#{qa.col.answer}">Ответ</th>
+            <th></th>
+        </tr></thead>
+        <tbody>
+        <tr th:each="q : ${questions}">
+            <td><span class="tag" th:text="#{'qaKind.' + ${q.kind}}">вопрос</span>
+                <span class="pre" th:text="${q.text}">Текст</span>
+                <span class="sub" th:text="${#temporals.format(q.createdAt, 'dd.MM.yyyy HH:mm')}">дата</span></td>
+            <td><a th:href="@{/questions/open(type=${q.targetType}, id=${q.targetId})}" th:text="#{'qaTarget.' + ${q.targetType}} + ' №' + ${q.targetId}">SKU</a></td>
+            <td><span class="st" th:classappend="${q.status.name() == 'ANSWERED' or q.status.name() == 'ACCEPTED'} ? 'st-ACTUAL' : (${q.status.name() == 'REJECTED'} ? 'st-EOL' : (${q.status.name() == 'CLOSED'} ? 'st-OUTDATED' : 'st-IN_PROGRESS'))"
+                      th:text="#{'qaStatus.' + ${q.status}}">Статус</span></td>
+            <td>
+                <span class="pre" th:if="${q.answer != null}" th:text="${q.answer}">Ответ</span>
+                <span class="sub" th:if="${q.answeredBy != null}" th:text="${q.answeredBy.fullName}">Кто ответил</span>
+                <span class="muted" th:if="${q.answer == null}" th:text="#{common.none}">-</span>
+            </td>
+            <td class="right">
+                <form th:if="${q.status.name() == 'NEW' or q.status.name() == 'IN_PROGRESS' or q.status.name() == 'ANSWERED'}"
+                      th:action="@{/questions/{id}/close(id=${q.id})}" method="post" class="inline">
+                    <button type="submit" class="link-btn" th:text="#{qa.close}">Закрыть</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</main>
+</body>
+</html>

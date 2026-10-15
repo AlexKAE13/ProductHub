@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: page(~{::title}, ~{::main})}">
+<head>
+    <title th:text="${firmwareId != null} ? #{firmware.edit} : #{firmware.publish}">Прошивка</title>
+</head>
+<body>
+<main class="content wide">
+    <h1 th:text="${firmwareId != null} ? #{firmware.edit} : #{firmware.publish}">Прошивка</h1>
+    <form class="block editing" method="post" enctype="multipart/form-data"
+          th:action="${firmwareId != null} ? @{/firmware/{id}/edit(id=${firmwareId})} : @{/firmware}">
+        <div class="field-row">
+            <div class="field"><label for="version" th:text="#{firmware.col.version}">Версия</label>
+                <input type="text" id="version" name="version" th:value="${form.version}" required placeholder="1.2.0">
+                <span class="error" th:if="${errors != null and errors.containsKey('version')}" th:text="#{${errors['version']}}"></span></div>
+            <div class="field"><label for="releaseDate" th:text="#{firmware.col.date}">Дата выпуска</label>
+                <input type="date" id="releaseDate" name="releaseDate" th:value="${form.releaseDate}">
+                <span class="error" th:if="${errors != null and errors.containsKey('releaseDate')}" th:text="#{${errors['releaseDate']}}"></span></div>
+            <div class="field"><label for="status" th:text="#{artifacts.col.status}">Статус</label>
+                <select id="status" name="status">
+                    <option th:each="s : ${statuses}" th:value="${s}" th:text="#{'firmwareStatus.' + ${s}}" th:selected="${s.name() == form.status}"></option>
+                </select></div>
+        </div>
+        <div class="field"><label for="skus" th:text="#{firmware.skusHint}">Совместимые SKU (артикулы через запятую)</label>
+            <textarea id="skus" name="skus" data-suggest="sku" autocomplete="off" rows="2" th:text="${form.skus}" required></textarea>
+            <span class="error" th:if="${errors != null and errors.containsKey('skus')}" th:text="#{${errors['skus']}}"></span></div>
+        <div class="field-row">
+            <div class="field"><label for="file" th:text="#{firmware.fileHint}">Файл прошивки (любой формат)</label>
+                <input type="file" id="file" name="file">
+                <span class="error" th:if="${errors != null and errors.containsKey('file')}" th:text="#{${errors['file']}}"></span></div>
+            <div class="field"><label for="externalUrl" th:text="#{artifacts.externalUrl}">Ссылка</label>
+                <input type="text" id="externalUrl" name="externalUrl" th:value="${form.externalUrl}" placeholder="https://">
+                <span class="error" th:if="${errors != null and errors.containsKey('externalUrl')}" th:text="#{${errors['externalUrl']}}"></span></div>
+        </div>
+        <div class="field"><label for="releaseNotes" th:text="#{firmware.notes}">Release notes</label>
+            <textarea id="releaseNotes" name="releaseNotes" rows="10" th:text="${form.releaseNotes}"></textarea></div>
+        <label class="check-line">
+            <input type="checkbox" name="publicRelease" value="true" th:checked="${form.publicRelease}">
+            <span th:text="#{firmware.public.label}">Показывать во внешнем контуре</span>
+        </label>
+        <div class="form-actions">
+            <button type="submit" class="primary" th:text="#{common.save}">Сохранить</button>
+            <a class="btn" th:href="${firmwareId != null} ? @{/firmware/{id}(id=${firmwareId})} : @{/firmware}" th:text="#{common.cancel}">Отмена</a>
+        </div>
+    </form>
+</main>
+</body>
+</html>

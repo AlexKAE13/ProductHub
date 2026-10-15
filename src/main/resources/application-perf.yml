@@ -1,0 +1,10 @@
+# Профиль замера скорости: отдельная база и индекс, чтобы не трогать рабочие данные в ./data
+# Запуск: SPRING_PROFILES_ACTIVE=dev,perf ./mvnw spring-boot:run
+spring:
+  datasource:
+    url: jdbc:h2:file:./data-perf/producthub;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH
+producthub:
+  search:
+    dir: ./data-perf/index
+  files:
+    dir: ./data-perf/files

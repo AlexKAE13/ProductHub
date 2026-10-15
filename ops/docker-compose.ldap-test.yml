@@ -1,0 +1,26 @@
+# Проверочный стенд: тестовый LDAP рядом с приложением. Запуск:
+#   docker compose -f docker-compose.yml -f ops/docker-compose.ldap-test.yml up -d --build
+# Вход: kuznetsov (продакт), moiseev (руководитель), sales1 (продажи), admin1 (администратор), пароль Test1234. outsider не состоит в группах HUB.
+services:
+  ldap:
+    image: osixia/openldap:1.5.0
+    command: --copy-service
+    environment:
+      LDAP_ORGANISATION: Example
+      LDAP_DOMAIN: example.local
+      LDAP_ADMIN_PASSWORD: admin-test
+      LDAP_TLS: "false"
+    volumes:
+      - ./ops/test-ldap/hub.ldif:/container/service/slapd/assets/config/bootstrap/ldif/custom/hub.ldif:ro
+
+  app:
+    depends_on:
+      - ldap
+    environment:
+      PRODUCTHUB_LDAP_ENABLED: "true"
+      PRODUCTHUB_LDAP_URL: ldap://ldap:389
+      PRODUCTHUB_LDAP_BASE: dc=example,dc=local
+      PRODUCTHUB_LDAP_MANAGER_DN: cn=admin,dc=example,dc=local
+      PRODUCTHUB_LDAP_MANAGER_PASSWORD: admin-test
+      PRODUCTHUB_LDAP_USER_SEARCH_BASE: ou=people
+      PRODUCTHUB_LDAP_GROUP_SEARCH_BASE: ou=groups

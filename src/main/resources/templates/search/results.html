@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: page(~{::title}, ~{::main})}">
+<head>
+    <title th:text="#{search.title}">Поиск</title>
+</head>
+<body>
+<main class="content">
+    <div class="page-head">
+        <div>
+            <h1 th:text="#{search.title}">Поиск</h1>
+            <p class="muted" th:if="${acceptable}" th:text="#{search.found(${result.total()})}">Найдено: 3</p>
+        </div>
+    </div>
+
+    <form th:action="@{/search}" method="get" class="filters">
+        <input type="search" name="q" class="search" th:value="${q}" autocomplete="off" th:placeholder="#{search.placeholder}"
+               th:aria-label="#{search.placeholder}" autofocus>
+        <button type="submit" class="primary" th:text="#{search.run}">Найти</button>
+    </form>
+
+    <p class="muted" th:unless="${acceptable}" th:text="#{search.hint}">Введите не меньше двух символов</p>
+
+    <th:block th:if="${acceptable}">
+        <p class="empty" th:if="${result.groups.isEmpty()}" th:text="#{search.empty}">Ничего не найдено</p>
+
+        <nav class="tabs" th:unless="${result.groups.isEmpty()}">
+            <a th:href="@{/search(q=${q})}" th:classappend="${type == null} ? 'active'" th:text="#{search.tab.all}">Все</a>
+            <a th:each="g : ${result.groups}" th:href="@{/search(q=${q},type=${g.type})}" th:classappend="${g.type == type} ? 'active'"
+               th:text="#{'search.type.' + ${g.type}} + ' ' + ${g.total}">Артикулы 3</a>
+        </nav>
+
+        <!-- Все группы: по несколько штук -->
+        <th:block th:if="${type == null}">
+            <section class="block" th:each="g : ${result.groups}">
+                <h2 th:text="#{'search.type.' + ${g.type}} + ' (' + ${g.total} + ')'">Артикулы</h2>
+                <div class="sr-list">
+                    <th:block th:each="h : ${g.hits}"><div th:replace="~{search/suggest :: hit(${h}, ${q})}"></div></th:block>
+                </div>
+                <p th:if="${g.total > g.hits.size()}"><a th:href="@{/search(q=${q},type=${g.type})}" th:text="#{search.all(${g.total})}">Все результаты</a></p>
+            </section>
+        </th:block>
+
+        <!-- Один тип: постранично -->
+        <th:block th:if="${type != null}">
+            <section class="block">
+                <h2 th:text="#{'search.type.' + ${type}} + ' (' + ${group.total} + ')'">Артикулы</h2>
+                <div class="sr-list">
+                    <th:block th:each="h : ${group.hits}">
+                        <div th:replace="~{search/suggest :: hit(${h}, ${q})}"></div>
+                        <p class="sr-snippet" th:if="${h.snippet != null}" th:text="${h.snippet}"></p>
+                    </th:block>
+                </div>
+                <div class="pager">
+                    <a th:if="${pageNo > 0}" th:href="@{/search(q=${q},type=${type},page=${pageNo - 1})}" th:text="#{search.prev}">Назад</a>
+                    <a th:if="${hasNext}" th:href="@{/search(q=${q},type=${type},page=${pageNo + 1})}" th:text="#{search.next}">Вперед</a>
+                </div>
+            </section>
+        </th:block>
+    </th:block>
+</main>
+</body>
+</html>

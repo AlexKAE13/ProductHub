@@ -1,0 +1,11 @@
+# Профиль для работы по локальной сети: приложение открывают коллеги, поэтому тестовые учетные записи не показываются.
+# Запуск: SPRING_PROFILES_ACTIVE=dev,lan ./mvnw spring-boot:run
+producthub:
+  # Импорт папки с компьютера отключен: по сети им можно было бы читать чужие папки сервера. Загрузка файлов перетаскиванием работает.
+  import:
+    folder-roots: ""
+  dev-login:
+    hidden: [product, service, sales, rnd, head, admin, partner]
+server:
+  address: 0.0.0.0
+  port: 7777

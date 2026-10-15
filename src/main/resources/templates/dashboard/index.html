@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: page(~{::title}, ~{::main})}">
+<head>
+    <title th:text="#{dashboard.title}">Дашборд</title>
+</head>
+<body>
+<main class="content wide" th:with="o=${d.ownerId()}">
+    <div class="page-head">
+        <div>
+            <h1 th:text="#{dashboard.title}">Дашборд</h1>
+            <p class="muted" th:text="${o == null} ? #{dashboard.scope.all} : #{dashboard.scope.own}">По всем SKU</p>
+        </div>
+        <form th:if="${canPick}" th:action="@{/dashboard}" method="get" class="filters">
+            <select name="owner" onchange="this.form.submit()" th:aria-label="#{dashboard.owner}">
+                <option value="" th:text="#{dashboard.owner.all}">Все продакты</option>
+                <option th:each="u : ${owners}" th:value="${u.id}" th:text="${u.fullName}" th:selected="${u.id == o}"></option>
+            </select>
+        </form>
+    </div>
+
+    <div class="kpis">
+        <div class="kpi"><div class="l" th:text="#{dashboard.coverage.skus}">SKU</div><div class="v" th:text="${d.skuTotal()}">309</div></div>
+        <div class="kpi"><div class="l" th:text="#{dashboard.kpi.completeness}">Заполненность</div><div class="v" th:text="${#numbers.formatDecimal(d.avgCompleteness(), 1, 0)} + '%'">40%</div></div>
+        <div class="kpi"><div class="l" th:text="#{dashboard.kpi.stale}">Просрочено ревью</div><div class="v" th:text="${d.staleSkus() + d.staleArtifacts()}">0</div></div>
+        <div class="kpi"><div class="l" th:text="#{dashboard.kpi.questions}">Открытых вопросов</div><div class="v" th:text="${d.openQuestions()}">0</div></div>
+    </div>
+    <div class="dash-grid">
+        <!-- Покрытие -->
+        <section class="block">
+            <h2 th:text="#{dashboard.coverage}">Покрытие</h2>
+            <p><a th:href="@{/catalog(owner=${o},includeEol=true)}"><strong th:text="${d.skuTotal()}">309</strong></a>
+                <span class="muted" th:text="#{dashboard.coverage.skus}">SKU</span>
+                <span class="muted" th:text="#{dashboard.coverage.avg(${#numbers.formatDecimal(d.avgCompleteness(), 1, 0)})}">заполненность 40%</span></p>
+            <div class="stackbar" th:if="${d.skuTotal() > 0}">
+                <i th:each="c : ${d.skuByStatus()}" th:classappend="'lc-' + ${c.key()}" th:style="'width:' + ${c.n() * 100.0 / d.skuTotal()} + '%'" th:title="#{'lifecycle.' + ${c.key()}} + ': ' + ${c.n()}"></i>
+            </div>
+            <table class="table dense">
+                <tr th:each="c : ${d.skuByStatus()}">
+                    <td><span class="lc" th:classappend="'lc-' + ${c.key()}" th:text="#{'lifecycle.' + ${c.key()}}">Серийный</span></td>
+                    <td class="num"><a th:href="@{/catalog(status=${c.key()},owner=${o},includeEol=${c.key() == 'EOL'} ? true : null)}" th:text="${c.n()}">3</a></td>
+                </tr>
+            </table>
+            <h3 th:text="#{dashboard.weakest}">Самые незаполненные</h3>
+            <table class="table dense">
+                <tr th:each="i : ${d.weakestSkus()}">
+                    <td><a th:href="@{${i.url()}}" th:text="${i.title()}">WEP-550K</a></td>
+                    <td class="num muted" th:text="${i.n()} + '%'">31%</td>
+                </tr>
+            </table>
+        </section>
+
+        <!-- Устаревание -->
+        <section class="block">
+            <h2 th:text="#{dashboard.stale}">Устаревание</h2>
+            <p><a th:href="@{/artifacts(reviewDue=true,owner=${o})}"><strong th:text="${d.staleArtifacts()}">0</strong></a>
+                <span class="muted" th:text="#{dashboard.stale.artifacts}">материалов с просроченным ревью</span></p>
+            <table class="table dense">
+                <tr th:each="i : ${d.staleArtifactList()}">
+                    <td><a th:href="@{${i.url()}}" th:text="${i.title()}">Материал</a></td>
+                    <td class="num muted" th:text="${i.sub()}">01.01.2026</td>
+                </tr>
+            </table>
+            <p><a th:href="@{/catalog(reviewDue=true,owner=${o},includeEol=true)}"><strong th:text="${d.staleSkus()}">0</strong></a>
+                <span class="muted" th:text="#{dashboard.stale.skus}">SKU с просроченным ревью</span></p>
+            <table class="table dense">
+                <tr th:each="i : ${d.staleSkuList()}">
+                    <td><a th:href="@{${i.url()}}" th:text="${i.title()}">WEP-550K</a></td>
+                    <td class="num muted" th:text="${i.sub()}">01.01.2026</td>
+                </tr>
+            </table>
+        </section>
+
+        <!-- Языки -->
+        <section class="block">
+            <h2 th:text="#{dashboard.languages}">Материалы по языкам</h2>
+            <table class="table dense">
+                <tr th:each="c : ${d.byLanguage()}">
+                    <td th:text="#{'language.' + ${c.key()}}">RU</td>
+                    <td class="num"><a th:href="@{/artifacts(language=${c.key()},owner=${o})}" th:text="${c.n()}">3</a></td>
+                </tr>
+            </table>
+            <p class="muted small" th:text="#{dashboard.languages.hint}"></p>
+        </section>
+
+        <!-- Вопросы -->
+        <section class="block">
+            <h2 th:text="#{dashboard.questions}">Вопросы</h2>
+            <p><a th:href="@{/tasks(assignee='all',type='ANSWER_QUESTION')}"><strong th:text="${d.openQuestions()}">0</strong></a>
+                <span class="muted" th:text="#{dashboard.questions.open}">открытых</span></p>
+            <p th:if="${d.avgAnswerHours() != null}"><strong th:text="${#numbers.formatDecimal(d.avgAnswerHours(), 1, 1)} + ' ' + #{dashboard.hours}">5 ч</strong>
+                <span class="muted" th:text="#{dashboard.questions.avg(${d.answeredQuestions()})}">среднее время ответа</span></p>
+            <p class="muted" th:if="${d.avgAnswerHours() == null}" th:text="#{dashboard.questions.none}">Ответов за 30 дней не было</p>
+        </section>
+
+        <!-- Задачи -->
+        <section class="block">
+            <h2 th:text="#{dashboard.tasks}">Задачи</h2>
+            <table class="table dense">
+                <tr th:each="c : ${d.tasksByStatus()}">
+                    <td th:text="#{'taskStatus.' + ${c.key()}}">Новые</td>
+                    <td class="num"><a th:href="@{/tasks(assignee=${o == null} ? 'all' : ${o})}" th:text="${c.n()}">3</a></td>
+                </tr>
+            </table>
+            <p><strong th:text="${d.overdueTasks()}">0</strong> <span class="muted" th:text="#{dashboard.tasks.overdue}">просроченных</span></p>
+            <h3 th:text="#{dashboard.tasks.byAssignee}">По исполнителям</h3>
+            <table class="table dense">
+                <tr th:each="c : ${d.tasksByAssignee()}">
+                    <td th:text="${c.label()}">Кузнецов</td>
+                    <td class="num"><a th:href="@{/tasks(assignee=${c.key()})}" th:text="${c.n()}">3</a></td>
+                </tr>
+            </table>
+        </section>
+
+        <!-- Спрос -->
+        <section class="block">
+            <h2 th:text="#{dashboard.demand}">Спрос за 30 дней</h2>
+            <h3 th:text="#{dashboard.demand.queries}">Что ищут</h3>
+            <table class="table dense">
+                <tr th:each="p : ${d.topQueries()}">
+                    <td><a th:href="@{/search(q=${p.text()})}" th:text="${p.text()}">wep</a></td>
+                    <td class="num muted" th:text="${p.n()}">3</td>
+                </tr>
+                <tr th:if="${d.topQueries().isEmpty()}"><td class="muted" th:text="#{dashboard.empty}">Пока пусто</td></tr>
+            </table>
+            <h3 th:text="#{dashboard.demand.zero}">Что ищут и не находят</h3>
+            <table class="table dense">
+                <tr th:each="p : ${d.zeroQueries()}">
+                    <td><a th:href="@{/search(q=${p.text()})}" th:text="${p.text()}">абв</a></td>
+                    <td class="num muted" th:text="${p.n()}">3</td>
+                </tr>
+                <tr th:if="${d.zeroQueries().isEmpty()}"><td class="muted" th:text="#{dashboard.empty}">Пока пусто</td></tr>
+            </table>
+        </section>
+
+        <section class="block">
+            <h2 th:text="#{dashboard.viewed}">Что открывают</h2>
+            <h3 th:text="#{dashboard.viewed.skus}">SKU</h3>
+            <table class="table dense">
+                <tr th:each="i : ${d.topSkus()}">
+                    <td><a th:href="@{${i.url()}}" th:text="${i.title()}">WEP-550K</a></td>
+                    <td class="num muted" th:text="${i.n()}">3</td>
+                </tr>
+                <tr th:if="${d.topSkus().isEmpty()}"><td class="muted" th:text="#{dashboard.empty}">Пока пусто</td></tr>
+            </table>
+            <h3 th:text="#{dashboard.viewed.artifacts}">Материалы</h3>
+            <table class="table dense">
+                <tr th:each="i : ${d.topArtifacts()}">
+                    <td><a th:href="@{${i.url()}}" th:text="${i.title()}">Материал</a></td>
+                    <td class="num muted" th:text="${i.n()}">3</td>
+                </tr>
+                <tr th:if="${d.topArtifacts().isEmpty()}"><td class="muted" th:text="#{dashboard.empty}">Пока пусто</td></tr>
+            </table>
+        </section>
+    </div>
+</main>
+</body>
+</html>

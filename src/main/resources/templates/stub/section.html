@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: page(~{::title}, ~{::main})}">
+<head>
+    <title th:text="#{'menu.' + ${section}}">Раздел</title>
+</head>
+<body>
+<main class="content">
+    <h1 th:text="#{'menu.' + ${section}}">Раздел</h1>
+    <p th:text="#{'stub.' + ${section}}">Появится позже.</p>
+</main>
+</body>
+</html>

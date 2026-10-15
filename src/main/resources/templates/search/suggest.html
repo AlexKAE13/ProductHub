@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:remove="all">
+<!-- Фрагмент выпадающего списка поиска (HTMX) -->
+<div th:fragment="hit(h, q)">
+    <a class="sr-hit" th:href="@{/search/go(to=${h.url},q=${q},type=${h.type},id=${h.id})}">
+        <span class="sr-title" th:text="${h.title}">WEP-550K</span>
+        <span class="st" th:if="${h.status != null and h.type == 'SKU'}" th:classappend="'lc-' + ${h.status}" th:text="#{'lifecycle.' + ${h.status}}">Серийный</span>
+        <span class="st" th:if="${h.status != null and h.type == 'FIRMWARE'}" th:classappend="'st-' + ${h.status}" th:text="#{'firmwareStatus.' + ${h.status}}">Релиз</span>
+        <span class="st" th:if="${h.status != null and h.type == 'ARTIFACT'}" th:classappend="'st-' + ${h.status}" th:text="#{'artifactStatus.' + ${h.status}}">Актуален</span>
+        <span class="sr-sub" th:if="${h.sub != null}" th:text="${h.sub}">Описание</span>
+    </a>
+</div>
+</div>
+
+<div th:fragment="results" class="sr">
+    <th:block th:if="${show}">
+        <div class="sr-empty" th:if="${result.groups.isEmpty()}" th:text="#{search.empty}">Ничего не найдено</div>
+        <section class="sr-group" th:each="g : ${result.groups}">
+            <div class="sr-head"><span th:text="#{'search.type.' + ${g.type}}">Артикулы</span><span class="muted" th:text="${g.total}">3</span></div>
+            <th:block th:each="h : ${g.hits}"><div th:replace="~{search/suggest :: hit(${h}, ${q})}"></div></th:block>
+            <a class="sr-more" th:if="${g.total > g.hits.size()}" th:href="@{/search(q=${q},type=${g.type})}"
+               th:text="#{search.all(${g.total})}">Все результаты</a>
+        </section>
+        <a class="sr-showall" th:unless="${result.groups.isEmpty()}" th:href="@{/search(q=${q})}" th:text="#{search.showAll}">Показать все результаты</a>
+    </th:block>
+</div>
+</body>
+</html>

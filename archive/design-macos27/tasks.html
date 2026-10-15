@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Задачи - макет Product HUB</title><link rel="stylesheet" href="glass.css"></head>
+<body><svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="catalog" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></symbol>
+<symbol id="artifacts" viewBox="0 0 24 24"><path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z"/><polyline points="14 2 14 7 19 7"/></symbol>
+<symbol id="firmware" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2.5"/><rect x="9.5" y="9.5" width="5" height="5" rx="1"/><path d="M9 2v3M15 2v3M9 19v3M15 19v3M19 9h3M19 14h3M2 9h3M2 14h3"/></symbol>
+<symbol id="cases" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2.5"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 13h18"/></symbol>
+<symbol id="tasks" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="8 12.5 11 15.5 16.5 9"/></symbol>
+<symbol id="dashboard" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></symbol>
+<symbol id="directories" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></symbol>
+<symbol id="settings" viewBox="0 0 24 24"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></symbol>
+<symbol id="search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></symbol>
+<symbol id="chev" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></symbol>
+<symbol id="left" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></symbol>
+<symbol id="plus" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></symbol>
+<symbol id="dots" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/></symbol>
+<symbol id="download" viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M4 20h16"/></symbol>
+<symbol id="warn" viewBox="0 0 24 24"><path d="M12 3 2 20h20z"/><line x1="12" y1="10" x2="12" y2="14"/><circle cx="12" cy="17" r=".6"/></symbol>
+</defs></svg>
+<div class="stage"><div class="window">
+<aside class="sidebar">
+  <div class="lights"><i></i><i></i><i></i></div>
+  <div class="brand"><div class="brand-mark">P</div>Product HUB</div>
+  <div class="nav-label">База знаний</div><nav class="nav"><a href="#"><svg class="i"><use href="#catalog"/></svg><span>Каталог</span></a><a href="#"><svg class="i"><use href="#artifacts"/></svg><span>Артефакты</span></a><a href="#"><svg class="i"><use href="#firmware"/></svg><span>Прошивки</span></a><a href="#"><svg class="i"><use href="#cases"/></svg><span>Кейсы</span></a></nav>
+  <div class="nav-label">Работа</div><nav class="nav"><a href="#" class="active"><svg class="i"><use href="#tasks"/></svg><span>Задачи</span><span class="count">3</span></a><a href="#"><svg class="i"><use href="#dashboard"/></svg><span>Дашборд</span></a></nav>
+  <div class="nav-label">Система</div><nav class="nav"><a href="#"><svg class="i"><use href="#directories"/></svg><span>Справочники</span></a><a href="#"><svg class="i"><use href="#settings"/></svg><span>Настройки</span></a></nav>
+  <div class="grow-fill"></div>
+  <div class="user"><div class="avatar">АК</div><div><b>Александр Кузнецов</b><small>Продакт-менеджер</small></div></div>
+  <a class="collapse" href="#"><svg class="i"><use href="#left"/></svg><span>Свернуть</span></a>
+</aside>
+<main class="content">
+<div class="toolbar-top"><div class="ttl"><h1>Задачи</h1><div class="sub">3 новые · 1 просрочена</div></div><span class="spacer"></span>
+<span class="field search"><svg class="i"><use href="#search"/></svg>Поиск по HUB<kbd>⌘K</kbd></span><a class="btn primary" href="#"><svg class="i"><use href="#plus"/></svg>Создать задачу</a></div>
+<div class="scroll">
+
+<div class="hero"><h1>Задачи</h1></div>
+<section class="glass filters"><div class="seg"><span class="on">Доска</span><span>Мои вопросы</span></div><span class="spacer"></span>
+ <span class="select on">Мои<svg class="i chev"><use href="#chev"/></svg></span><span class="select">Тип<svg class="i chev"><use href="#chev"/></svg></span><span class="field">SKU</span><span class="select">Линейка<svg class="i chev"><use href="#chev"/></svg></span></section>
+<div class="kanban"><section class="glass col"><div class="col-head"><span>Новые</span><span class="n">4</span></div><div class="card "><span class="t">Проверить даташит: WEP-550K (прошивка 2.4.1)</span><div class="meta"><span class="tag">Проверить даташит</span></div><a class="small" href="#">Прошивка 2.4.1</a><div class="foot"><span>до 27.10</span><span class="mini-avatar ">АК</span></div></div><div class="card "><span class="t">Проверить battle cards: WEP-550K (прошивка 2.4.1)</span><div class="meta"><span class="tag">Battle cards</span></div><a class="small" href="#">Прошивка 2.4.1</a><div class="foot"><span>до 27.10</span><span class="mini-avatar ">АК</span></div></div><div class="card "><span class="t">Ответить на вопрос: WEP-550K</span><div class="meta"><span class="tag">Вопрос</span><span class="pill work" style="height:20px">технический</span></div><a class="small" href="#">WEP-550K</a><div class="foot"><span>до 20.10</span><span class="mini-avatar ">АК</span></div></div><div class="card "><span class="t">Подготовить версию EN: Даташит WEP-3ax</span><div class="meta"><span class="tag">Перевод</span></div><a class="small" href="#">Даташит WEP-3ax</a><div class="foot"><span>до 27.10</span><span class="mini-avatar b">СМ</span></div></div></section>
+<section class="glass col"><div class="col-head"><span>В работе</span><span class="n">2</span></div><div class="card drag"><span class="t">Обновить сайт: WEP-550K (прошивка 2.4.1)</span><div class="meta"><span class="tag">Обновить сайт</span></div><a class="small" href="#">Прошивка 2.4.1</a><div class="foot"><span>до 27.10</span><span class="mini-avatar ">АК</span></div></div><div class="card "><span class="t">Провести ревью SKU: WLC-3200</span><div class="meta"><span class="tag">Ревью SKU</span><span class="pill bad" style="height:20px">просрочено</span></div><a class="small" href="#">WLC-3200</a><div class="foot"><span>до 12.10</span><span class="mini-avatar b">СМ</span></div></div></section>
+<section class="glass col"><div class="col-head"><span>На проверке</span><span class="n">1</span></div><div class="card "><span class="t">Проверить предложенную правку: WOP-30L</span><div class="meta"><span class="tag">Правка</span></div><a class="small" href="#">WOP-30L</a><div class="foot"><span>до 18.10</span><span class="mini-avatar ">АК</span></div></div></section>
+<section class="glass col"><div class="col-head"><span>Закрыто</span><span class="n">3</span></div><div class="card "><span class="t">Проверить актуальность материала: Руководство WEP-30L</span><div class="meta"><span class="tag">Устарел материал</span></div><a class="small" href="#">Руководство WEP-30L</a><div class="foot"><span>закрыто 11.10</span><span class="mini-avatar ">АК</span></div></div><div class="card "><span class="t">Ответить на вопрос: WLC-15</span><div class="meta"><span class="tag">Вопрос</span></div><a class="small" href="#">WLC-15</a><div class="foot"><span>закрыто 09.10</span><span class="mini-avatar b">СМ</span></div></div><div class="card "><span class="t">Проверить наличие migration guide: WB-3P-LR5</span><div class="meta"><span class="tag">Ручная</span></div><a class="small" href="#">WB-3P-LR5</a><div class="foot"><span>закрыто 08.10</span><span class="mini-avatar c">АК</span></div></div></section>
+</div>
+
+</div></main>
+</div></div></body></html>

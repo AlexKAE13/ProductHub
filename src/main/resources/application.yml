@@ -1,0 +1,125 @@
+spring:
+  servlet:
+    multipart:
+      max-file-size: 1GB
+      max-request-size: 2GB
+  application:
+    name: product-hub
+  profiles:
+    default: dev
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
+      probes:
+        enabled: true
+server:
+  compression:
+    enabled: true
+  error:
+    include-message: never
+    include-stacktrace: never
+
+producthub:
+  # Совладельцы SKU по семействам. Порядок важен: по кругу из них выбирается основной владелец линейки.
+  owners:
+    families:
+      - { family: "Wi-Fi", logins: [kuznetsov, smith] }
+      - { family: "Media", logins: [osokin, nagornova] }
+      - { family: "MES", logins: [polukhin, litosh, maslov] }
+      - { family: "ESR", logins: [polukhin, litosh, maslov] }
+      - { family: "PON", logins: [polukhin, litosh] }
+      - { family: "VoIP", logins: [golovanov] }
+  review-period-days: 90
+  schedule:
+    daily-checks: "0 0 7 * * *"
+  tasks:
+    question-due-days: 7
+    other-due-days: 14
+    done-visible-days: 14
+  completeness:
+    identification: 20
+    lifecycle: 15
+    specs: 35
+    commercial: 10
+    datasheets: 10
+    firmware: 5
+    photos: 5
+    commercial-max-age-days: 30
+  import:
+    seed-dir: seed
+    on-first-start: true
+    default-owner: kuznetsov
+    default-family: Прочее
+    other-line: OTHER
+    owner-aliases:
+      - { match: "Смит/Кузнецов", value: kuznetsov }
+    family-by-section:
+      - { match: "Беспроводной доступ", value: "Wi-Fi" }
+      - { match: "Оборудование xPON", value: "PON" }
+      - { match: "Ethernet-коммутаторы MES", value: "MES" }
+      - { match: "Маршрутизаторы ESR", value: "ESR" }
+      - { match: "VoIP-оборудование", value: "VoIP" }
+      - { match: "IP-АТС и UC", value: "VoIP" }
+      - { match: "ТВ-приставки, домашние роутеры и Wi-Fi репитеры", value: "Media" }
+    # Категория SKU: сначала по линейке из реестра ЖЦ, потом по префиксу артикула, иначе подраздел сайта
+    category-by-line:
+      - { match: LR, value: "Беспроводной мост" }
+      - { match: PTP, value: "Беспроводной мост" }
+    category-by-prefix:
+      - { match: WEP, value: "Точка доступа внутренняя" }
+      - { match: WOP, value: "Точка доступа уличная" }
+      - { match: WLC, value: "Контроллер" }
+      - { match: LTP, value: "OLT" }
+      - { match: LTX, value: "OLT" }
+      - { match: NTU, value: "ONT" }
+      - { match: NTX, value: "ONT" }
+      - { match: RG, value: "ONT" }
+    skip-types:
+      - "Наличие"
+      - "Статус продукта"
+    extra-types:
+      - "Карточка продукта"
+      - "Шаблон"
+      - "Прочее"
+    # В каком блоке карточки SKU показывать материалы типа: DOCS (блок 5), COMPARE (блок 6), MEDIA (блок 9), NONE
+    card-block-by-type:
+      - { match: "Battle card", value: COMPARE }
+      - { match: "Сравнение с конкурентами", value: COMPARE }
+      - { match: "Фото", value: MEDIA }
+      - { match: "Видео", value: MEDIA }
+      - { match: "Кейс / референс внедрения", value: NONE }
+      - { match: "Прошивка + release notes", value: NONE }
+      - { match: "FAQ / типовые вопросы", value: NONE }
+    # Разбор имен файлов (SPEC.md 5.11). Правила проверяются по порядку на имени без языка и расширения.
+    # Именованные группы competitor, segment, topic, market превращаются в теги.
+    files:
+      ignore:
+        - "~$*"
+        - ".DS_Store"
+        - "*.zip"
+      rules:
+        - pattern: '(?i)^eltex[ _]+vs[ _]+(?<competitor>.+?)[ _]+(?<segment>indoor|outdoor)\b'
+          type: "Сравнение с конкурентами"
+        - pattern: '(?i)^(?<topic>FBWA|БШПД)'
+          type: "Карточка продукта"
+        - pattern: '(?i)guide'
+          type: "Гайд по подбору оборудования"
+        - pattern: '(?i)_источники$'
+          type: "Прочее"
+          contour: INTERNAL
+  search:
+    dir: ./data/index
+    group-limit: 5
+    page-size: 20
+  files:
+    dir: ./data/files
+    max-size-mb: 200

@@ -1,0 +1,1228 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Product HUB - макет современного оформления</title>
+<style>
+:root {
+    --accent: #2f7bff; --accent-2: #6fb1ff;
+    --blob1: rgba(120, 150, 255, 0.30); --blob2: rgba(120, 210, 255, 0.24); --blob3: rgba(150, 140, 255, 0.18);
+    --base1: #f5f6fa; --base2: #eaecf4;
+    --surface-base: #ffffff; --surface-a: 0.74; --clear: 1;
+    --surface: color-mix(in srgb, var(--surface-base) calc(min(1, var(--surface-a) * var(--clear)) * 100%), transparent); --surface-solid: #ffffff; --field: rgba(255, 255, 255, 0.82);
+    --edge: rgba(255, 255, 255, 0.85); --hl: rgba(255, 255, 255, 0.9); --ring: #ffffff;
+    --hair: rgba(20, 24, 40, 0.08); --hair-strong: rgba(20, 24, 40, 0.14);
+    --hover: rgba(255, 255, 255, 0.6); --btn-hover: #fafafd; --col: rgba(255, 255, 255, 0.42); --seg-on: #ffffff;
+    --text: #1c1c1e; --text-2: rgba(60, 60, 67, 0.66); --text-3: rgba(60, 60, 67, 0.4);
+    /* Цвета статусов фиксированные: не зависят ни от темы-палитры, ни от акцента */
+    --st-green: #1f8a3b; --st-green-bg: rgba(52, 199, 89, 0.16);
+    --st-blue: #0a63d6; --st-blue-bg: rgba(10, 132, 255, 0.14);
+    --st-orange: #b45f00; --st-orange-bg: rgba(255, 149, 0, 0.18);
+    --st-red: #d3262f; --st-red-bg: rgba(255, 59, 48, 0.14);
+    --st-gray: #5d5d62; --st-gray-bg: rgba(120, 120, 128, 0.16);
+    --green: var(--st-green); --green-soft: var(--st-green-bg); --orange: var(--st-orange); --orange-soft: var(--st-orange-bg);
+    --red: var(--st-red); --red-soft: var(--st-red-bg); --gray-soft: var(--st-gray-bg); --gray-text: var(--st-gray);
+    --r-lg: 18px; --r-md: 12px; --r-sm: 9px;
+    --shadow: 0 1px 2px rgba(16, 24, 40, 0.05), 0 10px 30px rgba(31, 41, 90, 0.08);
+    --shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.08);
+    --accent-press: color-mix(in srgb, var(--accent) 86%, #000);
+    --accent-soft: color-mix(in srgb, var(--accent) 13%, transparent);
+    --link: var(--accent);
+    --hover-gray: rgba(120, 120, 128, 0.16);
+    --glass-fill: rgba(255, 255, 255, 0.08); --glass-ring: rgba(20, 24, 40, 0.2); --glass-rim: rgba(255, 255, 255, 0.95); --glass-rim2: rgba(255, 255, 255, 0.6);
+    --bar-a: var(--accent-2); --bar-b: var(--accent); --bar-track: rgba(120, 120, 128, 0.2);
+    --tint: rgba(255, 255, 255, 0.28);
+    --wall-blur: 18px;
+}
+/* Цветовые схемы (свои): акцент и подсветка за стеклом */
+html[data-palette="azure"]    { --accent: #2f7bff; --accent-2: #6fb1ff; --blob1: rgba(120, 150, 255, 0.30); --blob2: rgba(120, 210, 255, 0.24); --blob3: rgba(150, 140, 255, 0.18); }
+html[data-palette="lilac"]    { --accent: #7a5af0; --accent-2: #b7a2ff; --blob1: rgba(160, 130, 255, 0.32); --blob2: rgba(255, 170, 220, 0.24); --blob3: rgba(130, 160, 255, 0.18); }
+html[data-palette="pine"]     { --accent: #12806f; --accent-2: #5fcfb4; --blob1: rgba(70, 190, 160, 0.30); --blob2: rgba(170, 225, 140, 0.24); --blob3: rgba(90, 170, 210, 0.16); }
+html[data-palette="amber"]    { --accent: #d9731a; --accent-2: #ffb766; --blob1: rgba(255, 180, 110, 0.34); --blob2: rgba(255, 140, 130, 0.22); --blob3: rgba(250, 215, 120, 0.22); }
+/* Фирменная схема Eltex: акцент #275EC7, голубой #98C1FF, светло-голубой #E3EEFF, глубокий синий #02153C (руководство по фирстилю) */
+html[data-palette="eltex"]    { --accent: #275ec7; --accent-2: #98c1ff; --blob1: rgba(39, 94, 199, 0.28); --blob2: rgba(152, 193, 255, 0.34); --blob3: rgba(39, 94, 199, 0.16); --base1: #eef4ff; --base2: #e3eeff; }
+html[data-palette="graphite"] { --accent: #4f5b6e; --accent-2: #8a96a8; --blob1: rgba(140, 150, 170, 0.26); --blob2: rgba(180, 185, 200, 0.22); --blob3: rgba(120, 130, 150, 0.16); }
+/* Темная тема в системном стиле: нейтральный графит без цветного оттенка */
+html[data-theme="dark"] {
+    color-scheme: dark;
+    --base1: #1e1e20; --base2: #262628;
+    --surface-base: #2c2c2f; --surface-a: 0.72; --surface-solid: #2c2c2f; --field: rgba(255, 255, 255, 0.08);
+    --edge: rgba(255, 255, 255, 0.08); --hl: rgba(255, 255, 255, 0.07); --ring: #2c2c2f;
+    --hair: rgba(255, 255, 255, 0.1); --hair-strong: rgba(255, 255, 255, 0.17);
+    --hover: rgba(255, 255, 255, 0.08); --btn-hover: #3a3a3e; --col: rgba(255, 255, 255, 0.04); --seg-on: #636366;
+    --text: #f5f5f7; --text-2: rgba(235, 235, 245, 0.62); --text-3: rgba(235, 235, 245, 0.36);
+    --st-green: #4ade80; --st-green-bg: rgba(52, 199, 89, 0.2);
+    --st-blue: #6cb2ff; --st-blue-bg: rgba(10, 132, 255, 0.24);
+    --st-orange: #ffb340; --st-orange-bg: rgba(255, 159, 10, 0.22);
+    --st-red: #ff7a7a; --st-red-bg: rgba(255, 69, 58, 0.22);
+    --st-gray: rgba(235, 235, 245, 0.72); --st-gray-bg: rgba(255, 255, 255, 0.12);
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 34px rgba(0, 0, 0, 0.32);
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --link: color-mix(in srgb, var(--accent) 62%, #fff);
+    --hover-gray: rgba(255, 255, 255, 0.1);
+    --glass-fill: rgba(255, 255, 255, 0.1); --glass-ring: rgba(0, 0, 0, 0.45); --glass-rim: rgba(255, 255, 255, 0.55); --glass-rim2: rgba(255, 255, 255, 0.28);
+    --bar-a: color-mix(in srgb, var(--accent) 55%, #fff); --bar-b: color-mix(in srgb, var(--accent) 30%, #fff); --bar-track: rgba(255, 255, 255, 0.18);
+    --tint: rgba(0, 0, 0, 0.32);
+}
+/* В темной теме цветная подсветка приглушена */
+html[data-theme="dark"][data-palette="azure"]    { --blob1: rgba(47, 123, 255, 0.16); --blob2: rgba(60, 190, 255, 0.10); --blob3: rgba(120, 110, 255, 0.10); }
+html[data-theme="dark"][data-palette="lilac"]    { --blob1: rgba(122, 90, 240, 0.18); --blob2: rgba(230, 110, 190, 0.10); --blob3: rgba(90, 120, 255, 0.10); }
+html[data-theme="dark"][data-palette="pine"]     { --blob1: rgba(18, 160, 130, 0.16); --blob2: rgba(110, 200, 90, 0.09); --blob3: rgba(40, 130, 190, 0.10); }
+html[data-theme="dark"][data-palette="amber"]    { --blob1: rgba(230, 130, 40, 0.16); --blob2: rgba(240, 90, 80, 0.09); --blob3: rgba(230, 190, 70, 0.10); }
+html[data-theme="dark"][data-palette="eltex"]    { --base1: #02153c; --base2: #0d2451; --blob1: rgba(39, 94, 199, 0.42); --blob2: rgba(152, 193, 255, 0.14); --blob3: rgba(39, 94, 199, 0.26);
+    --surface-base: #0d2451; --surface-a: 0.62; --surface-solid: #11295c; --ring: #11295c; --btn-hover: #17356f; --seg-on: #2a4d92; --field: rgba(152, 193, 255, 0.09); --edge: rgba(152, 193, 255, 0.14); --hair: rgba(152, 193, 255, 0.12); --hair-strong: rgba(152, 193, 255, 0.22); }
+html[data-theme="dark"][data-palette="graphite"] { --blob1: rgba(150, 160, 180, 0.10); --blob2: rgba(120, 130, 150, 0.07); --blob3: rgba(100, 110, 130, 0.06); }
+* { box-sizing: border-box; }
+html { color-scheme: light; }
+body {
+    margin: 0; color: var(--text); min-height: 100vh;
+    font: 14px/1.45 -apple-system, "SF Pro Text", "Inter", system-ui, "Segoe UI", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    background: var(--base1);
+}
+/* Слои фона: сам фон (градиент, цвет, сетка или обои), тонировка и матовое зерно */
+#bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+#bg .layer, #bg .tint, #bg .grain { position: absolute; inset: -40px; }
+html[data-bgtype="mesh"] #bg .layer {
+    background: radial-gradient(700px 420px at 8% 4%, var(--blob1), transparent 70%), radial-gradient(640px 420px at 96% 6%, var(--blob2), transparent 70%),
+        radial-gradient(800px 500px at 60% 104%, var(--blob3), transparent 70%), linear-gradient(180deg, var(--base1), var(--base2)); }
+html[data-bgtype="flat"] #bg .layer { background: color-mix(in srgb, var(--accent) 7%, var(--base1)); }
+html[data-bgtype="dots"] #bg .layer { background: radial-gradient(circle, color-mix(in srgb, var(--accent) 22%, transparent) 1.3px, transparent 1.6px) 0 0 / 22px 22px,
+        linear-gradient(180deg, var(--base1), var(--base2)); }
+html[data-bgtype="photo"] #bg .layer { background: var(--wall) center / cover no-repeat; filter: blur(var(--wall-blur)) saturate(1.15); }
+html[data-bgtype="photo"] #bg .tint { background: var(--tint); }
+#bg .grain { opacity: 0.07; mix-blend-mode: overlay; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .5  0 0 0 0 .5  0 0 0 0 .5  0 0 0 .9 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+html[data-bgtype="photo"] #bg .grain { opacity: 0.12; }
+.shell, .switcher, .fbhost { position: relative; z-index: 1; }
+.shell { z-index: 1; }
+a { color: var(--link); text-decoration: none; }
+a:hover { text-decoration: underline; }
+h1, h2, h3, p, dl, dd { margin: 0; }
+svg.i { width: 18px; height: 18px; flex: none; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ---------- Каркас ---------- */
+.shell { padding-bottom: 84px !important; display: grid; grid-template-columns: 236px minmax(0, 1fr); gap: 16px; padding: 16px; min-height: 100vh; }
+.glass { background: var(--surface); -webkit-backdrop-filter: blur(24px) saturate(1.7); backdrop-filter: blur(24px) saturate(1.7);
+    border: 1px solid var(--edge); box-shadow: var(--shadow), inset 0 1px 0 var(--hl); }
+.sidebar { position: sticky; top: 16px; height: calc(100vh - 32px); border-radius: var(--r-lg); display: flex; flex-direction: column; padding: 14px 10px 10px; }
+.brand { display: flex; align-items: center; gap: 10px; padding: 4px 8px 14px; font-weight: 650; font-size: 16px; letter-spacing: -0.01em; }
+.brand-mark { width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center; color: #fff; font-weight: 700;
+    background: linear-gradient(160deg, var(--accent-2), var(--accent)); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), 0 2px 8px color-mix(in srgb, var(--accent) 40%, transparent); }
+.nav-label { padding: 12px 10px 4px; font-size: 11.5px; font-weight: 600; color: var(--text-3); letter-spacing: 0.04em; text-transform: uppercase; }
+.nav a { display: flex; align-items: center; gap: 11px; height: 36px; padding: 0 10px; margin: 1px 0; border-radius: 10px; color: var(--text); }
+.nav a svg.i { color: var(--text-2); }
+.nav a:hover { background: var(--hover); text-decoration: none; }
+.nav a.active { background: var(--surface-solid); font-weight: 600; box-shadow: var(--shadow-sm); }
+.nav a.active svg.i { color: var(--accent); }
+.count { margin-left: auto; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 10px; background: var(--accent); color: #fff; font-size: 12px; font-weight: 600; display: grid; place-items: center; }
+.grow { flex: 1; }
+.me { display: flex; align-items: center; gap: 10px; padding: 10px 8px 6px; border-top: 1px solid var(--hair); margin-top: 8px; }
+.me small { display: block; color: var(--text-2); font-size: 12px; }
+.collapse { display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 10px; color: var(--text-2); border-radius: 9px; margin-top: 4px; }
+.main { min-width: 0; display: flex; flex-direction: column; gap: 14px; }
+.topbar { display: flex; align-items: center; gap: 12px; padding: 8px 8px 0; }
+.search { flex: 0 1 460px; display: flex; align-items: center; gap: 8px; height: 38px; padding: 0 14px; border-radius: 19px; color: var(--text-3);
+    background: var(--surface); border: 1px solid var(--edge); box-shadow: var(--shadow-sm); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); }
+.search kbd { margin-left: auto; font: 12px -apple-system, sans-serif; color: var(--text-3); border: 1px solid var(--hair-strong); border-radius: 6px; padding: 0 6px; }
+.crumbs { color: var(--text-2); font-size: 13px; }
+
+.screen { display: none; flex-direction: column; gap: 14px; }
+.screen.on { display: flex; }
+.head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; padding: 4px 6px 0; }
+.head h1 { font-size: 30px; line-height: 1.15; font-weight: 700; letter-spacing: -0.025em; }
+.head .sub { color: var(--text-2); margin-top: 3px; }
+html[data-bgtype="photo"][data-theme="dark"] .head h1, html[data-bgtype="photo"][data-theme="dark"] .head .sub, html[data-bgtype="photo"][data-theme="dark"] .crumbs { text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3); }
+html[data-bgtype="photo"][data-theme="light"] .head h1, html[data-bgtype="photo"][data-theme="light"] .head .sub, html[data-bgtype="photo"][data-theme="light"] .crumbs { text-shadow: 0 0 3px rgba(255, 255, 255, 0.25); }
+.actions { display: flex; gap: 8px; align-items: center; }
+
+/* ---------- Элементы ---------- */
+.btn { display: inline-flex; align-items: center; gap: 7px; height: 34px; padding: 0 16px; border-radius: 17px; border: 1px solid var(--hair-strong);
+    background: var(--surface-solid); color: var(--text); font: inherit; font-weight: 500; cursor: pointer; box-shadow: var(--shadow-sm); white-space: nowrap; }
+.btn:hover { background: var(--btn-hover); text-decoration: none; }
+.btn.primary { color: #fff; border-color: rgba(255, 255, 255, 0.3); font-weight: 600;
+    background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 82%, #fff), var(--accent-press)); box-shadow: 0 2px 8px color-mix(in srgb, var(--accent) 45%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.4); }
+.btn.primary, .btn.danger.solid { background-origin: border-box !important; }
+.btn.sm { height: 28px; padding: 0 12px; font-size: 13px; }
+.btn.icon { width: 34px; padding: 0; justify-content: center; }
+.field, .select { display: inline-flex; align-items: center; gap: 8px; height: 34px; padding: 0 14px; color: var(--text-2); white-space: nowrap;
+    background: var(--field); border: 1px solid var(--hair); border-radius: 17px; box-shadow: inset 0 1px 2px rgba(16, 24, 40, 0.06); }
+.field.grow { flex: 1 1 240px; }
+.select svg.i { width: 12px; height: 12px; color: var(--text-3); margin-left: 2px; }
+.select.on { color: var(--link); background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 40%, transparent); font-weight: 500; }
+.seg { display: inline-flex; padding: 3px; border-radius: 12px; background: rgba(120, 120, 128, 0.16); }
+.seg span { padding: 0 14px; height: 28px; display: grid; place-items: center; border-radius: 9px; color: var(--text-2); font-weight: 500; font-size: 13px; cursor: default; }
+.seg span.on { background: var(--seg-on); color: var(--text); box-shadow: 0 1px 3px rgba(16, 24, 40, 0.2); }
+.switch { display: inline-flex; align-items: center; gap: 9px; color: var(--text-2); }
+.switch i { width: 38px; height: 22px; border-radius: 11px; background: rgba(120, 120, 128, 0.32); position: relative; transition: background 0.15s; flex: none; }
+.switch i::after { content: ""; position: absolute; left: 2px; top: 2px; width: 18px; height: 18px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3); transition: left 0.15s; }
+.switch.on i { background: #34c759; }
+.switch.on i::after { left: 18px; }
+.bar { height: 6px; border-radius: 3px; background: var(--bar-track); overflow: hidden; width: 90px; display: inline-block; vertical-align: middle; }
+.bar b { display: block; height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--bar-a), var(--bar-b)); }
+#dashboard .bar b { background: linear-gradient(90deg, #5aa9ff, #0a84ff); }
+.chip { display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 10px; border-radius: 12px; font-size: 12.5px; font-weight: 600; white-space: nowrap; }
+.chip::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.chip.new, .chip.ok { color: var(--st-green); background: var(--st-green-bg); }
+.chip.prod, .chip.work { color: var(--st-blue); background: var(--st-blue-bg); }
+.chip.dev, .chip.old { color: var(--st-gray); background: var(--st-gray-bg); }
+.chip.soon, .chip.draft { color: var(--st-orange); background: var(--st-orange-bg); }
+.chip.eol, .chip.bad { color: var(--st-red); background: var(--st-red-bg); }
+.tag { display: inline-flex; align-items: center; height: 24px; padding: 0 10px; border-radius: 12px; font-size: 12.5px; background: var(--field); border: 1px solid var(--hair); margin-right: 5px; }
+.muted { color: var(--text-2); }
+.small { font-size: 12.5px; }
+.avatars { display: inline-flex; }
+.av { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-size: 10px; font-weight: 700; color: #fff; border: 2px solid var(--ring); margin-left: -5px; letter-spacing: -0.02em; }
+.avatars .av:first-child { margin-left: 0; }
+.av.lg { width: 34px; height: 34px; font-size: 12.5px; margin: 0; }
+.c1 { background: linear-gradient(160deg, #8e8cff, #5a54e8); } .c2 { background: linear-gradient(160deg, #5ac8fa, #1a8ff0); }
+.c3 { background: linear-gradient(160deg, #ffb340, #ff8a00); } .c4 { background: linear-gradient(160deg, #5fd48a, #25a85a); }
+.c5 { background: linear-gradient(160deg, #ff7aa8, #e0457a); } .c6 { background: linear-gradient(160deg, #b98cff, #8a55e8); }
+.c7 { background: linear-gradient(160deg, #6fd3d0, #25a8a4); } .c8 { background: linear-gradient(160deg, #a0a8b8, #6b7385); }
+
+/* ---------- Карточки и панели ---------- */
+.panel { border-radius: var(--r-lg); padding: 18px 20px; }
+.filters { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 10px 12px; border-radius: var(--r-lg); }
+.spacer { flex: 1; }
+.block-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.block-head h2 { font-size: 17px; font-weight: 650; letter-spacing: -0.01em; }
+.grid2 { display: grid; grid-template-columns: minmax(0, 1fr) 330px; gap: 14px; align-items: start; }
+.stack { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.table-wrap { border-radius: var(--r-lg); padding: 6px 10px 4px; }
+table { width: 100%; border-collapse: separate; border-spacing: 0 2px; }
+th { text-align: left; padding: 10px 14px 8px; font-size: 12px; font-weight: 600; color: var(--text-3); letter-spacing: 0.03em; text-transform: uppercase; white-space: nowrap; }
+td { padding: 9px 14px; background: transparent; vertical-align: middle; }
+tbody tr:hover td { background: var(--accent-soft); }
+tbody tr td:first-child { border-radius: 10px 0 0 10px; }
+tbody tr td:last-child { border-radius: 0 10px 10px 0; }
+td a.model { font-weight: 600; }
+td .sub { display: block; font-size: 12.5px; color: var(--text-2); }
+.num { text-align: right; white-space: nowrap; }
+.pager { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; color: var(--text-2); }
+.pager .pages { display: flex; gap: 6px; }
+
+/* карточка SKU */
+.hero h1 { font-size: 34px; line-height: 1.1; font-weight: 700; letter-spacing: -0.03em; }
+.facts { display: flex; flex-wrap: wrap; gap: 14px 40px; margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--hair); }
+.facts dt { font-size: 12px; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 3px; }
+.specs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 28px; }
+.specs div { display: flex; justify-content: space-between; gap: 14px; padding: 9px 0; border-bottom: 1px solid var(--hair); }
+.specs dt { color: var(--text-2); } .specs dd { font-weight: 500; text-align: right; }
+.h3 { font-size: 12px; font-weight: 600; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.05em; margin: 16px 0 2px; }
+.fw { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 18px; border-radius: var(--r-md);
+    background: linear-gradient(135deg, var(--accent-soft), color-mix(in srgb, var(--accent-2) 14%, transparent)); border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent); }
+.fw .ver { font-size: 30px; font-weight: 700; letter-spacing: -0.03em; }
+.file { display: flex; align-items: center; gap: 12px; padding: 10px 6px; border-bottom: 1px solid var(--hair); }
+.file:last-child { border-bottom: 0; }
+.ficon { width: 36px; height: 42px; border-radius: 8px; background: var(--surface-solid); border: 1px solid var(--hair-strong); display: grid; place-items: end center; padding-bottom: 5px; font-size: 9.5px; font-weight: 800; color: var(--red); box-shadow: var(--shadow-sm); flex: none; }
+.ficon.ppt { color: var(--orange); } .ficon.doc { color: var(--accent-press); }
+.case { padding: 14px; border-radius: var(--r-md); background: var(--field); border: 1px solid var(--hair); display: flex; flex-direction: column; gap: 4px; }
+.timeline { position: relative; padding-left: 22px; }
+.timeline::before { content: ""; position: absolute; left: 6px; top: 6px; bottom: 6px; width: 2px; background: var(--hair-strong); border-radius: 1px; }
+.tl { position: relative; padding: 5px 0 12px; }
+.tl::before { content: ""; position: absolute; left: -22px; top: 8px; width: 14px; height: 14px; border-radius: 50%; background: var(--surface-solid); border: 3px solid var(--text-3); }
+.tl.done::before { border-color: var(--green); } .tl.now::before { border-color: var(--accent); background: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
+.tl b { display: block; font-weight: 600; } .tl span { color: var(--text-2); font-size: 12.5px; }
+.notice { display: flex; gap: 10px; padding: 12px 14px; border-radius: var(--r-md); background: var(--orange-soft); color: var(--orange); }
+.faq { padding: 12px 0; border-bottom: 1px solid var(--hair); }
+.ask { margin-top: 12px; padding: 14px; border-radius: var(--r-md); background: var(--field); border: 1px solid var(--hair); }
+.textarea { min-height: 72px; padding: 11px 14px; border-radius: var(--r-sm); background: var(--field); border: 1px solid var(--hair-strong); color: var(--text-3); margin: 10px 0; }
+.similar { padding: 10px 12px; border-radius: var(--r-sm); background: var(--accent-soft); margin-bottom: 10px; font-size: 13px; }
+
+/* канбан */
+.kanban { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; align-items: start; }
+.col { padding: 12px; border-radius: var(--r-lg); min-height: 460px; background: var(--col); -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px); border: 1px solid var(--edge); }
+.col-head { display: flex; justify-content: space-between; align-items: center; padding: 4px 6px 12px; font-weight: 650; }
+.col-head .n { min-width: 24px; height: 24px; padding: 0 8px; border-radius: 12px; background: rgba(120, 120, 128, 0.18); color: var(--text-2); font-size: 12.5px; display: grid; place-items: center; }
+.task { padding: 13px 14px; border-radius: var(--r-md); margin-bottom: 10px; background: var(--surface-solid); border: 1px solid var(--hair); box-shadow: var(--shadow-sm); }
+.task.drag { transform: rotate(1.8deg) translateY(-3px); box-shadow: 0 18px 38px rgba(31, 41, 90, 0.25); }
+.task .t { font-weight: 600; display: block; margin-bottom: 8px; }
+.task .meta { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.task .foot { display: flex; justify-content: space-between; align-items: center; color: var(--text-2); font-size: 12.5px; }
+
+/* дашборд */
+.kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+.kpi { padding: 16px 18px; border-radius: var(--r-lg); }
+.kpi .v { font-size: 34px; font-weight: 700; letter-spacing: -0.03em; line-height: 1.1; margin-top: 4px; }
+.kpi .l { color: var(--text-2); font-size: 13px; }
+.kpi .d { font-size: 12.5px; margin-top: 4px; }
+.stackbar { display: flex; height: 14px; border-radius: 7px; overflow: hidden; gap: 2px; margin: 8px 0 12px; }
+.stackbar i { display: block; height: 100%; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 18px; color: var(--text-2); font-size: 13px; }
+.legend span::before { content: ""; display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--c); margin-right: 6px; }
+.rows .row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--hair); }
+.rows .row:last-child { border-bottom: 0; }
+.cols3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+
+/* настройки */
+.setting { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 16px 0; border-bottom: 1px solid var(--hair); }
+.setting:last-child { border-bottom: 0; }
+.setting p { color: var(--text-2); font-size: 13px; margin-top: 2px; }
+.themes { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-top: 12px; }
+.theme { border-radius: var(--r-md); border: 2px solid var(--hair-strong); padding: 10px; background: var(--surface-solid); }
+.theme.on { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
+.theme .pv { height: 110px; border-radius: 8px; margin-bottom: 8px; position: relative; overflow: hidden; }
+.pv.classic { background: #fff; border: 1px solid #e4e7ea; }
+.pv.classic::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 18px; border-bottom: 1px solid #e4e7ea; background: #fff; }
+.pv.classic::after { content: ""; position: absolute; left: 10px; right: 10px; top: 30px; height: 60px; background: repeating-linear-gradient(#f6f7f8 0 10px, #fff 10px 20px); border: 1px solid #e4e7ea; }
+.pv.modern { background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 22%, #fff), color-mix(in srgb, var(--accent-2) 22%, #fff)); }
+.pv.modern::before { content: ""; position: absolute; left: 8px; top: 8px; bottom: 8px; width: 34px; border-radius: 8px; background: rgba(255, 255, 255, 0.8); }
+.pv.modern::after { content: ""; position: absolute; left: 50px; right: 8px; top: 12px; height: 80px; border-radius: 10px; background: rgba(255, 255, 255, 0.85); box-shadow: 0 4px 14px rgba(31, 41, 90, 0.15); }
+
+/* комментарии */
+.fbhost { position: fixed; right: 20px; bottom: 20px; z-index: 30; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
+.fbtn { display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 18px; border-radius: 20px; color: #fff; font-weight: 600; border: 0;
+    background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 82%, #fff), var(--accent-press)); box-shadow: 0 6px 20px color-mix(in srgb, var(--accent) 50%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.4); }
+.fbtn b { background: #fff; color: var(--accent-press); border-radius: 10px; min-width: 20px; height: 20px; font-size: 12px; display: grid; place-items: center; padding: 0 5px; }
+.fpanel { width: 340px; padding: 14px; border-radius: var(--r-lg); }
+.fi { padding: 10px 0; border-top: 1px solid var(--hair); }
+.pin { position: absolute; width: 22px; height: 22px; border-radius: 11px; background: var(--accent); color: #fff; font-size: 11.5px; font-weight: 700; display: grid; place-items: center; border: 2px solid var(--ring); box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3); }
+
+.swatches { display: flex; gap: 10px; }
+.sw { width: 44px; height: 44px; border-radius: 12px; border: 3px solid transparent; box-shadow: 0 0 0 1px var(--hair-strong); cursor: pointer; padding: 0; }
+.sw.on { border-color: var(--surface-solid); box-shadow: 0 0 0 3px var(--accent); }
+.sw[data-v="azure"] { background: linear-gradient(135deg, #2f7bff, #6fb1ff); } .sw[data-v="lilac"] { background: linear-gradient(135deg, #7a5af0, #b7a2ff); }
+.sw[data-v="pine"] { background: linear-gradient(135deg, #12806f, #5fcfb4); } .sw[data-v="amber"] { background: linear-gradient(135deg, #d9731a, #ffb766); }
+.sw[data-v="eltex"] { background: linear-gradient(135deg, #02153c 0%, #275ec7 62%, #98c1ff 100%); }
+.sw[data-v="graphite"] { background: linear-gradient(135deg, #4f5b6e, #8a96a8); }
+.dot { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--surface-solid); box-shadow: 0 0 0 1px var(--hair-strong); cursor: pointer; padding: 0; align-self: center; }
+.dot.on { box-shadow: 0 0 0 2px var(--accent); }
+.dot[data-v="azure"] { background: #2f7bff; } .dot[data-v="lilac"] { background: #7a5af0; } .dot[data-v="pine"] { background: #12806f; } .dot[data-v="amber"] { background: #d9731a; } .dot[data-v="eltex"] { background: #275ec7; } .dot[data-v="graphite"] { background: #4f5b6e; }
+.walls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 12px; }
+.wall { width: 92px; height: 58px; border-radius: 10px; border: 3px solid transparent; box-shadow: 0 0 0 1px var(--hair-strong); cursor: pointer; padding: 0; background-size: cover; background-position: center; }
+.wall.on { border-color: var(--surface-solid); box-shadow: 0 0 0 3px var(--accent); }
+.wall.add { display: grid; place-items: center; color: var(--text-2); background: var(--field); font-size: 12px; text-align: center; line-height: 1.2; }
+.slider { display: flex; align-items: center; gap: 12px; margin-top: 10px; color: var(--text-2); font-size: 13px; }
+.slider span:first-child { width: 90px; }
+input[type=range] { -webkit-appearance: none; appearance: none; width: 220px; height: 6px; border-radius: 3px; background: rgba(120, 120, 128, 0.3); outline: none; }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 22px; height: 22px; border-radius: 50%; background: #fff; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35); border: 0.5px solid rgba(0, 0, 0, 0.1); }
+.sep { width: 1px; background: var(--hair-strong); margin: 4px 6px; }
+
+/* ---------- Меню: серая подсветка и живые иконки при наведении ---------- */
+.nav a { transition: background 0.16s ease, color 0.16s ease; }
+.nav a:hover { background: var(--hover-gray); }
+.nav a.active, .nav a.active:hover { background: color-mix(in srgb, var(--accent) 17%, var(--surface-solid)); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 30%, transparent), 0 1px 2px rgba(16, 24, 40, 0.06); color: var(--text); }
+html[data-theme="dark"] .nav a.active, html[data-theme="dark"] .nav a.active:hover { background: color-mix(in srgb, var(--accent) 30%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 45%, transparent); }
+.nav a.active svg.ico { color: var(--link); }
+.nav a svg.ico { width: 18px; height: 18px; flex: none; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; color: var(--text-2); overflow: visible; }
+.nav a.active svg.ico { color: var(--link); }
+.nav a svg.ico * { transform-box: fill-box; transform-origin: center; }
+@media (prefers-reduced-motion: no-preference) {
+  /* каталог: плитки по очереди подпрыгивают */
+  .nav a:hover svg.ico.catalog rect { animation: tilePop 0.5s cubic-bezier(.3, 1.6, .5, 1) both; }
+  .nav a:hover svg.ico.catalog rect:nth-child(2) { animation-delay: 0.05s; }
+  .nav a:hover svg.ico.catalog rect:nth-child(3) { animation-delay: 0.1s; }
+  .nav a:hover svg.ico.catalog rect:nth-child(4) { animation-delay: 0.15s; }
+  /* артефакты: лист приподнимается и чуть качается */
+  .nav a:hover svg.ico.artifacts { animation: pageLift 0.55s ease both; }
+  /* прошивки: ядро чипа пульсирует, ножки вытягиваются */
+  .nav a:hover svg.ico.firmware rect:last-of-type { animation: corePulse 0.6s ease both; }
+  .nav a:hover svg.ico.firmware path { animation: pinsOut 0.6s ease both; }
+  /* кейсы: портфель подпрыгивает */
+  .nav a:hover svg.ico.cases { animation: hop 0.8s cubic-bezier(.4, 0, .2, 1) both; }
+  /* задачи: галочка рисуется заново */
+  .nav a:hover svg.ico.tasks polyline { stroke-dasharray: 16; animation: drawCheck 0.55s ease both; }
+  .nav a:hover svg.ico.tasks circle { animation: ringPulse 0.55s ease both; }
+  /* дашборд: столбцы растут по очереди */
+  .nav a:hover svg.ico.dashboard line { transform-origin: bottom; animation: barGrow 0.55s cubic-bezier(.3, 1.4, .5, 1) both; }
+  .nav a:hover svg.ico.dashboard line:nth-child(2) { animation-delay: 0.07s; }
+  .nav a:hover svg.ico.dashboard line:nth-child(3) { animation-delay: 0.14s; }
+  /* справочники: книга слегка раскрывается */
+  .nav a:hover svg.ico.directories { animation: bookOpen 0.6s ease both; transform-origin: left center; }
+  /* правки: сообщение покачивается */
+  .nav a:hover svg.ico.feedback { animation: wiggle 0.6s ease both; transform-origin: 30% 80%; }
+  /* настройки: ползунки разъезжаются */
+  .nav a:hover svg.ico.settings line:nth-child(7) { animation: slideR 0.6s ease both; }
+  .nav a:hover svg.ico.settings line:nth-child(8) { animation: slideL 0.6s ease both; }
+  .nav a:hover svg.ico.settings line:nth-child(9) { animation: slideR 0.6s 0.06s ease both; }
+}
+@keyframes tilePop { 0% { transform: scale(1); } 40% { transform: scale(0.72); } 100% { transform: scale(1); } }
+@keyframes pageLift { 0% { transform: none; } 35% { transform: translateY(-3px) rotate(-6deg); } 70% { transform: translateY(-1px) rotate(3deg); } 100% { transform: none; } }
+@keyframes corePulse { 0% { transform: scale(1); } 45% { transform: scale(1.45); } 100% { transform: scale(1); } }
+@keyframes pinsOut { 0% { transform: scale(1); } 45% { transform: scale(1.12); } 100% { transform: scale(1); } }
+@keyframes hop { 0% { transform: none; } 40% { transform: translateY(-2px) scale(1.03); } 75% { transform: translateY(0.5px) scale(0.99); } 100% { transform: none; } }
+@keyframes drawCheck { 0% { stroke-dashoffset: 16; } 100% { stroke-dashoffset: 0; } }
+@keyframes ringPulse { 0% { transform: scale(1); } 40% { transform: scale(1.12); } 100% { transform: scale(1); } }
+@keyframes barGrow { 0% { transform: scaleY(0.25); } 100% { transform: scaleY(1); } }
+@keyframes bookOpen { 0% { transform: none; } 40% { transform: perspective(60px) rotateY(-28deg); } 100% { transform: none; } }
+@keyframes wiggle { 0% { transform: none; } 25% { transform: rotate(-9deg); } 55% { transform: rotate(7deg); } 80% { transform: rotate(-3deg); } 100% { transform: none; } }
+@keyframes slideR { 0% { transform: none; } 50% { transform: translateX(6px); } 100% { transform: none; } }
+@keyframes slideL { 0% { transform: none; } 50% { transform: translateX(-6px); } 100% { transform: none; } }
+.field input { border: 0; background: transparent; outline: none; font: inherit; color: var(--text); width: 100%; min-width: 120px; }
+.field input::placeholder { color: var(--text-3); }
+.switch, .seg span, .select { cursor: pointer; user-select: none; }
+.empty-note { text-align: center; padding: 28px; color: var(--text-2); }
+html.compact td { padding-top: 4px; padding-bottom: 4px; }
+html.compact table { border-spacing: 0 1px; }
+.collapse svg { transition: transform 0.38s cubic-bezier(.3, 1.35, .5, 1); }
+html.collapsed .collapse svg { transform: rotate(180deg); }
+.collapse:hover svg { transform: translateX(-2px); }
+html.collapsed .collapse:hover svg { transform: rotate(180deg) translateX(-2px); }
+/* Плавное сворачивание: ширина колонки, отступы и подписи меняются одной кривой, ничего не «прыгает» */
+:root { --ease-menu: cubic-bezier(.22, 1, .36, 1); --t-menu: 0.5s; }
+.shell { grid-template-columns: 236px minmax(0, 1fr); transition: grid-template-columns var(--t-menu) var(--ease-menu); }
+html.collapsed .shell { grid-template-columns: 74px minmax(0, 1fr); }
+.sidebar { overflow: hidden; transition: padding var(--t-menu) var(--ease-menu); }
+.brand { gap: 0; transition: padding var(--t-menu) var(--ease-menu); }
+.brand > span { margin-left: 10px; max-width: 160px; white-space: nowrap; overflow: hidden; transition: max-width var(--t-menu) var(--ease-menu), margin-left var(--t-menu) var(--ease-menu), opacity 0.22s ease 0.12s; }
+.nav-label { max-height: 40px; white-space: nowrap; overflow: hidden; transition: max-height var(--t-menu) var(--ease-menu), padding var(--t-menu) var(--ease-menu), opacity 0.22s ease 0.1s; }
+.nav a { position: relative; gap: 0; transition: padding var(--t-menu) var(--ease-menu), background 0.16s ease, color 0.16s ease; }
+.nav a .label { margin-left: 11px; max-width: 170px; white-space: nowrap; overflow: hidden; transition: max-width var(--t-menu) var(--ease-menu), margin-left var(--t-menu) var(--ease-menu), opacity 0.22s ease 0.12s; }
+.nav a .count { position: absolute; right: 10px; top: 50%; margin: 0; transform: translateY(-50%); transition: right var(--t-menu) var(--ease-menu), top var(--t-menu) var(--ease-menu), transform var(--t-menu) var(--ease-menu), min-width 0.3s, height 0.3s, font-size 0.3s, padding 0.3s; }
+.me { gap: 0; transition: padding var(--t-menu) var(--ease-menu); }
+.me > div { margin-left: 10px; max-width: 170px; white-space: nowrap; overflow: hidden; transition: max-width var(--t-menu) var(--ease-menu), margin-left var(--t-menu) var(--ease-menu), opacity 0.22s ease 0.12s; }
+.collapse { gap: 0; transition: padding var(--t-menu) var(--ease-menu); }
+.collapse > span { margin-left: 8px; max-width: 120px; white-space: nowrap; overflow: hidden; transition: max-width var(--t-menu) var(--ease-menu), margin-left var(--t-menu) var(--ease-menu), opacity 0.22s ease 0.1s; }
+html.collapsed .sidebar { padding-left: 8px; padding-right: 8px; }
+html.collapsed .brand { padding-left: 14px; padding-right: 0; }
+html.collapsed .brand > span, html.collapsed .nav a .label, html.collapsed .me > div, html.collapsed .collapse > span { max-width: 0; margin-left: 0; opacity: 0; transition: max-width var(--t-menu) var(--ease-menu), margin-left var(--t-menu) var(--ease-menu), opacity 0.12s ease; }
+html.collapsed .nav-label { max-height: 0; padding-top: 0; padding-bottom: 0; opacity: 0; transition: max-height var(--t-menu) var(--ease-menu), padding var(--t-menu) var(--ease-menu), opacity 0.12s ease; }
+html.collapsed .nav a { padding-left: 20px; padding-right: 0; }
+html.collapsed .me { padding-left: 11px; padding-right: 0; }
+html.collapsed .collapse { padding-left: 20px; padding-right: 0; }
+html.collapsed .nav a .count { right: 10px; top: 4px; transform: none; min-width: 16px; height: 16px; padding: 0 4px; font-size: 10px; }
+html.topmenu .shell { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+html.topmenu .sidebar { position: static; height: auto; flex-direction: row; align-items: center; padding: 8px 14px; gap: 6px; flex-wrap: wrap; }
+html.topmenu .sidebar .nav { display: flex; gap: 2px; }
+html.topmenu .nav-label, html.topmenu .grow, html.topmenu .collapse { display: none; }
+html.topmenu .brand { padding: 0 14px 0 2px; }
+html.topmenu .me { border: 0; margin: 0 0 0 auto; padding: 0; }
+html.topmenu .nav a { padding: 0 12px; }
+html.topmenu .nav a .count { position: static; transform: none; margin-left: 8px; }
+html.topmenu .shell { transition: none; }
+html.topmenu .sidebar { overflow: visible; }
+
+/* ---------- Перетаскиваемые переключатели (движение рисует скрипт на пружинах) ---------- */
+.seg, .seg *, .switch, .switch * { -webkit-user-select: none; user-select: none; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent; }
+html.ui-dragging, html.ui-dragging * { -webkit-user-select: none !important; user-select: none !important; cursor: grabbing !important; }
+.seg { position: relative; cursor: pointer; touch-action: none; }
+.seg span, .seg span.on { position: relative; z-index: 1; background: transparent !important; box-shadow: none !important; transition: color 0.16s ease, opacity 0.16s; }
+.seg span.on, .seg span.hot { color: var(--text); font-weight: 600; }
+.seg.dragging span.on:not(.hot) { color: var(--text-2); font-weight: 500; }
+.seg .thumb { position: absolute; top: 3px; bottom: 3px; left: 0; width: 0; border-radius: 9px; z-index: 0; pointer-events: none; background: var(--seg-on); will-change: transform, width;
+    box-shadow: 0 1px 3px rgba(16, 24, 40, 0.22), 0 0 0 0.5px rgba(16, 24, 40, 0.06); transition: box-shadow 0.2s ease; }
+.seg.pressed .thumb { box-shadow: 0 4px 12px rgba(16, 24, 40, 0.28), 0 0 0 0.5px rgba(16, 24, 40, 0.1); }
+.switch { cursor: pointer; }
+.switch i { cursor: grab; touch-action: none; transition: background 0.25s ease; }
+.switch i::after { left: var(--kx, 2px); width: var(--kw, 18px); transition: none; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 0 0 0.5px rgba(0, 0, 0, 0.06); }
+.switch.on i::after { left: var(--kx, 18px); }
+.switch:not(.driving) i::after { transition: left 0.28s cubic-bezier(.3, 1.2, .5, 1), width 0.16s ease; }
+.switch.pressed i::after { box-shadow: 0 3px 8px rgba(0, 0, 0, 0.35), 0 0 0 0.5px rgba(0, 0, 0, 0.08); }
+
+/* ---------- Состояния кнопок ---------- */
+.btn { position: relative; overflow: hidden; transition: transform 0.14s cubic-bezier(.3, 1.5, .5, 1), box-shadow 0.18s ease, background 0.16s ease, border-color 0.16s ease, color 0.16s ease, opacity 0.16s ease; -webkit-user-select: none; user-select: none; }
+.btn:hover, .btn.is-hover { transform: translateY(-1px); box-shadow: 0 5px 14px rgba(16, 24, 40, 0.14), inset 0 1px 0 var(--hl); }
+.btn:active, .btn.is-active { transform: translateY(0) scale(0.965); box-shadow: inset 0 2px 4px rgba(16, 24, 40, 0.2); background: color-mix(in srgb, var(--surface-solid) 90%, #000); transition-duration: 0.06s; }
+.btn.primary:hover, .btn.primary.is-hover { box-shadow: 0 6px 18px color-mix(in srgb, var(--accent) 50%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.45); filter: brightness(1.06); }
+.btn.primary:active, .btn.primary.is-active { background: linear-gradient(180deg, var(--accent-press), color-mix(in srgb, var(--accent) 70%, #000)); filter: brightness(0.95); box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.3); }
+.btn:focus-visible, .btn.is-focus { outline: 3px solid color-mix(in srgb, var(--accent) 45%, transparent); outline-offset: 2px; }
+.btn[disabled], .btn.disabled { opacity: 0.42; pointer-events: none; box-shadow: none; filter: saturate(0.6); }
+.btn.danger { color: var(--st-red); border-color: color-mix(in srgb, var(--st-red) 35%, transparent); }
+.btn.danger:hover, .btn.danger.is-hover { background: var(--st-red-bg); }
+.btn.danger:active, .btn.danger.is-active { background: color-mix(in srgb, var(--st-red) 24%, transparent); }
+.btn.danger.solid { color: #fff; background: linear-gradient(180deg, #ff5a52, #e0362d); border-color: rgba(255, 255, 255, 0.3); }
+.btn.ghost { background: transparent; border-color: transparent; box-shadow: none; color: var(--link); }
+.btn.ghost:hover, .btn.ghost.is-hover { background: var(--hover-gray); box-shadow: none; transform: none; }
+.btn.ghost:active, .btn.ghost.is-active { background: rgba(120, 120, 128, 0.3); transform: scale(0.97); box-shadow: none; }
+.btn.loading { pointer-events: none; }
+.btn.icon.loading svg { display: none; }
+.btn.loading::before { content: ""; width: 14px; height: 14px; border-radius: 50%; border: 2px solid currentColor; border-right-color: transparent; animation: spin 0.7s linear infinite; flex: none; }
+.btn.success { background: linear-gradient(180deg, #43d070, #27a84f) !important; color: #fff !important; border-color: rgba(255, 255, 255, 0.3) !important; pointer-events: none; animation: pop 0.45s cubic-bezier(.3, 1.6, .5, 1); }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes pop { 0% { transform: scale(0.94); } 60% { transform: scale(1.05); } 100% { transform: scale(1); } }
+.states { display: grid; grid-template-columns: 150px repeat(6, minmax(0, 1fr)); gap: 14px 10px; align-items: center; }
+.states .h { font-size: 12px; font-weight: 600; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.04em; }
+.states .r { font-weight: 600; }
+.demo { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+
+/* ---------- Liquid Glass: при перетаскивании подложка и кружок становятся прозрачной линзой (как в macOS 26 и новее) ---------- */
+.seg .thumb { transition: box-shadow 0.22s ease, background 0.22s ease, backdrop-filter 0.22s ease, -webkit-backdrop-filter 0.22s ease; }
+.seg.pressed .thumb, .seg.dragging .thumb {
+    z-index: 2; background: var(--glass-fill);
+    -webkit-backdrop-filter: saturate(1.45) brightness(1.03) contrast(1.05); backdrop-filter: saturate(1.45) brightness(1.03) contrast(1.05);
+    box-shadow: 0 0 0 1px var(--glass-ring), inset 0 2px 0 var(--glass-rim), inset 0 -2px 0 var(--glass-rim2), inset 0 0 8px rgba(255, 255, 255, 0.28), 0 10px 18px rgba(16, 24, 40, 0.2); }
+.switch i::after { transition: background 0.2s ease, box-shadow 0.2s ease, height 0.18s ease, top 0.18s ease; }
+.switch:not(.driving) i::after { transition: left 0.28s cubic-bezier(.3, 1.2, .5, 1), width 0.16s ease, background 0.2s ease, box-shadow 0.2s ease, height 0.18s ease, top 0.18s ease; }
+.switch.pressed i::after {
+    top: 1px; height: 20px; background: var(--glass-fill);
+    -webkit-backdrop-filter: saturate(1.3) brightness(1.04) contrast(1.04); backdrop-filter: saturate(1.3) brightness(1.04) contrast(1.04);
+    box-shadow: 0 0 0 1px var(--glass-ring), inset 0 2px 0 var(--glass-rim), inset 0 -2px 0 var(--glass-rim2), inset 0 0 6px rgba(255, 255, 255, 0.3), 0 8px 14px rgba(16, 24, 40, 0.25); }
+@media (prefers-reduced-transparency: reduce) {
+  .seg.pressed .thumb, .seg.dragging .thumb { z-index: 0; background: var(--seg-on); -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .switch.pressed i::after { background: #fff; -webkit-backdrop-filter: none; backdrop-filter: none; }
+}
+
+/* ---------- Скелетоны загрузки ---------- */
+.sk { position: relative; overflow: hidden; display: block; border-radius: 8px; background: rgba(120, 120, 128, 0.16); flex: none; }
+.sk::after { content: ""; position: absolute; inset: 0; transform: translateX(-100%); background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent); animation: sk-sweep 1.5s ease-in-out infinite; }
+html[data-theme="dark"] .sk { background: rgba(255, 255, 255, 0.08); }
+html[data-theme="dark"] .sk::after { background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent); }
+.sk.l { height: 12px; } .sk.l2 { height: 12px; width: 70%; } .sk.t { height: 28px; width: 220px; border-radius: 9px; } .sk.h { height: 34px; border-radius: 17px; width: 112px; }
+.sk.p { height: 24px; border-radius: 12px; width: 108px; } .sk.c { width: 28px; height: 28px; border-radius: 50%; margin-left: -6px; border: 2px solid var(--ring); box-sizing: content-box; }
+.sk.b { height: 6px; width: 90px; border-radius: 3px; } .sk.f { height: 34px; border-radius: 17px; }
+.sk-row { display: grid; grid-template-columns: 1.1fr 2.2fr 0.8fr 1.5fr 0.9fr 1fr 1.3fr; gap: 14px; align-items: center; padding: 13px 14px; }
+.sk-row + .sk-row { border-top: 1px solid var(--hair); }
+.sk-stack { display: flex; flex-direction: column; gap: 9px; }
+.sk-line { display: flex; gap: 10px; align-items: center; }
+.sk-in { animation: sk-in 0.35s ease both; }
+.sk-out { animation: sk-out 0.3s ease both; }
+.screen.reveal { animation: sk-in 0.45s ease both; }
+@keyframes sk-sweep { to { transform: translateX(100%); } }
+@keyframes sk-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+@keyframes sk-out { to { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .sk::after { animation: none; display: none; } .sk { animation: sk-pulse 2.2s ease-in-out infinite; } }
+@keyframes sk-pulse { 50% { opacity: 0.55; } }
+.sk-note { position: fixed; bottom: 78px; left: 50%; transform: translateX(-50%); z-index: 50; padding: 6px 14px; border-radius: 16px; font-size: 13px; color: var(--text-2); background: var(--surface); border: 1px solid var(--edge); box-shadow: var(--shadow-sm); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); }
+.switcher { z-index: 40; position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%); z-index: 40; display: flex; gap: 4px; padding: 5px; border-radius: 16px; }
+.switcher a { white-space: nowrap; padding: 7px 14px; border-radius: 11px; color: var(--text-2); font-weight: 500; font-size: 13px; }
+.switcher a.on { background: var(--surface-solid); color: var(--text); box-shadow: var(--shadow-sm); text-decoration: none; }
+@media (max-width: 1100px) {
+  .collapse svg { transform: rotate(180deg); }
+  .shell { grid-template-columns: 74px minmax(0, 1fr); }
+  .sidebar { padding-left: 8px; padding-right: 8px; }
+  .brand > span, .nav a .label, .me > div, .collapse > span { max-width: 0; margin-left: 0; opacity: 0; }
+  .nav-label { max-height: 0; padding-top: 0; padding-bottom: 0; opacity: 0; }
+  .nav a, .collapse { padding-left: 20px; padding-right: 0; }
+  .brand { padding-left: 14px; padding-right: 0; } .me { padding-left: 11px; padding-right: 0; }
+  .nav a .count { right: 10px; top: 4px; transform: none; min-width: 16px; height: 16px; padding: 0 4px; font-size: 10px; }
+  .grid2, .cols3 { grid-template-columns: minmax(0, 1fr); } .kanban, .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="catalog" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></symbol>
+<symbol id="artifacts" viewBox="0 0 24 24"><path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z"/><polyline points="14 2 14 7 19 7"/></symbol>
+<symbol id="firmware" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="3"/><rect x="9.5" y="9.5" width="5" height="5" rx="1"/><path d="M9 2v3M15 2v3M9 19v3M15 19v3M19 9h3M19 14h3M2 9h3M2 14h3"/></symbol>
+<symbol id="cases" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="3"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 13h18"/></symbol>
+<symbol id="tasks" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="8 12.5 11 15.5 16.5 9"/></symbol>
+<symbol id="dashboard" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></symbol>
+<symbol id="directories" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></symbol>
+<symbol id="feedback" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></symbol>
+<symbol id="settings" viewBox="0 0 24 24"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></symbol>
+<symbol id="search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></symbol>
+<symbol id="chev" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></symbol>
+<symbol id="left" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></symbol>
+<symbol id="plus" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></symbol>
+<symbol id="dots" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="19" cy="12" r="1.3"/></symbol>
+<symbol id="download" viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M4 20h16"/></symbol>
+<symbol id="warn" viewBox="0 0 24 24"><path d="M12 3 2 20h20z"/><line x1="12" y1="10" x2="12" y2="14"/><circle cx="12" cy="17" r=".6"/></symbol>
+<symbol id="check" viewBox="0 0 24 24"><polyline points="5 12.5 10 17.5 19 7"/></symbol>
+<symbol id="msg" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></symbol>
+</defs></svg>
+
+<div id="bg"><div class="layer"></div><div class="tint"></div><div class="grain"></div></div>
+<div class="shell">
+  <aside class="sidebar glass" id="sidebar"></aside>
+  <div class="main">
+    <div class="topbar">
+      <div class="search"><svg class="i"><use href="#search"/></svg><span>Поиск по HUB: артикул, материал, прошивка</span><kbd>/</kbd></div>
+      <span class="grow"></span>
+      <span class="crumbs" id="crumbs"></span>
+    </div>
+
+    <!-- ===== Каталог ===== -->
+    <section class="screen" id="catalog">
+      <div class="head"><div><h1>Каталог</h1><div class="sub">309 SKU · обновлено сегодня</div></div>
+        <div class="actions"><a class="btn" href="#"><svg class="i"><use href="#download"/></svg>Экспорт</a><a class="btn primary" href="#"><svg class="i"><use href="#plus"/></svg>Создать SKU</a></div></div>
+      <div class="glass filters">
+        <div class="seg" id="seg-family"><span class="on" data-f="all">Все</span><span data-f="Wi-Fi">Wi-Fi</span><span data-f="PON">PON</span><span data-f="MES">MES</span><span data-f="ESR">ESR</span><span data-f="VoIP">VoIP</span><span data-f="Media">Media</span></div>
+        <label class="field grow"><svg class="i"><use href="#search"/></svg><input id="q" type="search" placeholder="Артикул или наименование" autocomplete="off"></label>
+      </div>
+      <div class="glass filters">
+        <span class="select">Линейка<svg class="i"><use href="#chev"/></svg></span>
+        <span class="select">Категория<svg class="i"><use href="#chev"/></svg></span>
+        <span class="select on">Статус ЖЦ: Серийный выпуск<svg class="i"><use href="#chev"/></svg></span>
+        <span class="select">Владелец<svg class="i"><use href="#chev"/></svg></span>
+        <span class="select">Тег<svg class="i"><use href="#chev"/></svg></span>
+        <span class="spacer"></span>
+        <span class="switch" id="sw-review"><i></i>Требует ревью</span>
+        <span class="switch on" id="sw-eol"><i></i>Показывать снятые (EOL)</span>
+      </div>
+      <div class="glass table-wrap">
+        <table><thead><tr><th>Артикул</th><th>Наименование</th><th>Линейка</th><th>Статус ЖЦ</th><th>Прошивка</th><th>Владельцы</th><th class="num">Заполненность</th></tr></thead><tbody id="catalog-rows"></tbody></table><div class="empty-note" id="empty-note" style="display:none">Ничего не найдено. Измените фильтры.</div>
+        <div class="pager"><span id="shown">Показано 14 из 309</span><div class="pages"><a class="btn sm" href="#">Назад</a><span class="btn sm" style="background:var(--accent);color:#fff;border-color:var(--accent)">1</span><a class="btn sm" href="#">2</a><a class="btn sm" href="#">3</a><a class="btn sm" href="#">Вперед</a></div></div>
+      </div>
+    </section>
+
+    <!-- ===== Карточка SKU ===== -->
+    <section class="screen" id="card">
+      <div class="glass panel hero">
+        <div style="display:flex;justify-content:space-between;gap:16px;align-items:flex-start">
+          <div>
+            <div class="muted small" style="margin-bottom:10px"><a href="#">Каталог</a> / Wi-Fi / WEP</div>
+            <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap"><h1>WEP-550K</h1><span class="chip new">Новинка</span></div>
+            <p style="font-size:17px;margin-top:6px">Точка доступа Wi-Fi 6, внутренняя</p>
+            <p class="muted">Indoor Wi-Fi 6 access point</p>
+            <div style="margin-top:14px"><span class="tag">Indoor</span><span class="tag">Wi-Fi 6</span><span class="tag">Mesh</span><span class="tag">Ритейл</span><span class="tag" style="border-style:dashed;color:var(--text-3)">+ тег</span></div>
+          </div>
+          <div class="actions"><a class="btn" href="#">Править</a><a class="btn" href="#">Создать копию</a><a class="btn icon" href="#"><svg class="i"><use href="#dots"/></svg></a></div>
+        </div>
+        <dl class="facts">
+          <div><dt>Категория</dt><dd>Точка доступа внутренняя</dd></div>
+          <div><dt>Владельцы</dt><dd style="display:flex;align-items:center;gap:8px"><span class="avatars"><span class="av c1">КУ</span><span class="av c2">СМ</span></span>Кузнецов, Смит</dd></div>
+          <div><dt>Чипсет</dt><dd>Mediatek</dd></div>
+          <div><dt>Последнее ревью</dt><dd>16.07.2026</dd></div>
+          <div><dt>Заполненность</dt><dd><span class="bar"><b style="width:31%"></b></span> <span class="muted">31%</span></dd></div>
+        </dl>
+      </div>
+      <div class="grid2">
+        <div class="stack">
+          <div class="glass panel"><div class="block-head"><h2>Описание</h2><a href="#">Править</a></div>
+            <ul style="margin:0 0 10px;padding-left:20px"><li>Wi-Fi 6, два диапазона, до 3 Гбит/с</li><li>PoE 802.3at, питание от коммутатора</li><li>Работа в контроллерной и автономной схеме</li></ul>
+            <p>Точка доступа для офисов, магазинов и гостиниц. Поддерживает бесшовный роуминг и Mesh, управляется контроллером WLC или облачной системой.</p></div>
+          <div class="glass panel"><div class="block-head"><h2>Характеристики</h2><a href="#">Править</a></div>
+            <div class="h3" style="margin-top:0">Радио</div>
+            <dl class="specs"><div><dt>Стандарт Wi-Fi</dt><dd>802.11ax</dd></div><div><dt>Диапазоны</dt><dd>2,4 и 5 ГГц</dd></div><div><dt>Макс. скорость</dt><dd>3000 Мбит/с</dd></div><div><dt>MIMO</dt><dd>4x4 + 4x4</dd></div><div><dt>Мощность</dt><dd>23 дБм</dd></div><div><dt>Антенны</dt><dd>8 внутренних</dd></div></dl>
+            <div class="h3">Порты и питание</div>
+            <dl class="specs"><div><dt>Порты LAN</dt><dd>2 x 2,5 GE</dd></div><div><dt>PoE</dt><dd>802.3at</dd></div><div><dt>Потребление</dt><dd>21 Вт</dd></div><div><dt>Крепление</dt><dd>Потолок, стена</dd></div></dl>
+            <p class="muted small" style="margin-top:12px">Не заполнено полей: 9 · <a href="#">Заполнить</a></p></div>
+          <div class="glass panel"><div class="block-head"><h2>Прошивки</h2><a href="#">Опубликовать</a></div>
+            <div class="fw"><div><div class="ver">2.4.1 <span class="chip ok" style="vertical-align:middle;margin-left:8px">Релиз</span></div><div class="muted">Текущая релизная версия от 02.10.2026</div></div>
+              <div class="actions"><a class="btn primary" href="#"><svg class="i"><use href="#download"/></svg>Скачать</a><a class="btn" href="#">Release notes</a></div></div>
+            <p class="small" style="margin-top:12px"><a href="#">Другие версии (4)</a></p></div>
+          <div class="glass panel"><div class="block-head"><h2>Документация и материалы</h2><div class="seg"><span class="on">Все</span><span>RU</span><span>EN</span></div></div>
+            <div class="file"><div class="ficon">PDF</div><div style="flex:1"><a class="model" href="#" style="font-weight:600">Карточка продукта WEP-550K</a><div class="muted small">Карточка продукта · RU</div></div><span class="chip ok">Актуален</span><span class="muted small">13.10.2026</span></div>
+            <div class="file"><div class="ficon">PDF</div><div style="flex:1"><a href="#" style="font-weight:600">Даташит WEP-550K</a><div class="muted small">Даташит · RU</div></div><span class="chip ok">Актуален</span><span class="muted small">02.10.2026</span></div>
+            <div class="file"><div class="ficon ppt">PPT</div><div style="flex:1"><a href="#" style="font-weight:600">Eltex vs Huawei Indoor</a><div class="muted small">Сравнение · EN <span class="tag" style="margin-left:6px;height:20px">Huawei</span></div></div><span class="chip ok">Актуален</span><span class="muted small">13.10.2026</span></div>
+            <div class="file"><div class="ficon doc">DOC</div><div style="flex:1"><a href="#" style="font-weight:600">Руководство по настройке</a><div class="muted small">Руководство · RU</div></div><span class="chip old">Устарел</span><span class="muted small">11.03.2026</span></div></div>
+          <div class="glass panel"><div class="block-head"><h2>Кейсы</h2><a href="#">Добавить кейс</a></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+              <div class="case"><b>Wi-Fi в торговом центре, Алматы</b><span class="muted small">Казахстан · 2026</span><span class="small">300 точек доступа</span><span><span class="tag">Ритейл</span></span></div>
+              <div class="case"><b>Гостиница на 420 номеров</b><span class="muted small">Узбекистан · 2025</span><span class="small">180 точек доступа</span><span><span class="tag">Отель</span></span></div></div></div>
+          <div class="glass panel"><div class="block-head"><h2>Вопросы и правки</h2></div>
+            <div class="faq"><b>Какая последняя прошивка поддерживает WPA3?</b><p class="muted" style="margin-top:4px">Начиная с версии 2.4.0. Ответил Кузнецов, 08.10.2026</p></div>
+            <div class="faq" style="border-bottom:0"><b>Можно ли питать от PoE 802.3af?</b></div>
+            <div class="ask"><div class="seg"><span class="on">Вопрос</span><span>Предложить правку</span></div>
+              <div class="textarea">Поддерживает ли точка Passpoint на прошивке 2.4?</div>
+              <div class="similar"><b>Возможно, ответ уже есть.</b> Passpoint поддерживается с версии 2.3.0 в режиме контроллера.</div>
+              <div style="display:flex;align-items:center;gap:16px"><a class="btn primary" href="#">Отправить</a><span class="switch"><i></i>Технический вопрос</span></div></div></div>
+        </div>
+        <aside class="stack">
+          <div class="glass panel"><div class="block-head"><h2>Жизненный цикл</h2><a href="#">Править</a></div>
+            <div class="timeline">
+              <div class="tl done"><b>Разработка</b><span>до 1Q26</span></div>
+              <div class="tl now"><b>Запуск (GA) - Новинка</b><span>2Q26 · сейчас</span></div>
+              <div class="tl"><b>Анонс EOL</b><span>не задан</span></div>
+              <div class="tl"><b>Last Order / Last Ship</b><span>не заданы</span></div>
+              <div class="tl"><b>End of Support</b><span>не задан</span></div>
+            </div>
+            <div class="muted small" style="margin:4px 0 12px">Предшественник: <a href="#">WEP-3ax</a> · След. ревью: 14.10.2026</div>
+            <a class="btn" href="#">Ревью проведено</a></div>
+          <div class="glass panel"><div class="block-head"><h2>Коммерческий блок</h2><a href="#">Править</a></div>
+            <div class="notice"><svg class="i"><use href="#warn"/></svg><span>Данные старше 30 дней или не заполнены, цену и наличие нужно уточнить.</span></div></div>
+          <div class="glass panel"><div class="block-head"><h2>Планы по продукту</h2><a href="#">Править</a></div><p class="muted">Планы не заполнены.</p><p class="muted small" style="margin-top:6px">Только для внутреннего контура</p></div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ===== Задачи ===== -->
+    <section class="screen" id="tasks">
+      <div class="head"><div><h1>Задачи</h1><div class="sub">3 новые · 1 просрочена</div></div><div class="actions"><a class="btn primary" href="#"><svg class="i"><use href="#plus"/></svg>Создать задачу</a></div></div>
+      <div class="glass filters"><div class="seg"><span class="on">Доска</span><span>Мои вопросы</span></div><span class="spacer"></span>
+        <span class="select on">Мои<svg class="i"><use href="#chev"/></svg></span><span class="select">Тип<svg class="i"><use href="#chev"/></svg></span><span class="field">SKU</span><span class="select">Линейка<svg class="i"><use href="#chev"/></svg></span></div>
+      <div class="kanban" id="kanban"></div>
+    </section>
+
+    <!-- ===== Дашборд ===== -->
+    <section class="screen" id="dashboard">
+      <div class="head"><div><h1>Дашборд</h1><div class="sub">Цифры по всем SKU и материалам</div></div><div class="actions"><span class="select">Все продакты<svg class="i"><use href="#chev"/></svg></span></div></div>
+      <div class="kpis">
+        <div class="glass kpi"><div class="l">SKU в каталоге</div><div class="v">309</div><div class="d muted">169 серийных, 92 новинки</div></div>
+        <div class="glass kpi"><div class="l">Средняя заполненность</div><div class="v">24%</div><div class="d"><span class="bar" style="width:140px"><b style="width:24%"></b></span></div></div>
+        <div class="glass kpi"><div class="l">Просрочено ревью</div><div class="v" style="color:var(--red)">12</div><div class="d muted">материалов и 3 SKU</div></div>
+        <div class="glass kpi"><div class="l">Открытых вопросов</div><div class="v">4</div><div class="d muted">ответ в среднем за 5,2 ч</div></div>
+      </div>
+      <div class="glass panel"><div class="block-head"><h2>Покрытие по статусам ЖЦ</h2></div>
+        <div class="stackbar"><i style="width:55%;background:#0a84ff"></i><i style="width:30%;background:#34c759"></i><i style="width:12%;background:#ff3b30"></i><i style="width:3%;background:#a1a1aa"></i></div>
+        <div class="legend"><span style="--c:#0a84ff">Серийный выпуск 169</span><span style="--c:#34c759">Новинка 92</span><span style="--c:#ff3b30">Снят с производства 38</span><span style="--c:#a1a1aa">Разработка 10</span></div></div>
+      <div class="cols3">
+        <div class="glass panel"><div class="block-head"><h2>Самые незаполненные</h2></div><div class="rows" id="weak"></div></div>
+        <div class="glass panel"><div class="block-head"><h2>Что ищут</h2><span class="muted small">30 дней</span></div><div class="rows">
+          <div class="row"><a href="#">wep550k</a><span class="muted">42</span></div><div class="row"><a href="#">контроллер wlc</a><span class="muted">31</span></div><div class="row"><a href="#">battle card huawei</a><span class="muted">27</span></div><div class="row"><a href="#">gpon olt</a><span class="muted">19</span></div><div class="row"><a href="#">passpoint</a><span class="muted">11</span></div></div></div>
+        <div class="glass panel"><div class="block-head"><h2>Ищут и не находят</h2><span class="muted small">30 дней</span></div><div class="rows">
+          <div class="row"><a href="#">wifi 7</a><span class="muted">9</span></div><div class="row"><a href="#">mesh контроллер</a><span class="muted">6</span></div><div class="row"><a href="#">сертификат eac</a><span class="muted">4</span></div></div></div>
+      </div>
+    </section>
+
+    <!-- ===== Кнопки ===== -->
+    <section class="screen" id="buttons">
+      <div class="head"><div><h1>Кнопки</h1><div class="sub">Состояния: обычная, наведение, нажатие, фокус, отключена, загрузка</div></div></div>
+      <div class="glass panel"><div class="block-head"><h2>Все состояния</h2><span class="muted small">Тут показаны принудительно, живые кнопки ниже</span></div>
+        <div class="states" id="states"></div></div>
+      <div class="glass panel"><div class="block-head"><h2>Попробуйте нажать</h2></div>
+        <div class="demo">
+          <a class="btn primary" href="#" data-demo="save">Сохранить</a>
+          <a class="btn" href="#" data-demo="export">Экспорт</a>
+          <a class="btn primary" href="#" data-demo="publish">Опубликовать</a>
+          <a class="btn danger" href="#" data-demo="delete">Удалить</a>
+          <a class="btn ghost" href="#" data-demo="none">Отмена</a>
+          <a class="btn disabled" href="#">Недоступно</a>
+          <a class="btn icon" href="#" data-demo="none" title="Еще"><svg class="i"><use href="#dots"/></svg></a>
+        </div>
+        <p class="muted small" style="margin-top:14px">Нажатие: кнопка чуть вдавливается и темнеет. «Сохранить», «Экспорт» и «Опубликовать» на секунду показывают загрузку, затем зеленую галочку «Готово». «Удалить» сначала просит подтвердить.</p></div>
+    </section>
+
+    <!-- ===== Настройки ===== -->
+    <section class="screen" id="settings">
+      <div class="head"><div><h1>Настройки</h1><div class="sub">Личные настройки, действуют только для вас</div></div></div>
+      <div class="glass panel" style="max-width:860px">
+        <div class="setting" style="display:block"><div><b>Оформление</b><p>Современный вид новее, классический привычнее. Можно переключаться в любой момент.</p></div>
+          <div class="themes"><div class="theme"><div class="pv classic"></div><b>Классический</b><div class="muted small">Строгий, плотный, без украшений</div></div>
+          <div class="theme on"><div class="pv modern"></div><b>Современный</b><div class="muted small">Мягкий, с полупрозрачными панелями</div></div></div></div>
+        <div class="setting"><div><b>Тема</b><p>Светлая, темная (в системном стиле) или как настроено в вашей системе</p></div><div class="seg" id="seg-theme"><span data-v="light">Светлая</span><span data-v="dark">Темная</span><span data-v="auto">Как в системе</span></div></div>
+        <div class="setting" style="display:block"><div style="display:flex;align-items:center;justify-content:space-between;gap:20px"><div><b>Прозрачность интерфейса</b><p>Насколько просвечивают панели, меню и таблицы. Слева плотнее, справа прозрачнее</p></div>
+          <div class="slider" style="margin:0"><span class="muted small">Плотно</span><input type="range" id="r-glass" min="0" max="100" value="50"><span class="muted small">Стекло</span><span id="v-glass" style="min-width:36px;text-align:right">50%</span></div></div></div>
+        <div class="setting"><div><b>Цветовая схема</b><p>Акцентный цвет и оттенок подсветки (первая схема фирменная, цвета Eltex). Цвета статусов (серийный выпуск, новинка и т.д.) не меняются</p></div>
+          <div class="swatches" id="swatches"><button class="sw" data-v="azure" title="Лазурь"></button><button class="sw" data-v="lilac" title="Сирень"></button><button class="sw" data-v="pine" title="Хвоя"></button><button class="sw" data-v="amber" title="Янтарь"></button><button class="sw" data-v="eltex" title="Eltex (фирменная)"></button><button class="sw" data-v="graphite" title="Графит"></button></div></div>
+        <div class="setting" style="display:block"><div style="display:flex;align-items:center;justify-content:space-between;gap:20px"><div><b>Фон</b><p>Оформление фона за стеклянными панелями</p></div>
+          <div class="seg" id="seg-bgtype"><span data-v="mesh">Градиент</span><span data-v="flat">Однотонный</span><span data-v="dots">Сетка</span><span data-v="photo">Обои</span></div></div>
+          <div id="wall-box" style="display:none">
+            <div class="walls" id="walls"></div>
+            <div class="slider"><span>Размытие</span><input type="range" id="r-blur" min="0" max="40" value="18"><span id="v-blur">18</span></div>
+            <div class="slider"><span>Затемнение (минимум)</span><input type="range" id="r-dim" min="0" max="70" value="28"><span id="v-dim">28%</span></div>
+            <p class="muted small" style="margin-top:8px">Обои размываются и покрываются матовым зерном, как шлифованное стекло. Если обои светлые, а тема темная (или наоборот), приложение само добавляет затемнение или осветление, чтобы заголовки были читаемы; ползунок задает минимальный уровень. Свое изображение хранится только в вашем браузере (в макете) и сжимается до 1600 пикселей.</p></div></div>
+        <div class="setting"><div><b>Расположение меню</b><p>Слева (сайдбар) или сверху</p></div><div class="seg" id="seg-menu"><span data-v="side">Сбоку</span><span data-v="top">Сверху</span></div></div>
+        <div class="setting"><div><b>Плотность таблиц</b><p>Компактная показывает больше строк</p></div><div class="seg" id="seg-density"><span data-v="normal">Обычная</span><span data-v="compact">Компактная</span></div></div>
+        <div class="setting"><div><b>Стартовая страница</b><p>Куда попадать после входа</p></div><span class="select">Каталог<svg class="i"><use href="#chev"/></svg></span></div>
+        <div class="setting"><div><b>Скрывать снятые с производства</b><p>В каталоге по умолчанию</p></div><span class="switch on" id="sw-hide-eol"><i></i></span></div>
+        <div class="setting"><div><b>Сворачивать боковое меню</b><p>Запоминается автоматически</p></div><span class="switch" id="sw-collapse"><i></i></span></div>
+        <div style="margin-top:16px"><a class="btn primary" href="#">Сохранить</a></div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<!-- комментарии (как в приложении, в современном оформлении) -->
+<div class="fbhost" id="fb"></div>
+
+<nav class="switcher glass" id="switcher"></nav>
+
+<script>
+const nav = [
+  ['catalog', 'catalog', 'Каталог'], ['artifacts', 'artifacts', 'Артефакты'], ['firmware', 'firmware', 'Прошивки'], ['cases', 'cases', 'Кейсы'],
+  ['tasks', 'tasks', 'Задачи'], ['dashboard', 'dashboard', 'Дашборд'], ['directories', 'directories', 'Справочники'], ['feedback', 'feedback', 'Правки'], ['settings', 'settings', 'Настройки']
+];
+const screens = { catalog: 'catalog', card: 'catalog', tasks: 'tasks', dashboard: 'dashboard', buttons: 'settings', settings: 'settings' };
+const names = { catalog: 'Каталог', card: 'Каталог / WEP-550K', tasks: 'Задачи', dashboard: 'Дашборд', buttons: 'Кнопки', settings: 'Настройки' };
+const ic = n => `<svg class="i"><use href="#${n}"/></svg>`;
+const AV = { 'КУ': 'c1', 'СМ': 'c2', 'ПО': 'c3', 'ЛИ': 'c4', 'МА': 'c5', 'ОС': 'c6', 'НА': 'c7', 'ГО': 'c8' };
+const avatars = list => `<span class="avatars">${list.map(n => `<span class="av ${AV[n]}" title="${n}">${n}</span>`).join('')}</span>`;
+const PILL = { new: ['new', 'Новинка'], prod: ['prod', 'Серийный выпуск'], dev: ['dev', 'Разработка'], soon: ['soon', 'Анонс EOL'], eol: ['eol', 'Снят'] };
+const chip = k => `<span class="chip ${PILL[k][0]}">${PILL[k][1]}</span>`;
+
+const NAVSVG = {
+  catalog: '<rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/>',
+  artifacts: '<path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z"/><polyline points="14 2 14 7 19 7"/>',
+  firmware: '<rect x="5" y="5" width="14" height="14" rx="3"/><path d="M9 2v3M15 2v3M9 19v3M15 19v3M19 9h3M19 14h3M2 9h3M2 14h3"/><rect x="9.5" y="9.5" width="5" height="5" rx="1"/>',
+  cases: '<rect x="3" y="7" width="18" height="13" rx="3"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 13h18"/>',
+  tasks: '<circle cx="12" cy="12" r="9"/><polyline points="8 12.5 11 15.5 16.5 9"/>',
+  dashboard: '<line x1="6" y1="20" x2="6" y2="14"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="18" y1="20" x2="18" y2="10"/>',
+  directories: '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>',
+  feedback: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
+  settings: '<line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/>'
+};
+const navIcon = n => `<svg class="ico ${n}" viewBox="0 0 24 24">${NAVSVG[n]}</svg>`;
+function sidebar(active) {
+  const item = ([k, i, t]) => `<a href="#${k === 'catalog' ? 'catalog' : k}" class="${k === active ? 'active' : ''}">${navIcon(i)}<span class="label">${t}</span>${k === 'tasks' ? '<span class="count">3</span>' : ''}</a>`;
+  document.getElementById('sidebar').innerHTML = `
+    <div class="brand"><div class="brand-mark">P</div><span>Product HUB</span></div>
+    <div class="nav-label">База знаний</div><nav class="nav">${nav.slice(0, 4).map(item).join('')}</nav>
+    <div class="nav-label">Работа</div><nav class="nav">${nav.slice(4, 6).map(item).join('')}</nav>
+    <div class="nav-label">Система</div><nav class="nav">${nav.slice(6).map(item).join('')}</nav>
+    <div class="grow"></div>
+    <div class="me"><span class="av lg c1">АК</span><div><b>Александр Кузнецов</b><small>Продакт-менеджер</small></div></div>
+    <a class="collapse" href="#">${ic('left')}<span>Свернуть</span></a>`;
+}
+
+const rows = [
+  ['WEP-550K', 'Точка доступа Wi-Fi 6, внутренняя', 'Точка доступа внутренняя', 'WEP', 'new', '2.4.1', ['КУ', 'СМ'], 31],
+  ['WEP-500K', 'Точка доступа Wi-Fi 6E', 'Точка доступа внутренняя', 'WEP', 'dev', '-', ['СМ', 'КУ'], 24],
+  ['WEP-3ax', 'Точка доступа Wi-Fi 6, внутренняя', 'Точка доступа внутренняя', 'WEP', 'prod', '2.2.0', ['КУ', 'СМ'], 58],
+  ['WOP-30L', 'Точка доступа Wi-Fi 5, уличная', 'Точка доступа уличная', 'WOP', 'prod', '1.28.3', ['СМ', 'КУ'], 61],
+  ['WLC-3200', 'Контроллер Wi-Fi', 'Контроллер', 'WLC', 'prod', '1.14.0', ['КУ', 'СМ'], 47],
+  ['WB-3P-LR5', 'Мост дальнего действия, 5 ГГц', 'Беспроводной мост', 'LR', 'soon', '3.1.2', ['СМ', 'КУ'], 52],
+  ['LTP-16N', 'OLT GPON, 16 портов', 'OLT', 'LTP', 'new', '3.52.1', ['ПО', 'ЛИ'], 44],
+  ['LTP-8N', 'OLT GPON, 8 портов', 'OLT', 'LTP', 'prod', '3.52.1', ['ЛИ', 'ПО'], 41],
+  ['NTU-RG-5440G-Wac', 'ONT GPON с Wi-Fi 5', 'ONT', 'NTU', 'prod', '4.0.8', ['ПО', 'ЛИ'], 37],
+  ['MES2324P', 'Коммутатор 24 порта PoE', 'Коммутатор', 'MES', 'prod', '10.4.3', ['ПО', 'ЛИ', 'МА'], 39],
+  ['ESR-1511', 'Маршрутизатор ESR', 'Маршрутизатор', 'ESR', 'eol', '1.20.4', ['ЛИ', 'МА', 'ПО'], 33],
+  ['TAU-72.IP', 'VoIP-шлюз 72 порта', 'VoIP-шлюз', 'TAU', 'prod', '3.9.0', ['ГО'], 36],
+  ['RG-5521G', 'Абонентский шлюз', 'Абонентский шлюз', 'RG', 'prod', '4.1.2', ['ПО', 'ЛИ'], 40],
+  ['STB-210', 'ТВ-приставка', 'Приставка', 'STB', 'dev', '-', ['ОС', 'НА'], 18]
+];
+const FAMILY = { WEP: 'Wi-Fi', WOP: 'Wi-Fi', WLC: 'Wi-Fi', LR: 'Wi-Fi', LTP: 'PON', NTU: 'PON', RG: 'PON', MES: 'MES', ESR: 'ESR', TAU: 'VoIP', STB: 'Media' };
+function renderCatalog() {
+  const body = document.getElementById('catalog-rows');
+  if (!body) return;
+  const q = state.q.trim().toLowerCase().replace(/[\s_-]/g, '');
+  const list = rows.filter(r => (state.family === 'all' || FAMILY[r[3]] === state.family)
+    && (state.showEol || r[4] !== 'eol')
+    && (!state.review || r[4] === 'soon' || r[4] === 'eol')
+    && (!q || (r[0] + r[1]).toLowerCase().replace(/[\s_-]/g, '').includes(q)));
+  body.innerHTML = list.map(r => `<tr><td><a class="model" href="#card">${r[0]}</a></td>
+    <td>${r[1]}<span class="sub">${r[2]}</span></td><td>${r[3]}</td><td>${chip(r[4])}</td><td>${r[5]}</td><td>${avatars(r[6])}</td>
+    <td class="num"><span class="bar"><b style="width:${r[7]}%"></b></span> <span class="muted small">${r[7]}%</span></td></tr>`).join('');
+  document.getElementById('shown').textContent = 'Показано ' + list.length + ' из ' + rows.length + ' (на странице макета)';
+  document.getElementById('empty-note').style.display = list.length ? 'none' : 'block';
+}
+
+const T = (t, type, obj, due, who, extra = '', cls = '') => `<div class="task ${cls}"><span class="t">${t}</span><div class="meta"><span class="tag">${type}</span>${extra}</div>
+  <div class="foot"><span>${obj} · ${due}</span><span class="avatars"><span class="av ${AV[who]}">${who}</span></span></div></div>`;
+const late = '<span class="chip bad">просрочено</span>';
+const cols = [
+  ['Новые', [T('Проверить даташит: WEP-550K (прошивка 2.4.1)', 'Даташит', 'Прошивка 2.4.1', 'до 27.10', 'КУ'), T('Проверить battle cards: WEP-550K', 'Battle cards', 'Прошивка 2.4.1', 'до 27.10', 'КУ'),
+    T('Ответить на вопрос: WEP-550K', 'Вопрос', 'WEP-550K', 'до 20.10', 'КУ', '<span class="chip work">технический</span>'), T('Подготовить версию EN: Даташит WEP-3ax', 'Перевод', 'Даташит', 'до 27.10', 'СМ')]],
+  ['В работе', [T('Обновить сайт: WEP-550K (прошивка 2.4.1)', 'Обновить сайт', 'Прошивка 2.4.1', 'до 27.10', 'КУ', '', 'drag'), T('Провести ревью SKU: WLC-3200', 'Ревью SKU', 'WLC-3200', 'до 12.10', 'СМ', late)]],
+  ['На проверке', [T('Проверить предложенную правку: WOP-30L', 'Правка', 'WOP-30L', 'до 18.10', 'КУ')]],
+  ['Закрыто', [T('Проверить актуальность: Руководство WEP-30L', 'Устарел материал', 'Руководство', 'закрыто 11.10', 'КУ'), T('Ответить на вопрос: WLC-15', 'Вопрос', 'WLC-15', 'закрыто 09.10', 'СМ'), T('Проверить migration guide: WB-3P-LR5', 'Ручная', 'WB-3P-LR5', 'закрыто 08.10', 'ПО')]]
+];
+document.getElementById('kanban').innerHTML = cols.map(c => `<div class="col"><div class="col-head"><span>${c[0]}</span><span class="n">${c[1].length}</span></div>${c[1].join('')}</div>`).join('');
+
+document.getElementById('weak').innerHTML = ['LTP-16N', 'LTP-8N', 'LTX-16', 'LTX-8', 'NTU-1L', 'NTU-52W'].map(m => `<div class="row"><a href="#card">${m}</a><span><span class="bar" style="width:70px"><b style="width:16%"></b></span> <span class="muted small">16%</span></span></div>`).join('');
+
+document.getElementById('fb').innerHTML = `
+  <div class="fpanel glass" id="fpanel">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><b>Комментарии к этой странице</b><span class="muted">&times;</span></div>
+    <div class="actions" style="margin-bottom:8px"><a class="btn primary sm" href="#">Выбрать элемент</a><a class="btn sm" href="#">Ко всей странице</a></div>
+    <div class="fi"><div style="display:flex;gap:8px;align-items:center"><span class="pin" style="position:static">1</span><b>Александр Смит</b><span class="chip work" style="height:20px">Новый</span></div>
+      <div class="muted small" style="margin:3px 0">Прошивки: «Опубликовать»</div><div>Кнопку лучше назвать «Загрузить прошивку».</div></div>
+    <div class="fi"><div style="display:flex;gap:8px;align-items:center"><span class="pin" style="position:static">2</span><b>Роман Полухин</b><span class="chip ok" style="height:20px">Принят</span></div>
+      <div class="muted small" style="margin:3px 0">Характеристики: «Антенны»</div><div>Нужно указать усиление в дБи.</div></div>
+  </div>
+  <button class="fbtn">${ic('msg')}Комментарий<b>2</b></button>`;
+
+const state = { theme: 'light', palette: 'eltex', menu: 'side', density: 'normal', collapsed: false, showEol: true, family: 'all', q: '', review: false, bgtype: 'mesh', wallId: 'dunes', blur: 18, dim: 28, glass: 50, custom: null };
+try { Object.assign(state, JSON.parse(localStorage.getItem('hub-mock2') || '{}')); } catch (e) { }
+const svgUrl = svg => 'url("data:image/svg+xml;utf8,' + encodeURIComponent(svg) + '")';
+const WALLS = {
+  dunes: { name: 'Дюны', css: svgUrl('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffd9a8"/><stop offset="1" stop-color="#f08a5d"/></linearGradient></defs><rect width="1600" height="1000" fill="url(#g)"/><circle cx="1200" cy="260" r="120" fill="#fff4d6" opacity=".9"/><path d="M0 640 C300 520 600 700 900 600 S1400 520 1600 620 V1000 H0Z" fill="#d9744f"/><path d="M0 760 C300 660 700 840 1000 740 S1400 700 1600 780 V1000 H0Z" fill="#b25339"/><path d="M0 880 C400 800 800 940 1200 860 S1500 850 1600 890 V1000 H0Z" fill="#7d3a2e"/></svg>') },
+  peaks: { name: 'Горы', css: svgUrl('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6c7bd9"/><stop offset="1" stop-color="#e5b9d8"/></linearGradient></defs><rect width="1600" height="1000" fill="url(#g)"/><path d="M0 700 L260 420 L480 620 L760 330 L1060 650 L1300 450 L1600 700 V1000 H0Z" fill="#4a5599"/><path d="M0 800 L300 560 L560 760 L860 520 L1180 780 L1420 620 L1600 800 V1000 H0Z" fill="#323b78"/><path d="M0 900 L360 740 L700 900 L1000 760 L1340 900 L1600 820 V1000 H0Z" fill="#1f2557"/></svg>') },
+  aurora: { name: 'Сияние', css: svgUrl('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0f2b3d"/><stop offset="1" stop-color="#1b1f4a"/></linearGradient><linearGradient id="a" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#3be0b0"/><stop offset=".5" stop-color="#4aa3ff"/><stop offset="1" stop-color="#b072ff"/></linearGradient></defs><rect width="1600" height="1000" fill="url(#g)"/><path d="M-100 420 C300 200 700 560 1100 300 S1500 220 1700 340 L1700 560 C1300 460 900 760 500 560 S100 600 -100 640Z" fill="url(#a)" opacity=".75"/><path d="M0 860 C400 780 900 900 1600 800 V1000 H0Z" fill="#0a1426"/></svg>') }
+};
+// Яркость обоев: считаем по уменьшенной копии, чтобы текст вне стеклянных панелей всегда читался
+const lumaCache = {};
+function wallKey() { return state.wallId === 'custom' ? 'custom:' + (state.custom || '').length : state.wallId; }
+function measureLuma() {
+  const key = wallKey();
+  if (lumaCache[key] !== undefined) return;
+  lumaCache[key] = 0.5;                                   // пока не посчитано - средняя
+  const src = state.wallId === 'custom' && state.custom ? state.custom : ((WALLS[state.wallId] || WALLS.dunes).css.match(/url\("(.*)"\)/) || [])[1];
+  if (!src) return;
+  const img = new Image();
+  img.onload = () => {
+    try {
+      const c = document.createElement('canvas'); c.width = c.height = 24;
+      const g = c.getContext('2d'); g.drawImage(img, 0, 0, 24, 24);
+      const d = g.getImageData(0, 0, 24, 24).data; let sum = 0;
+      for (let i = 0; i < d.length; i += 4) sum += (0.2126 * d[i] + 0.7152 * d[i + 1] + 0.0722 * d[i + 2]) / 255;
+      lumaCache[key] = sum / (d.length / 4);
+    } catch (e) { /* картинка недоступна для чтения - остается средняя */ }
+    applyLook();
+  };
+  img.src = src;
+}
+function autoTint(theme) {
+  const L = lumaCache[wallKey()] ?? 0.5;
+  // темная тема: чем светлее обои, тем сильнее затемняем; светлая: чем темнее обои, тем сильнее осветляем
+  return theme === 'dark' ? Math.max(0, Math.min(0.78, (L - 0.2) * 1.25)) : Math.max(0, Math.min(0.72, (0.62 - L) * 1.2));
+}
+function wallCss() { return state.wallId === 'custom' && state.custom ? 'url("' + state.custom + '")' : (WALLS[state.wallId] || WALLS.dunes).css; }
+function resolvedTheme() { return state.theme === 'auto' ? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : state.theme; }
+function applyLook() {
+  const root = document.documentElement;
+  root.dataset.theme = resolvedTheme();
+  root.dataset.palette = state.palette;
+  root.dataset.bgtype = state.bgtype;
+  root.classList.toggle('compact', state.density === 'compact');
+  root.classList.toggle('collapsed', state.collapsed && state.menu === 'side');
+  root.classList.toggle('topmenu', state.menu === 'top');
+  document.querySelectorAll('#seg-menu span').forEach(el => el.classList.toggle('on', el.dataset.v === state.menu));
+  document.querySelectorAll('#seg-density span').forEach(el => el.classList.toggle('on', el.dataset.v === state.density));
+  document.querySelectorAll('#seg-family span').forEach(el => el.classList.toggle('on', el.dataset.f === state.family));
+  [['sw-eol', state.showEol], ['sw-hide-eol', !state.showEol], ['sw-collapse', state.collapsed], ['sw-review', state.review]].forEach(([id, on]) => { const e = document.getElementById(id); if (e) e.classList.toggle('on', on); });
+  const qi = document.getElementById('q'); if (qi && qi.value !== state.q) qi.value = state.q;
+  if (typeof renderCatalog === 'function') renderCatalog();
+  root.style.setProperty('--wall', wallCss());
+  root.style.setProperty('--wall-blur', state.blur + 'px');
+  root.style.setProperty('--clear', (0.4 + (100 - state.glass) / 50 * 0.6).toFixed(3));
+  const rg = document.getElementById('r-glass'); if (rg) { rg.value = state.glass; document.getElementById('v-glass').textContent = state.glass + '%'; }
+  if (state.bgtype === 'photo') measureLuma();
+  const th = resolvedTheme();
+  const eff = Math.max(autoTint(th), state.dim / 100);      // ползунок задает минимум, авто-контраст добавляет нужное
+  root.style.setProperty('--tint', (th === 'dark' ? 'rgba(0,0,0,' : 'rgba(255,255,255,') + eff.toFixed(2) + ')');
+  try { localStorage.setItem('hub-mock2', JSON.stringify(state)); } catch (e) { }
+  document.querySelectorAll('#seg-theme span').forEach(el => el.classList.toggle('on', el.dataset.v === state.theme));
+  document.querySelectorAll('#seg-bgtype span').forEach(el => el.classList.toggle('on', el.dataset.v === state.bgtype));
+  document.querySelectorAll('#swatches .sw').forEach(el => el.classList.toggle('on', el.dataset.v === state.palette));
+  document.querySelectorAll('.switcher .dot').forEach(el => el.classList.toggle('on', el.dataset.v === state.palette));
+  document.querySelectorAll('.switcher [data-theme-btn]').forEach(el => el.classList.toggle('on', el.dataset.themeBtn === resolvedTheme()));
+  const box = document.getElementById('wall-box');
+  if (box) box.style.display = state.bgtype === 'photo' ? 'block' : 'none';
+  const walls = document.getElementById('walls');
+  if (walls) {
+    walls.innerHTML = Object.entries(WALLS).map(([id, w]) => `<button class="wall ${state.wallId === id ? 'on' : ''}" data-wall="${id}" title="${w.name}" style='background-image:${w.css}'></button>`).join('')
+      + (state.custom ? `<button class="wall ${state.wallId === 'custom' ? 'on' : ''}" data-wall="custom" title="Мое изображение" style="background-image:url('${state.custom}')"></button>` : '')
+      + '<label class="wall add">+ Загрузить<br>свое<input type="file" id="wall-file" accept="image/*" hidden></label>';
+    const f = document.getElementById('wall-file');
+    if (f) f.onchange = () => uploadWall(f.files[0]);
+  }
+  const rb = document.getElementById('r-blur'), rd = document.getElementById('r-dim');
+  if (rb) { rb.value = state.blur; document.getElementById('v-blur').textContent = state.blur; }
+  if (rd) { rd.value = state.dim; document.getElementById('v-dim').textContent = state.dim + '%'; }
+}
+function uploadWall(file) {
+  if (!file) return;
+  const img = new Image();
+  const url = URL.createObjectURL(file);
+  img.onload = () => {
+    const k = Math.min(1, 1600 / Math.max(img.width, img.height));
+    const c = document.createElement('canvas');
+    c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+    c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+    state.custom = c.toDataURL('image/jpeg', 0.82);
+    state.wallId = 'custom';
+    URL.revokeObjectURL(url);
+    applyLook();
+  };
+  img.src = url;
+}
+document.addEventListener('click', e => {
+  const sw = e.target.closest('.switch');
+  if (sw) {
+    const on = !sw.classList.contains('on');
+    if (sw.id === 'sw-eol') state.showEol = on;
+    else if (sw.id === 'sw-hide-eol') state.showEol = !on;
+    else if (sw.id === 'sw-collapse') state.collapsed = on;
+    else if (sw.id === 'sw-review') state.review = on;
+    else sw.classList.toggle('on');
+    applyLook();
+    return;
+  }
+  const seg = e.target.closest('.seg span');
+  if (seg && !seg.dataset.v && !seg.dataset.f) {
+    seg.parentElement.querySelectorAll('span').forEach(x => x.classList.remove('on'));
+    seg.classList.add('on');
+    return;
+  }
+  const w = e.target.closest('[data-wall]');
+  if (w) { state.wallId = w.dataset.wall; applyLook(); return; }
+  const t = e.target.closest('[data-v],[data-theme-btn]');
+  if (!t) return;
+  if (t.dataset.themeBtn) state.theme = t.dataset.themeBtn;
+  else if (t.closest('#seg-theme')) state.theme = t.dataset.v;
+  else if (t.closest('#seg-bgtype')) state.bgtype = t.dataset.v;
+  else if (t.closest('#seg-menu')) state.menu = t.dataset.v;
+  else if (t.closest('#seg-density')) state.density = t.dataset.v;
+  else if (t.classList.contains('sw') || t.classList.contains('dot')) state.palette = t.dataset.v;
+  else return;
+  e.preventDefault();
+  applyLook();
+});
+document.addEventListener('click', e => {
+  const f = e.target.closest('#seg-family span');
+  if (f) { state.family = f.dataset.f; applyLook(); }
+  if (e.target.closest('.collapse')) { e.preventDefault(); state.collapsed = !state.collapsed; applyLook(); }
+});
+document.addEventListener('input', e => {
+  if (e.target.id === 'q') { state.q = e.target.value; applyLook(); }
+  if (e.target.id === 'r-blur') { state.blur = +e.target.value; applyLook(); }
+  if (e.target.id === 'r-glass') { state.glass = +e.target.value; applyLook(); }
+  if (e.target.id === 'r-dim') { state.dim = +e.target.value; applyLook(); }
+});
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { if (state.theme === 'auto') applyLook(); });
+
+function show() {
+  const parts = decodeURIComponent((location.hash || '#catalog').slice(1)).split('|');
+  const id = parts[0];
+  if (parts[1]) state.theme = parts[1];
+  if (parts[2]) state.palette = parts[2];
+  if (parts[3]) state.bgtype = parts[3];
+  if (parts[4]) state.wallId = parts[4];
+  if (parts[5]) state.collapsed = parts[5] === 'collapsed';
+  if (parts[6]) state.menu = parts[6];
+  if (parts[7]) state.glass = +parts[7];
+  const key = screens[id] ? id : 'catalog';
+  document.querySelectorAll('.screen').forEach(s => s.classList.toggle('on', s.id === key));
+  sidebar(screens[key]);
+  document.getElementById('crumbs').textContent = names[key];
+  document.getElementById('fpanel').style.display = key === 'card' ? 'block' : 'none';
+  document.getElementById('switcher').innerHTML = [['catalog', 'Каталог'], ['card', 'Карточка SKU'], ['tasks', 'Задачи'], ['dashboard', 'Дашборд'], ['buttons', 'Кнопки'], ['settings', 'Настройки']]
+    .map(([k, t]) => `<a href="#${k}" class="${k === key ? 'on' : ''}">${t}</a>`).join('')
+    + '<span class="sep"></span><a href="#" data-skeleton="1">Загрузка</a>'
+    + '<span class="sep"></span><a href="#" data-theme-btn="light">Светлая</a><a href="#" data-theme-btn="dark">Темная</a><span class="sep"></span>'
+    + ['eltex', 'azure', 'lilac', 'pine', 'amber', 'graphite'].map(v => `<button class="dot" data-v="${v}"></button>`).join('');
+  applyLook();
+  window.scrollTo(0, 0);
+}
+
+// ---------- Физика: пружины, как в Apple (WWDC18 "Designing Fluid Interfaces") ----------
+// Нажатие отзывается сразу, элемент идет за курсором один в один, у края сопротивление, при отпускании учитывается скорость,
+// остановка на пружине: без отскока для обычного щелчка и с легким отскоком после броска.
+const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const activeSprings = new Set();
+let rafId = 0, lastT = 0;
+class Spring {
+  constructor(x) { this.x = x; this.v = 0; this.t = x; this.w = 2 * Math.PI / 0.32; this.z = 1; this.onTick = null; }
+  to(t, { response = 0.32, damping = 1, velocity } = {}) {
+    this.t = t; this.w = 2 * Math.PI / response; this.z = damping;
+    if (velocity !== undefined) this.v = velocity;
+    if (REDUCED) { this.x = t; this.v = 0; this.onTick && this.onTick(); return; }
+    activeSprings.add(this); if (!rafId) { lastT = performance.now(); rafId = requestAnimationFrame(frame); }
+  }
+  jump(x) { this.x = x; this.t = x; this.v = 0; activeSprings.delete(this); this.onTick && this.onTick(); }
+  get settled() { return Math.abs(this.x - this.t) < 0.03 && Math.abs(this.v) < 0.05; }
+}
+function frame(now) {
+  const dt = Math.min(0.05, (now - lastT) / 1000); lastT = now;
+  for (const sp of [...activeSprings]) {
+    const n = Math.max(1, Math.ceil(dt / 0.004)), h = dt / n;
+    for (let i = 0; i < n; i++) { const a = -sp.w * sp.w * (sp.x - sp.t) - 2 * sp.z * sp.w * sp.v; sp.v += a * h; sp.x += sp.v * h; }
+    if (sp.settled) { sp.x = sp.t; sp.v = 0; activeSprings.delete(sp); }
+    sp.onTick && sp.onTick();
+  }
+  rafId = activeSprings.size ? requestAnimationFrame(frame) : 0;
+}
+// резиновый ограничитель: за край можно слегка оттянуть, но не дальше lim пикселей (как у Apple: чем дальше тянешь, тем сильнее сопротивление)
+const rubber = (d, lim) => lim * (1 - 1 / (d / lim * 0.6 + 1));
+const clamped = (x, min, max, lim) => x < min ? min - rubber(min - x, lim) : x > max ? max + rubber(x - max, lim) : x;
+const clearSelection = () => { try { getSelection().removeAllRanges(); } catch (e) { } };
+const tick = () => { try { navigator.vibrate && navigator.vibrate(6); } catch (e) { } };
+// скорость по последним точкам (px/сек)
+function velocityOf(samples) {
+  const now = performance.now(), recent = samples.filter(p => now - p.t < 90);
+  if (recent.length < 2) return 0;
+  const a = recent[0], b = recent[recent.length - 1];
+  return b.t === a.t ? 0 : (b.x - a.x) / ((b.t - a.t) / 1000);
+}
+
+// ---------- Сегментные переключатели ----------
+function initSeg(seg) {
+  if (seg._ready) return; seg._ready = true;
+  const thumb = document.createElement('i'); thumb.className = 'thumb'; seg.prepend(thumb);
+  const sx = new Spring(0), sw = new Spring(0), ss = new Spring(1);
+  const render = () => { thumb.style.width = sw.x + 'px'; thumb.style.transform = 'translateX(' + sx.x + 'px) scale(' + ss.x + ')'; };
+  sx.onTick = sw.onTick = ss.onTick = render;
+  seg._springs = { sx, sw, ss };
+  const spans = () => [...seg.querySelectorAll(':scope > span')];
+  const onSpan = () => seg.querySelector(':scope > span.on');
+
+  // выставить подложку под выбранный сегмент (с анимацией, если уже были размеры)
+  seg._place = (opts) => {
+    const on = onSpan();
+    if (!on || !on.offsetWidth) { thumb.style.opacity = on ? 1 : 0; return; }
+    thumb.style.opacity = 1;
+    const first = sw.x === 0;
+    const o = Object.assign({ response: 0.34, damping: 0.9 }, seg._release || {}, opts || {});
+    seg._release = null;
+    if (first) { sx.jump(on.offsetLeft); sw.jump(on.offsetWidth); return; }
+    sx.to(on.offsetLeft, o); sw.to(on.offsetWidth, { response: o.response, damping: 1 });
+  };
+  new MutationObserver(() => { if (!seg.classList.contains('dragging')) seg._place(); })
+    .observe(seg, { subtree: true, attributes: true, attributeFilter: ['class'] });
+  new ResizeObserver(() => { if (!seg.classList.contains('dragging') && sw.settled) { const on = onSpan(); if (on && on.offsetWidth) { sx.jump(on.offsetLeft); sw.jump(on.offsetWidth); } } }).observe(seg);
+  seg.addEventListener('selectstart', e => e.preventDefault());
+  seg.addEventListener('dragstart', e => e.preventDefault());
+  // настоящие щелчки обрабатываем через pointerup, чтобы не было двойного срабатывания
+  seg.addEventListener('click', e => { if (e.isTrusted) { e.stopPropagation(); e.preventDefault(); } }, true);
+
+  seg.addEventListener('pointerdown', e => {
+    if (e.button) return;
+    e.preventDefault(); clearSelection();
+    const list = spans();
+    // под курсором может оказаться поле самого переключателя (рамка 3 px): тогда берем ближайший сегмент
+    const downSpan = list.find(sp => sp.contains(e.target))
+      || list.reduce((best, sp) => { const r = sp.getBoundingClientRect(); const d = Math.abs(e.clientX - (r.left + r.width / 2)); return d < best.d ? { sp, d } : best; }, { sp: list[0], d: 1e9 }).sp;
+    try { seg.setPointerCapture(e.pointerId); } catch (err) { }
+    const rect = seg.getBoundingClientRect();
+    const th = { left: rect.left + sx.x, right: rect.left + sx.x + sw.x };
+    const onThumb = e.clientX >= th.left - 4 && e.clientX <= th.right + 4;   // хватаем подложку
+    const grab = e.clientX - th.left;                                        // смещение внутри подложки: идем за курсором один в один
+    const min = 3, max = rect.width - sw.x - 3;
+    const samples = [{ x: e.clientX, t: performance.now() }];
+    let dragging = false, hot = onSpan();
+    if (onThumb) { seg.classList.add('pressed'); ss.to(1.06, { response: 0.22, damping: 0.9 }); }   // отклик на нажатие сразу
+    else { downSpan.style.opacity = 0.6; }
+
+    const move = ev => {
+      samples.push({ x: ev.clientX, t: performance.now() }); if (samples.length > 12) samples.shift();
+      if (!dragging) {
+        if (!onThumb || Math.abs(ev.clientX - e.clientX) < 4) return;       // порог 4 px: отличаем щелчок от перетаскивания
+        dragging = true; seg.classList.add('dragging'); document.documentElement.classList.add('ui-dragging'); clearSelection();
+      }
+      let x = ev.clientX - rect.left - grab;
+      x = clamped(x, min, max, 10);                                         // оттянуть можно слегка, подложка остается внутри
+      sx.jump(x);
+      const c = rect.left + x + sw.x / 2;
+      const h = list.find(sp => { const r = sp.getBoundingClientRect(); return c >= r.left && c < r.right; }) || (c < rect.left ? list[0] : list[list.length - 1]);
+      if (h !== hot) { hot.classList.remove('hot'); h.classList.add('hot'); hot = h; tick(); }
+    };
+    const up = ev => {
+      seg.removeEventListener('pointermove', move); seg.removeEventListener('pointerup', up); seg.removeEventListener('pointercancel', up);
+      try { seg.releasePointerCapture(ev.pointerId); } catch (err) { }
+      downSpan.style.opacity = '';
+      const was = onSpan();
+      let target;
+      if (dragging) {
+        const v = velocityOf(samples);
+        const projected = sx.x + sw.x / 2 + Math.max(-70, Math.min(70, v * 0.14));                        // куда подложка «долетит» по инерции
+        const cx = rect.left + projected;
+        target = list.reduce((best, sp) => { const r = sp.getBoundingClientRect(); const d = Math.abs(cx - (r.left + r.width / 2)); return d < best.d ? { sp, d } : best; }, { sp: list[0], d: 1e9 }).sp;
+        seg._release = { response: 0.36, damping: 0.78, velocity: v };       // бросок: легкий упругий подскок
+      } else {
+        const r = downSpan.getBoundingClientRect();
+        target = ev.clientX >= r.left && ev.clientX <= r.right ? downSpan : was;   // отпустили за пределами - отмена
+        seg._release = { response: 0.32, damping: 0.88 };
+      }
+      list.forEach(sp => sp.classList.remove('hot'));
+      seg.classList.remove('dragging', 'pressed'); document.documentElement.classList.remove('ui-dragging');
+      ss.to(1, { response: 0.3, damping: 0.55 });                            // подложка слегка «отпружинивает» из нажатого состояния
+      if (target !== was) { tick(); target.click(); } else seg._place();
+    };
+    seg.addEventListener('pointermove', move); seg.addEventListener('pointerup', up); seg.addEventListener('pointercancel', up);
+  });
+  seg._place();
+}
+
+// ---------- Переключатели on/off ----------
+function initSwitch(sw) {
+  const track = sw.querySelector(':scope > i');
+  if (!track || track._ready) return; track._ready = true;
+  track.addEventListener('click', e => { if (e.isTrusted) { e.stopPropagation(); e.preventDefault(); } }, true);
+  track.addEventListener('selectstart', e => e.preventDefault());
+  track.addEventListener('pointerdown', e => {
+    if (e.button) return;
+    e.preventDefault(); clearSelection();
+    try { track.setPointerCapture(e.pointerId); } catch (err) { }
+    const rect = track.getBoundingClientRect(), W = rect.width, REST = 18, PRESS = 24;
+    const left = (kw) => W - 2 - kw;
+    const isOn = sw.classList.contains('on');
+    const kx = new Spring(isOn ? left(REST) : 2), kw = new Spring(REST);
+    const render = () => { sw.style.setProperty('--kx', kx.x + 'px'); sw.style.setProperty('--kw', kw.x + 'px'); };
+    kx.onTick = kw.onTick = render;
+    sw.classList.add('driving', 'pressed'); render();
+    // как в iOS: кружок при нажатии становится шире
+    kw.to(PRESS, { response: 0.2, damping: 0.9 });
+    kx.to(isOn ? left(PRESS) : 2, { response: 0.2, damping: 0.9 });
+    const samples = [{ x: e.clientX, t: performance.now() }];
+    const grabOffset = e.clientX - (rect.left + kx.x);
+    let moved = false;
+    const move = ev => {
+      samples.push({ x: ev.clientX, t: performance.now() }); if (samples.length > 12) samples.shift();
+      if (!moved && Math.abs(ev.clientX - e.clientX) < 4) return;
+      if (!moved) { moved = true; document.documentElement.classList.add('ui-dragging'); clearSelection(); }
+      let x = ev.clientX - rect.left - grabOffset;
+      const min = 2, max = left(kw.x);
+      x = clamped(x, min, max, 5);                                          // кружок оттягивается максимум на 5 px, остальное - сопротивление
+      kx.jump(x);
+    };
+    const up = ev => {
+      track.removeEventListener('pointermove', move); track.removeEventListener('pointerup', up); track.removeEventListener('pointercancel', up);
+      try { track.releasePointerCapture(ev.pointerId); } catch (err) { }
+      document.documentElement.classList.remove('ui-dragging');
+      let want;
+      if (moved) { const v = velocityOf(samples); const proj = Math.max(-9, Math.min(9, v * 0.12)); want = kx.x + kw.x / 2 + proj > W / 2; }
+      else want = !isOn;                                                      // просто щелчок: переключаем
+      const v0 = moved ? velocityOf(samples) : 0;
+      sw.classList.remove('pressed');
+      if (want !== isOn) { tick(); sw.click(); }                              // состояние меняется сразу, анимация догоняет
+      kw.to(REST, { response: 0.3, damping: 0.85 });
+      kx.to(want ? left(REST) : 2, { response: 0.36, damping: moved ? 0.78 : 0.9, velocity: moved ? v0 : 0 });
+      const done = () => { if (kx.settled && kw.settled) { sw.classList.remove('driving'); sw.style.removeProperty('--kx'); sw.style.removeProperty('--kw'); } else requestAnimationFrame(done); };
+      requestAnimationFrame(done);
+    };
+    track.addEventListener('pointermove', move); track.addEventListener('pointerup', up); track.addEventListener('pointercancel', up);
+  });
+}
+function initDrag() { document.querySelectorAll('.seg').forEach(initSeg); document.querySelectorAll('.switch').forEach(initSwitch); }
+initDrag();
+const placeAll = () => document.querySelectorAll('.seg').forEach(seg => seg._place && seg._place({ response: 0.01, damping: 1 }));
+window.addEventListener('load', placeAll);
+
+// ---------- Кнопки: матрица состояний и живые примеры ----------
+(function () {
+  const cols = ['', 'is-hover', 'is-active', 'is-focus', 'disabled', 'loading'];
+  const heads = ['', 'Обычная', 'Наведение', 'Нажатие', 'Фокус', 'Отключена', 'Загрузка'];
+  const kinds = [['Основная', 'btn primary', 'Сохранить'], ['Вторичная', 'btn', 'Экспорт'], ['Опасная', 'btn danger', 'Удалить'], ['Текстовая', 'btn ghost', 'Отмена'], ['Иконка', 'btn icon', '']];
+  let h = heads.map(t => `<div class="h">${t}</div>`).join('');
+  kinds.forEach(([name, cls, label]) => {
+    h += `<div class="r">${name}</div>` + cols.map(c => `<div><a class="${cls} ${c}" href="#" tabindex="-1" onclick="return false">${label || '<svg class="i"><use href="#dots"/></svg>'}</a></div>`).join('');
+  });
+  const el = document.getElementById('states'); if (el) el.innerHTML = h;
+})();
+document.addEventListener('click', e => {
+  const b = e.target.closest('.btn'); if (!b) return;
+  if (b.tagName === 'A' && b.getAttribute('href') === '#') e.preventDefault();
+  const kind = b.dataset.demo; if (!kind || kind === 'none' || b.classList.contains('loading')) return;
+  if (!b.dataset.label) b.dataset.label = b.innerHTML;     // исходная подпись запоминается один раз
+  const label = b.dataset.label;
+  const finish = (msg) => {
+    b.classList.remove('loading'); b.classList.add('success'); b.innerHTML = '<svg class="i"><use href="#check"/></svg>' + msg;
+    setTimeout(() => { b.classList.remove('success'); b.innerHTML = label; }, 1500);
+  };
+  if (kind === 'delete') {
+    if (b.dataset.confirm) { delete b.dataset.confirm; b.classList.remove('solid'); b.classList.add('loading'); b.innerHTML = 'Удаляю'; setTimeout(() => finish('Удалено'), 900); return; }
+    b.dataset.confirm = '1'; b.classList.add('solid'); b.innerHTML = 'Точно удалить?';
+    setTimeout(() => { if (b.dataset.confirm) { delete b.dataset.confirm; b.classList.remove('solid'); b.innerHTML = label; } }, 2500);
+    return;
+  }
+  b.classList.add('loading'); b.innerHTML = kind === 'save' ? 'Сохраняю' : kind === 'export' ? 'Готовлю файл' : 'Публикую';
+  setTimeout(() => finish(kind === 'save' ? 'Сохранено' : kind === 'export' ? 'Файл готов' : 'Опубликовано'), 1100);
+});
+
+// ---------- Скелетоны: разметка по экранам и показ «как загрузится» ----------
+const skLines = (n, w = 100) => Array.from({ length: n }, (_, i) => `<span class="sk l" style="width:${i === n - 1 ? w * 0.7 : w}%"></span>`).join('');
+const SK = {
+  catalog: () => `
+    <div class="head"><div class="sk-stack"><span class="sk t"></span><span class="sk l" style="width:180px"></span></div><div class="actions"><span class="sk h"></span><span class="sk h" style="width:140px"></span></div></div>
+    <div class="glass filters"><span class="sk f" style="width:340px"></span><span class="sk f" style="flex:1"></span></div>
+    <div class="glass filters">${[110, 120, 190, 110, 80].map(w => `<span class="sk f" style="width:${w}px"></span>`).join('')}<span class="spacer"></span><span class="sk f" style="width:260px"></span></div>
+    <div class="glass table-wrap" style="padding:8px 10px">${Array.from({ length: 11 }, (_, i) => i === 0
+      ? `<div class="sk-row">${[60, 80, 50, 70, 50, 60, 80].map(w => `<span class="sk l" style="width:${w}%;opacity:.7"></span>`).join('')}</div>`
+      : `<div class="sk-row"><span class="sk l" style="width:80%"></span><div class="sk-stack"><span class="sk l"></span><span class="sk l2"></span></div><span class="sk l" style="width:50%"></span><span class="sk p"></span><span class="sk l" style="width:55%"></span><span class="sk-line" style="padding-left:6px"><span class="sk c"></span><span class="sk c"></span></span><span class="sk b" style="justify-self:end"></span></div>`).join('')}</div>`,
+  card: () => `
+    <div class="glass panel"><div class="sk-line" style="justify-content:space-between;align-items:flex-start"><div class="sk-stack" style="width:55%"><span class="sk l" style="width:140px"></span><span class="sk-line"><span class="sk t" style="width:240px;height:36px"></span><span class="sk p"></span></span><span class="sk l" style="width:60%"></span><span class="sk l" style="width:40%"></span><span class="sk-line"><span class="sk p" style="width:70px"></span><span class="sk p" style="width:80px"></span><span class="sk p" style="width:60px"></span></span></div><div class="actions"><span class="sk h" style="width:90px"></span><span class="sk h" style="width:140px"></span></div></div>
+      <div class="sk-line" style="margin-top:20px;padding-top:16px;border-top:1px solid var(--hair);gap:40px">${[170, 140, 90, 120, 130].map(w => `<div class="sk-stack"><span class="sk l" style="width:60px"></span><span class="sk l" style="width:${w}px"></span></div>`).join('')}</div></div>
+    <div class="grid2"><div class="stack">
+      <div class="glass panel"><div class="sk-stack"><span class="sk t" style="width:140px;height:22px"></span>${skLines(4)}</div></div>
+      <div class="glass panel"><div class="sk-stack"><span class="sk t" style="width:180px;height:22px"></span><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px 28px">${Array.from({ length: 8 }, () => `<span class="sk l"></span>`).join('')}</div></div></div>
+      <div class="glass panel"><div class="sk-stack"><span class="sk t" style="width:120px;height:22px"></span><span class="sk" style="height:70px;border-radius:12px"></span></div></div>
+      <div class="glass panel"><div class="sk-stack"><span class="sk t" style="width:240px;height:22px"></span>${Array.from({ length: 4 }, () => `<span class="sk-line"><span class="sk" style="width:36px;height:42px;border-radius:8px"></span><span class="sk-stack" style="flex:1"><span class="sk l" style="width:50%"></span><span class="sk l" style="width:30%"></span></span><span class="sk p" style="width:80px"></span></span>`).join('')}</div></div>
+    </div><aside class="stack"><div class="glass panel"><div class="sk-stack"><span class="sk t" style="width:150px;height:22px"></span>${Array.from({ length: 5 }, () => `<span class="sk-line"><span class="sk c" style="margin:0;width:14px;height:14px"></span><span class="sk-stack" style="flex:1"><span class="sk l" style="width:60%"></span><span class="sk l" style="width:35%"></span></span></span>`).join('')}</div></div>
+      <div class="glass panel"><div class="sk-stack"><span class="sk t" style="width:170px;height:22px"></span><span class="sk" style="height:56px;border-radius:12px"></span></div></div></aside></div>`,
+  tasks: () => `
+    <div class="head"><div class="sk-stack"><span class="sk t" style="width:140px"></span><span class="sk l" style="width:170px"></span></div><div class="actions"><span class="sk h" style="width:150px"></span></div></div>
+    <div class="glass filters"><span class="sk f" style="width:180px"></span><span class="spacer"></span>${[90, 90, 110, 110].map(w => `<span class="sk f" style="width:${w}px"></span>`).join('')}</div>
+    <div class="kanban">${[4, 2, 1, 3].map(n => `<div class="col"><div class="col-head"><span class="sk l" style="width:90px;height:14px"></span><span class="sk c" style="margin:0;width:20px;height:20px"></span></div>${Array.from({ length: n }, () => `<div class="task"><div class="sk-stack"><span class="sk l"></span><span class="sk l2"></span><span class="sk p" style="width:84px;height:22px"></span><span class="sk-line" style="justify-content:space-between"><span class="sk l" style="width:45%"></span><span class="sk c" style="margin:0"></span></span></div></div>`).join('')}</div>`).join('')}</div>`,
+  dashboard: () => `
+    <div class="head"><div class="sk-stack"><span class="sk t" style="width:160px"></span><span class="sk l" style="width:200px"></span></div><div class="actions"><span class="sk f" style="width:140px"></span></div></div>
+    <div class="kpis">${Array.from({ length: 4 }, () => `<div class="glass kpi"><div class="sk-stack"><span class="sk l" style="width:60%"></span><span class="sk t" style="width:90px;height:34px"></span><span class="sk l" style="width:75%"></span></div></div>`).join('')}</div>
+    <div class="glass panel"><div class="sk-stack"><span class="sk t" style="width:220px;height:22px"></span><span class="sk" style="height:14px;border-radius:7px"></span><span class="sk-line"><span class="sk l" style="width:130px"></span><span class="sk l" style="width:110px"></span><span class="sk l" style="width:150px"></span></span></div></div>
+    <div class="cols3">${Array.from({ length: 3 }, () => `<div class="glass panel"><div class="sk-stack"><span class="sk t" style="width:170px;height:22px"></span>${Array.from({ length: 6 }, () => `<span class="sk-line" style="justify-content:space-between"><span class="sk l" style="width:45%"></span><span class="sk l" style="width:18%"></span></span>`).join('')}</div></div>`).join('')}</div>`,
+  settings: () => `<div class="head"><div class="sk-stack"><span class="sk t" style="width:180px"></span><span class="sk l" style="width:260px"></span></div></div><div class="glass panel" style="max-width:860px"><div class="sk-stack" style="gap:22px">${Array.from({ length: 6 }, () => `<span class="sk-line" style="justify-content:space-between"><span class="sk-stack" style="width:45%"><span class="sk l" style="width:50%"></span><span class="sk l" style="width:80%"></span></span><span class="sk f" style="width:150px"></span></span>`).join('')}</div></div>`
+};
+let skTimer = 0;
+function playLoading(ms = 2200) {
+  const real = document.querySelector('.screen.on'); if (!real) return;
+  const key = (real.id === 'buttons' ? 'settings' : real.id);
+  clearTimeout(skTimer);
+  document.querySelectorAll('.sk-ghost, .sk-note').forEach(n => n.remove());
+  const fp = document.getElementById('fpanel'); if (fp) fp.style.visibility = 'hidden';
+  const ghost = document.createElement('section'); ghost.className = 'screen on sk-ghost sk-in'; ghost.setAttribute('aria-busy', 'true');
+  ghost.innerHTML = (SK[key] || SK.catalog)();
+  real.style.display = 'none'; real.after(ghost);
+  const note = document.createElement('div'); note.className = 'sk-note'; note.textContent = 'Так выглядит загрузка страницы'; document.body.appendChild(note);
+  skTimer = setTimeout(() => {
+    ghost.classList.replace('sk-in', 'sk-out');
+    setTimeout(() => { ghost.remove(); note.remove(); if (fp) fp.style.visibility = ''; real.style.display = ''; real.classList.add('reveal'); setTimeout(() => real.classList.remove('reveal'), 500); }, 280);
+  }, ms);
+}
+document.addEventListener('click', e => { if (e.target.closest('[data-skeleton]')) { e.preventDefault(); playLoading(); } });
+window.addEventListener('hashchange', () => { document.querySelectorAll('.sk-ghost, .sk-note').forEach(n => n.remove()); document.querySelectorAll('.screen').forEach(x => x.style.display = ''); show(); setTimeout(placeAll, 0); });
+show();
+initDrag();
+if (decodeURIComponent(location.hash).includes('skeleton')) setTimeout(() => playLoading(1e9), 150);
+requestAnimationFrame(placeAll);
+</script>
+</body>
+</html>

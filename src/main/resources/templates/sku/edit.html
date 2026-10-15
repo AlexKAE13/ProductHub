@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- Поле ввода. Параметры: имя поля формы, тип input. -->
+<div class="field" th:fragment="text(name, type)">
+    <label th:for="${name}" th:text="#{'field.' + ${name}}">Поле</label>
+    <input th:type="${type}" th:id="${name}" th:name="${name}" th:value="${form[name]}">
+    <span class="error" th:if="${errors != null and errors.containsKey(name)}" th:text="#{${errors.get(name)}}"></span>
+</div>
+
+<div class="field" th:fragment="lifecycleDate(name)">
+    <label th:for="${name}" th:text="#{'field.' + ${name}}">Поле</label>
+    <input type="text" th:id="${name}" th:name="${name}" th:value="${form[name]}" placeholder="3Q26" size="10">
+    <span class="error" th:if="${errors != null and errors.containsKey(name)}" th:text="#{${errors.get(name)}}"></span>
+</div>
+
+<div class="field" th:fragment="area(name, rows)">
+    <label th:for="${name}" th:text="#{'field.' + ${name}}">Поле</label>
+    <textarea th:id="${name}" th:name="${name}" th:rows="${rows}" th:text="${form[name]}"></textarea>
+</div>
+
+<!-- Выбор линейки, категории и владельца. Общий для создания и правки. -->
+<th:block th:fragment="identity">
+    <div class="field-row">
+        <div class="field" th:if="${block == null or block == 'main'}">
+            <label for="model" th:text="#{field.model}">Артикул</label>
+            <input type="text" id="model" name="model" th:value="${form.model}" required>
+            <span class="error" th:if="${errors != null and errors.containsKey('model')}" th:text="#{${errors['model']}}"></span>
+        </div>
+        <div class="field">
+            <label for="lineId" th:text="#{field.lineId}">Линейка</label>
+            <select id="lineId" name="lineId" required>
+                <option th:each="l : ${lines}" th:value="${l.id}" th:text="${l.code} + ' - ' + ${l.name}"
+                        th:selected="${l.id == form.lineId}"></option>
+            </select>
+            <span class="error" th:if="${errors != null and errors.containsKey('lineId')}" th:text="#{${errors['lineId']}}"></span>
+        </div>
+        <div class="field">
+            <label for="category" th:text="#{field.category}">Категория</label>
+            <input type="text" id="category" name="category" th:value="${form.category}" list="category-list" required>
+            <datalist id="category-list"><option th:each="c : ${categories}" th:value="${c}"></option></datalist>
+            <span class="error" th:if="${errors != null and errors.containsKey('category')}" th:text="#{${errors['category']}}"></span>
+        </div>
+        <div class="field">
+            <label for="ownerId" th:text="#{field.ownerId}">Владелец</label>
+            <select id="ownerId" name="ownerId" required>
+                <option th:each="o : ${owners}" th:value="${o.id}" th:text="${o.fullName}"
+                        th:selected="${o.id == form.ownerId}"></option>
+            </select>
+            <span class="error" th:if="${errors != null and errors.containsKey('ownerId')}" th:text="#{${errors['ownerId']}}"></span>
+        </div>
+        <div class="field">
+            <label th:text="#{field.ownerIds}">Совладельцы</label>
+            <div class="tag-picker">
+                <label class="check" th:each="o : ${owners}">
+                    <input type="checkbox" name="ownerIds" th:value="${o.id}" th:checked="${form.ownerIds.contains(o.id)}"> <span th:text="${o.fullName}">Имя</span>
+                </label>
+            </div>
+            <span class="muted small" th:text="#{field.ownerIds.hint}"></span>
+        </div>
+    </div>
+    <div class="field-row">
+        <div th:replace="~{:: text('nameRu', 'text')}"></div>
+        <div th:replace="~{:: text('nameEn', 'text')}"></div>
+        <div th:replace="~{:: text('chip', 'text')}"></div>
+    </div>
+    <div class="field-row">
+        <div th:replace="~{:: text('siteSectionRu', 'text')}"></div>
+        <div th:replace="~{:: text('siteSubsectionRu', 'text')}"></div>
+        <div th:replace="~{:: text('siteStatusRu', 'text')}"></div>
+    </div>
+    <div class="field-row">
+        <div th:replace="~{:: text('siteSectionEn', 'text')}"></div>
+        <div th:replace="~{:: text('siteSubsectionEn', 'text')}"></div>
+        <div th:replace="~{:: text('siteStatusEn', 'text')}"></div>
+    </div>
+</th:block>
+
+<!-- Выбор тегов (общий для создания и правки) -->
+<div class="field" th:fragment="tag-picker">
+    <label th:text="#{sku.tags}">Теги</label>
+    <div class="tag-picker">
+        <label class="check" th:each="t : ${allTags}">
+            <input type="checkbox" name="tagIds" th:value="${t.id}" th:checked="${form.tagIds != null and form.tagIds.contains(t.id)}">
+            <span th:text="#{'tagCategory.' + ${t.category}} + ': ' + ${t.value}">тег</span>
+        </label>
+    </div>
+    <span class="muted small" th:text="#{sku.tags.hint}"></span>
+</div>
+
+<!-- Правка шапки -->
+<section id="block-main" class="block editing" th:fragment="edit-main">
+    <form th:attr="hx-post=@{/skus/{id}/edit/main(id=${s.id})}" hx-target="#block-main" hx-swap="outerHTML">
+        <div th:replace="~{:: identity}"></div>
+        <div th:replace="~{:: tag-picker}"></div>
+        <div class="field">
+            <label for="contour" th:text="#{field.contour}">Контур</label>
+            <select id="contour" name="contour">
+                <option th:each="c : ${contours}" th:value="${c}" th:text="#{'contour.' + ${c}}" th:selected="${c.name() == form.contour}"></option>
+            </select>
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="primary" th:text="#{common.save}">Сохранить</button>
+            <button type="button" th:text="#{common.cancel}"
+                    th:attr="hx-get=@{/skus/{id}/block/main(id=${s.id})}" hx-target="#block-main" hx-swap="outerHTML">Отмена</button>
+        </div>
+    </form>
+</section>
+
+<!-- Правка описания -->
+<section id="block-text" class="block editing" th:fragment="edit-text">
+    <form th:attr="hx-post=@{/skus/{id}/edit/text(id=${s.id})}" hx-target="#block-text" hx-swap="outerHTML">
+        <div th:replace="~{:: area('keyFeatures', 6)}"></div>
+        <div th:replace="~{:: area('description', 8)}"></div>
+        <div class="form-actions">
+            <button type="submit" class="primary" th:text="#{common.save}">Сохранить</button>
+            <button type="button" th:text="#{common.cancel}"
+                    th:attr="hx-get=@{/skus/{id}/block/text(id=${s.id})}" hx-target="#block-text" hx-swap="outerHTML">Отмена</button>
+        </div>
+    </form>
+</section>
+
+<!-- Правка планов -->
+<section id="block-plans" class="block editing" th:fragment="edit-plans">
+    <form th:attr="hx-post=@{/skus/{id}/edit/plans(id=${s.id})}" hx-target="#block-plans" hx-swap="outerHTML">
+        <div th:replace="~{:: area('plans', 8)}"></div>
+        <div class="form-actions">
+            <button type="submit" class="primary" th:text="#{common.save}">Сохранить</button>
+            <button type="button" th:text="#{common.cancel}"
+                    th:attr="hx-get=@{/skus/{id}/block/plans(id=${s.id})}" hx-target="#block-plans" hx-swap="outerHTML">Отмена</button>
+        </div>
+    </form>
+</section>
+
+<!-- Правка характеристик: пользователь видит только те, что ему разрешено править -->
+<section id="block-specs" class="block editing" th:fragment="edit-specs">
+    <form th:attr="hx-post=@{/skus/{id}/edit/specs(id=${s.id})}" hx-target="#block-specs" hx-swap="outerHTML">
+        <div th:each="g : ${editableSpecGroups}">
+            <h3 th:text="${g.key}">Радио</h3>
+            <div class="spec-form">
+                <div class="field" th:each="d : ${g.value}">
+                    <label th:for="'spec' + ${d.id}">
+                        <span th:text="${d.labelRu}">Характеристика</span>
+                        <span th:if="${d.unit != null}" th:text="'(' + ${d.unit} + ')'"></span>
+                    </label>
+                    <select th:if="${d.valueType.name() == 'ENUM'}" th:id="'spec' + ${d.id}" th:name="'specs[' + ${d.id} + ']'">
+                        <option value=""></option>
+                        <option th:each="o : ${d.enumOptions}" th:value="${o}" th:text="${o}"
+                                th:selected="${o == form.specs[d.id]}"></option>
+                    </select>
+                    <select th:if="${d.valueType.name() == 'BOOLEAN'}" th:id="'spec' + ${d.id}" th:name="'specs[' + ${d.id} + ']'">
+                        <option value=""></option>
+                        <option value="Да" th:selected="${'Да' == form.specs[d.id]}" th:text="#{common.yes}">Да</option>
+                        <option value="Нет" th:selected="${'Нет' == form.specs[d.id]}" th:text="#{common.no}">Нет</option>
+                    </select>
+                    <input th:if="${d.valueType.name() == 'TEXT' or d.valueType.name() == 'NUMBER'}" type="text"
+                           th:id="'spec' + ${d.id}" th:name="'specs[' + ${d.id} + ']'" th:value="${form.specs[d.id]}">
+                    <span class="error" th:if="${errors != null and errors.containsKey('specs[' + d.id + ']')}"
+                          th:text="#{${errors['specs[' + d.id + ']']}}"></span>
+                </div>
+            </div>
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="primary" th:text="#{common.save}">Сохранить</button>
+            <button type="button" th:text="#{common.cancel}"
+                    th:attr="hx-get=@{/skus/{id}/block/specs(id=${s.id})}" hx-target="#block-specs" hx-swap="outerHTML">Отмена</button>
+        </div>
+    </form>
+</section>
+
+<!-- Правка коммерческого блока -->
+<section id="block-commercial" class="block editing" th:fragment="edit-commercial">
+    <form th:attr="hx-post=@{/skus/{id}/edit/commercial(id=${s.id})}" hx-target="#block-commercial" hx-swap="outerHTML">
+        <div class="field-row">
+            <div th:replace="~{:: text('price', 'text')}"></div>
+            <div th:replace="~{:: text('currency', 'text')}"></div>
+            <div class="field">
+                <label for="priceList" th:text="#{field.priceList}">Прайс-лист</label>
+                <select id="priceList" name="priceList">
+                    <option value=""></option>
+                    <option th:each="p : ${priceLists}" th:value="${p}" th:text="#{'pricelist.' + ${p}}" th:selected="${p.name() == form.priceList}"></option>
+                </select>
+            </div>
+            <div class="field">
+                <label for="availability" th:text="#{field.availability}">Наличие</label>
+                <select id="availability" name="availability">
+                    <option value=""></option>
+                    <option th:each="a : ${availabilities}" th:value="${a}" th:text="#{'availability.' + ${a}}" th:selected="${a.name() == form.availability}"></option>
+                </select>
+            </div>
+            <div th:replace="~{:: text('leadTimeDays', 'text')}"></div>
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="primary" th:text="#{common.save}">Сохранить</button>
+            <button type="button" th:text="#{common.cancel}"
+                    th:attr="hx-get=@{/skus/{id}/block/commercial(id=${s.id})}" hx-target="#block-commercial" hx-swap="outerHTML">Отмена</button>
+        </div>
+    </form>
+</section>
+
+<!-- Правка жизненного цикла -->
+<section id="block-lifecycle" class="block editing" th:fragment="edit-lifecycle">
+    <form th:attr="hx-post=@{/skus/{id}/edit/lifecycle(id=${s.id})}" hx-target="#block-lifecycle" hx-swap="outerHTML">
+        <p class="muted small" th:text="#{field.hint.lifecycleDate}"></p>
+        <div class="field-row">
+            <div class="field">
+                <label for="lifecycleStatus" th:text="#{field.lifecycleStatus}">Статус ЖЦ</label>
+                <select id="lifecycleStatus" name="lifecycleStatus">
+                    <option th:each="st : ${statuses}" th:value="${st}" th:text="#{'lifecycle.' + ${st}}" th:selected="${st.name() == form.lifecycleStatus}"></option>
+                </select>
+            </div>
+            <div th:replace="~{:: lifecycleDate('gaDate')}"></div>
+            <div th:replace="~{:: lifecycleDate('eolAnnounceDate')}"></div>
+            <div th:replace="~{:: lifecycleDate('lastOrderDate')}"></div>
+            <div th:replace="~{:: lifecycleDate('lastShipDate')}"></div>
+            <div th:replace="~{:: lifecycleDate('endOfSupportDate')}"></div>
+        </div>
+        <div class="field-row">
+            <div th:replace="~{:: text('successorModel', 'text')}"></div>
+            <div th:replace="~{:: text('lastReviewDate', 'date')}"></div>
+            <div th:replace="~{:: text('nextReviewDate', 'date')}"></div>
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="primary" th:text="#{common.save}">Сохранить</button>
+            <button type="button" th:text="#{common.cancel}"
+                    th:attr="hx-get=@{/skus/{id}/block/lifecycle(id=${s.id})}" hx-target="#block-lifecycle" hx-swap="outerHTML">Отмена</button>
+        </div>
+    </form>
+</section>
+</body>
+</html>
