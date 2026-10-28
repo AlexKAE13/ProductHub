@@ -46,19 +46,28 @@ public class FolderImportController {
     }
 
     @GetMapping("/artifacts/upload")
-    public String uploadPage(@AuthenticationPrincipal HubUserDetails user, Model model) {
+    public String uploadPage(@RequestParam(required = false) String sku, @RequestParam(required = false) String type,
+                             @AuthenticationPrincipal HubUserDetails user, Model model) {
         requireEdit(user);
+        model.addAttribute("hintSku", cleanHint(sku));
+        model.addAttribute("hintType", cleanHint(type));
         model.addAttribute("activeMenu", "artifacts");
         return "importer/upload";
     }
 
     @PostMapping("/artifacts/upload")
-    public String upload(@RequestParam("files") List<MultipartFile> files, @AuthenticationPrincipal HubUserDetails user,
+    public String upload(@RequestParam("files") List<MultipartFile> files, @RequestParam(required = false) String sku,
+                         @RequestParam(required = false) String type, @AuthenticationPrincipal HubUserDetails user,
                          Model model) {
         try {
-            return "redirect:/artifacts/import/" + service.stageUploads(files, user).getToken();
+            ImportPlan plan = service.stageUploads(files, user);
+            service.applyHints(plan, cleanHint(sku), cleanHint(type));
+            plan.setReturnSku(cleanHint(sku));
+            return "redirect:/artifacts/import/" + plan.getToken();
         } catch (FormValidationException e) {
             model.addAttribute("errors", e.getErrors());
+            model.addAttribute("hintSku", cleanHint(sku));
+            model.addAttribute("hintType", cleanHint(type));
             model.addAttribute("activeMenu", "artifacts");
             return "importer/upload";
         }
@@ -112,9 +121,12 @@ public class FolderImportController {
     public String confirm(@PathVariable String token, @ModelAttribute PlanForm form,
                           @AuthenticationPrincipal HubUserDetails user, RedirectAttributes redirect) {
         try {
+            ImportPlan plan = store.get(token);
+            String back = plan == null ? null : plan.getReturnSku();
             ImportRun run = service.confirm(token, form.getRows(), form.isDryRun(), user);
             redirect.addFlashAttribute("token", form.isDryRun() ? token : null);
-            return "redirect:/artifacts/import/runs/" + run.getId();
+            return "redirect:/artifacts/import/runs/" + run.getId()
+                    + (back == null ? "" : "?back=" + java.net.URLEncoder.encode(back, java.nio.charset.StandardCharsets.UTF_8));
         } catch (FormValidationException e) {
             redirect.addFlashAttribute("planExpired", true);
             return "redirect:/artifacts/upload";
@@ -122,8 +134,10 @@ public class FolderImportController {
     }
 
     @GetMapping("/artifacts/import/runs/{id}")
-    public String result(@PathVariable Long id, @AuthenticationPrincipal HubUserDetails user, Model model) {
+    public String result(@PathVariable Long id, @RequestParam(required = false) String back,
+                         @AuthenticationPrincipal HubUserDetails user, Model model) {
         requireEdit(user);
+        model.addAttribute("backSku", cleanHint(back));
         model.addAttribute("run", service.run(id));
         model.addAttribute("activeMenu", "artifacts");
         return "importer/run";
@@ -139,5 +153,14 @@ public class FolderImportController {
         if (!permissions.canManage(user)) {
             throw new AccessDeniedException("Импорт папки доступен только PRODUCT и ADMIN");
         }
+    }
+
+    /** Подсказка из карточки SKU: артикул и тип материала. Принимаем только короткий безопасный текст. */
+    private static String cleanHint(String text) {
+        if (text == null) {
+            return null;
+        }
+        String t = text.strip();
+        return t.isEmpty() || t.length() > 80 || !t.matches("[\\p{L}\\p{N} ._/+\\-()]+") ? null : t;
     }
 }

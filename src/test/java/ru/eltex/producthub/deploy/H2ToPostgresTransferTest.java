@@ -94,7 +94,7 @@ class H2ToPostgresTransferTest {
             assertNotNull(one(c, "select max(id) from feedback_comment"));
             assertEquals(3, one(c, "select count(*) from feedback_comment"));
             // служебная история миграций не тронута
-            assertEquals(14, one(c, "select count(*) from flyway_schema_history"));
+            assertEquals(migrationCount(), one(c, "select count(*) from flyway_schema_history"));
         }
     }
 
@@ -111,5 +111,11 @@ class H2ToPostgresTransferTest {
             var e = org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, () -> new H2DataTransfer().copy(src, dst));
             assertTrue(e.getMessage().contains("Версии схемы различаются"));
         }
+    }
+
+    /** Число файлов миграций в проекте: тест не ломается при добавлении новой миграции. */
+    private static long migrationCount() throws java.io.IOException {
+        return new org.springframework.core.io.support.PathMatchingResourcePatternResolver()
+                .getResources("classpath:db/migration/V*.sql").length;
     }
 }

@@ -9,7 +9,10 @@
     <h1 th:text="#{upload.title}">Загрузка файлов</h1>
     <p class="warn" th:if="${planExpired != null}" th:text="#{validation.plan.expired}">План устарел</p>
     <p class="muted" th:text="#{upload.hint}"></p>
+    <p class="notice" th:if="${hintSku != null}"><span th:text="#{upload.forSku(${hintSku})}">Файлы будут привязаны к SKU</span></p>
     <form th:action="@{/artifacts/upload}" method="post" enctype="multipart/form-data" id="upload-form">
+        <input type="hidden" name="sku" th:if="${hintSku != null}" th:value="${hintSku}">
+        <input type="hidden" name="type" th:if="${hintType != null}" th:value="${hintType}">
         <div id="dropzone" class="dropzone">
             <p th:text="#{upload.drop}">Перетащите файлы сюда или выберите</p>
             <input type="file" name="files" id="upload-input" multiple required>
@@ -18,7 +21,7 @@
         <span class="error" th:if="${errors != null and errors.containsKey('files')}" th:text="#{${errors['files']}}"></span>
         <div class="form-actions">
             <button type="submit" class="primary" th:text="#{upload.next}">Далее: метаданные</button>
-            <a class="btn" th:href="@{/artifacts}" th:text="#{common.cancel}">Отмена</a>
+            <a class="btn" th:href="${hintSku != null} ? @{/sku/{m}(m=${hintSku})} : @{/artifacts}" th:text="#{common.cancel}">Отмена</a>
         </div>
     </form>
     <script th:src="@{/js/upload.js}" defer></script>

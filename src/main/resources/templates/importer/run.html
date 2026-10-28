@@ -17,7 +17,8 @@
     <pre class="log" th:text="${run.log}"></pre>
     <div class="form-actions">
         <a class="btn" th:if="${token != null}" th:href="@{/artifacts/import/{t}(t=${token})}" th:text="#{run.backToPreview}">Вернуться к предпросмотру</a>
-        <a class="btn primary" th:href="@{/artifacts}" th:text="#{artifacts.title}">Артефакты</a>
+        <a class="btn primary" th:if="${backSku != null}" th:href="@{/sku/{m}(m=${backSku})}" th:text="#{run.backToSku(${backSku})}">Вернуться к карточке</a>
+        <a class="btn" th:classappend="${backSku == null} ? 'primary'" th:href="@{/artifacts}" th:text="#{artifacts.title}">Артефакты</a>
     </div>
 </main>
 </body>

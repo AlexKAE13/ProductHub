@@ -24,7 +24,7 @@
                 <button type="button" class="link-btn edit-only" th:text="#{sku.edit.main}"
                         th:attr="hx-get=@{/skus/{id}/edit/main(id=${s.id})}" hx-target="#block-main" hx-swap="outerHTML">Основные данные</button>
                 <button type="button" id="editToggle" class="edit-toggle" th:text="#{common.edit}"
-                        th:attr="data-l-edit=#{common.edit},data-l-done=#{sku.edit.done}" aria-pressed="false">Править</button>
+                        th:attr="data-l-edit=#{common.edit},data-l-done=#{sku.edit.done},data-l-discard=#{sku.edit.discard}" aria-pressed="false">Править</button>
                 <details class="more edit-only">
                     <summary th:title="#{sku.menu}" th:aria-label="#{sku.menu}">&middot;&middot;&middot;</summary>
                     <div class="more-list">
@@ -61,26 +61,34 @@
         <div class="col-main">
 
             <!-- 2. Ключевые особенности и описание -->
-            <section id="block-text" class="block" th:fragment="block-text" th:if="${card.can('DESCRIPTION')}">
+            <section id="block-text" class="block" data-collapsible="text" th:fragment="block-text" th:if="${card.can('DESCRIPTION')}">
                 <div class="block-head">
-                    <h2 th:text="#{sku.section.text}">Описание</h2>
+                    <h2 class="block-title" th:text="#{sku.section.text}">Описание</h2>
+                    <button type="button" class="block-toggle" data-collapse="text" aria-expanded="true" th:title="#{sku.block.collapse}" th:aria-label="#{sku.block.collapse}"
+                            th:attr="data-l-collapse=#{sku.block.collapse},data-l-expand=#{sku.block.expand}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
                     <button type="button" class="link-btn edit-only" th:if="${card.canEdit()}" th:text="#{common.edit}"
                             th:attr="hx-get=@{/skus/{id}/edit/text(id=${s.id})}" hx-target="#block-text" hx-swap="outerHTML">Править</button>
                 </div>
+                <div class="collapsible"><div class="collapsible-inner">
                 <ul class="features" th:if="${!s.keyFeatureList.isEmpty()}">
                     <li th:each="line : ${s.keyFeatureList}" th:text="${line}">Особенность</li>
                 </ul>
                 <p class="pre" th:if="${s.description != null}" th:text="${s.description}">Описание</p>
                 <p class="empty-note" th:if="${s.description == null and s.keyFeatureList.isEmpty()}" th:text="#{sku.noDescription}">Описание не заполнено.</p>
+                </div></div>
             </section>
 
             <!-- 3. Характеристики: только заполненные, пустые одной строкой -->
-            <section id="block-specs" class="block" th:fragment="block-specs" th:if="${card.can('SPECS')}">
+            <section id="block-specs" class="block" data-collapsible="specs" th:fragment="block-specs" th:if="${card.can('SPECS')}">
                 <div class="block-head">
-                    <h2 th:text="#{sku.section.specs}">Характеристики</h2>
+                    <h2 class="block-title" th:text="#{sku.section.specs}">Характеристики</h2>
+                    <button type="button" class="block-toggle" data-collapse="specs" aria-expanded="true" th:title="#{sku.block.collapse}" th:aria-label="#{sku.block.collapse}"
+                            th:attr="data-l-collapse=#{sku.block.collapse},data-l-expand=#{sku.block.expand}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
                     <button type="button" class="link-btn edit-only" th:if="${card.canEditSpecs()}" th:text="#{common.edit}"
                             th:attr="hx-get=@{/skus/{id}/edit/specs(id=${s.id})}" hx-target="#block-specs" hx-swap="outerHTML">Править</button>
                 </div>
+                <div class="collapsible"><div class="collapsible-inner">
+                <div class="spec-groups">
                 <div th:each="g : ${card.specGroups()}">
                     <h3 th:text="${g.name()}">Радио</h3>
                     <dl class="specs-grid">
@@ -90,12 +98,14 @@
                         </div>
                     </dl>
                 </div>
+                </div>
                 <p class="empty-note" th:if="${card.specGroups().isEmpty()}" th:text="#{sku.noSpecsFilled}">Характеристики пока не заполнены.</p>
                 <p class="empty-note" th:if="${card.emptySpecs() > 0 and card.canEditSpecs()}">
                     <span th:text="#{sku.specs.emptyNote(${card.emptySpecs()})}">Не заполнено полей: 12</span>
                     <button type="button" class="link-btn edit-only" th:text="#{sku.specs.fillAction}"
                             th:attr="hx-get=@{/skus/{id}/edit/specs(id=${s.id})}" hx-target="#block-specs" hx-swap="outerHTML">Заполнить</button>
                 </p>
+                </div></div>
             </section>
 
             <!-- 4. Прошивки -->

@@ -7,10 +7,20 @@
 <body>
 <main class="content wide">
     <h1 th:text="${caseId != null} ? #{cases.edit} : #{cases.create}">Кейс</h1>
-    <form class="block editing" method="post"
+    <form class="block editing" method="post" th:attr="enctype=${caseId == null} ? 'multipart/form-data' : null"
           th:action="${caseId != null} ? @{/cases/{id}/edit(id=${caseId})} : @{/cases}">
+        <!-- Готовый файл кейса: только при создании (к существующему кейсу файлы добавляются на его странице) -->
+        <div class="case-upload" th:if="${caseId == null}">
+            <h2 th:text="#{cases.upload.title}">Добавьте готовый файл или заполните форму ниже</h2>
+            <p class="muted small" th:text="#{cases.upload.hint}"></p>
+            <div id="dropzone" class="dropzone">
+                <p th:text="#{cases.upload.drop}">Перетащите файлы сюда или выберите</p>
+                <input type="file" name="files" id="upload-input" multiple accept=".pdf,.pptx,.docx,.png,.jpg,.jpeg">
+                <ul id="upload-list" class="muted"></ul>
+            </div>
+        </div>
         <div class="field"><label for="title" th:text="#{cases.col.title}">Название</label>
-            <input type="text" id="title" name="title" th:value="${form.title}" required>
+            <input type="text" id="title" name="title" th:value="${form.title}" th:required="${caseId != null}">
             <span class="error" th:if="${errors != null and errors.containsKey('title')}" th:text="#{${errors['title']}}"></span></div>
         <div class="field-row">
             <div class="field"><label for="country" th:text="#{cases.col.country}">Страна</label>
@@ -32,11 +42,14 @@
                 <select id="ownerId" name="ownerId">
                     <option th:each="o : ${owners}" th:value="${o.id}" th:text="${o.fullName}" th:selected="${o.id == form.ownerId}"></option></select></div>
         </div>
+        <th:block th:if="${canManage}">
         <label class="check-line"><input type="checkbox" name="customerVisible" value="true" th:checked="${form.customerVisible}">
             <span th:text="#{cases.customerVisible}">Можно называть заказчика</span></label>
         <p class="muted small" th:text="#{cases.customerVisible.hint}"></p>
         <label class="check-line"><input type="checkbox" name="publicationAllowed" value="true" th:checked="${form.publicationAllowed}">
             <span th:text="#{cases.publicationAllowed}">Можно показывать партнерам (внешний контур)</span></label>
+        </th:block>
+        <p class="muted small" th:unless="${canManage}" th:text="#{cases.reviewHint}"></p>
         <div class="field" style="margin-top:10px"><label for="skus" th:text="#{firmware.skusHint}">SKU</label>
             <textarea id="skus" name="skus" data-suggest="sku" autocomplete="off" rows="2" th:text="${form.skus}" required></textarea>
             <span class="error" th:if="${errors != null and errors.containsKey('skus')}" th:text="#{${errors['skus']}}"></span></div>
@@ -61,6 +74,7 @@
             <a class="btn" th:href="${caseId != null} ? @{/cases/{id}(id=${caseId})} : @{/cases}" th:text="#{common.cancel}">Отмена</a>
         </div>
     </form>
+    <script th:src="@{/js/upload.js}" defer></script>
 </main>
 </body>
 </html>

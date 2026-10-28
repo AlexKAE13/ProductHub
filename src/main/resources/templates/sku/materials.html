@@ -24,6 +24,7 @@
     <section class="block" id="block-docs">
         <div class="block-head">
             <h2 th:text="#{sku.section.docs}">Документация и материалы</h2>
+            <a class="link-btn edit-only" th:if="${canAddMaterials}" th:href="@{/artifacts/upload(sku=${s.model})}" th:text="#{sku.docs.add}">Добавить документы</a>
             <div class="lang-filter" role="group">
                 <button type="button" th:each="l : ${ {'ALL','RU','EN'} }" th:classappend="${materials.lang == l} ? 'active'"
                         th:text="${l == 'ALL'} ? #{common.all} : ${l}"
@@ -46,7 +47,8 @@
     </section>
 
     <section class="block" id="block-compare">
-        <div class="block-head"><h2 th:text="#{sku.section.compare}">Сравнения и battle cards</h2></div>
+        <div class="block-head"><h2 th:text="#{sku.section.compare}">Сравнения и battle cards</h2>
+            <a class="link-btn edit-only" th:if="${canAddMaterials}" th:href="@{/artifacts/upload(sku=${s.model},type='Battle card')}" th:text="#{sku.compare.add}">Добавить battle card</a></div>
         <p class="muted" th:if="${materials.compare.actual.isEmpty() and materials.compare.outdated.isEmpty()}" th:text="#{sku.compare.empty}">Нет материалов.</p>
         <table class="table dense materials" th:if="${!materials.compare.actual.isEmpty()}">
             <th:block th:each="item : ${materials.compare.actual}"><tr th:replace="~{:: row(${item})}"></tr></th:block>
@@ -62,7 +64,8 @@
 
 <!-- Блок 9: фото и видео -->
 <section class="block" id="block-media" th:fragment="media">
-    <div class="block-head"><h2 th:text="#{sku.section.media}">Фото и видео</h2></div>
+    <div class="block-head"><h2 th:text="#{sku.section.media}">Фото и видео</h2>
+        <a class="link-btn edit-only" th:if="${canAddMaterials}" th:href="@{/artifacts/upload(sku=${s.model},type='Фото')}" th:text="#{sku.media.add}">Добавить фото и видео</a></div>
     <p class="muted" th:if="${materials.media.isEmpty()}" th:text="#{sku.media.empty}">Фото и видео нет.</p>
     <div class="media-grid">
         <figure th:each="item : ${materials.media}" class="media-item">

@@ -262,6 +262,30 @@ class FolderImportTest {
     }
 
     @Test
+    void fileOfAnotherTypeNeverBecomesNewVersionOfExistingMaterial(@TempDir Path tmp) throws IOException {
+        Path folder = makeFolder(tmp);
+        ImportPlan first = importService.scanFolder(folder.toString(), product);
+        importService.confirm(first.getToken(), keepAll(first), false, product);
+        Artifact card = artifacts.findBySourceKey("wep-550k|RU").get(0);
+        int versionsBefore = artifactService.detail(card.getId(), product).versions().size();
+        long count = artifacts.count();
+
+        // файл с тем же именем, но загружается как battle card (подсказка из блока карточки SKU)
+        write(folder.resolve("RU/PPTX/WEP-550K_RU.pptx"), pptx());
+        ImportPlan plan = importService.scanFolder(folder.toString(), product);
+        PlanRow changed = row(plan, "WEP-550K", "RU");
+        assertEquals(PlanRow.Action.NEW_VERSION, changed.getAction(), "по имени это был бы файл новой версии карточки");
+        importService.applyHints(plan, "WEP-550K", "Battle card");
+        assertEquals(PlanRow.Action.CREATE, changed.getAction());
+        assertEquals("Battle card", changed.getType());
+
+        importService.confirm(plan.getToken(), keepAll(plan), false, product);
+        assertEquals(count + 1, artifacts.count(), "создан отдельный материал");
+        assertEquals(versionsBefore, artifactService.detail(card.getId(), product).versions().size(),
+                "карточка продукта не получила новую версию");
+    }
+
+    @Test
     void userEditsInPreviewAreApplied(@TempDir Path tmp) throws IOException {
         write(tmp.resolve("Unknown_thing_RU.pdf"), pdf());
         ImportPlan plan = importService.scanFolder(tmp.toString(), product);

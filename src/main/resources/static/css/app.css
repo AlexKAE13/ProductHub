@@ -698,3 +698,28 @@ td .inline .link-btn.danger { margin-left: 12px; }
 .edit-toggle { height: 32px; padding: 0 12px; border: 1px solid var(--line-strong); border-radius: var(--radius); background: var(--bg); cursor: pointer; }
 .content.card.editing .edit-toggle { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 500; }
 .content.card.editing .edit-only { outline: 0; }
+
+/* Характеристики: группы укладываются в две колонки плотно, внутри группы одна колонка строк "название - значение" */
+.spec-groups { column-count: 2; column-gap: 44px; }
+.spec-groups > div { break-inside: avoid; margin: 0 0 14px; }
+.spec-groups h3 { margin-top: 4px; }
+.spec-groups .specs-grid { grid-template-columns: minmax(0, 1fr); gap: 0; }
+@container content (max-width: 900px) { .spec-groups { column-count: 1; } }
+
+/* Сворачиваемые блоки карточки (описание, характеристики): плавное движение той же кривой, что у бокового меню */
+:root { --ease-menu: cubic-bezier(.22, 1, .36, 1); --t-menu: 0.5s; }
+.block-head .block-title { flex: 1 1 auto; cursor: pointer; }
+.block-toggle { order: 3; display: inline-grid; place-items: center; width: 28px; height: 28px; margin-left: 8px; padding: 0; border: 0; border-radius: 8px; background: none; color: var(--muted); cursor: pointer; }
+.block-toggle:hover { background: var(--bg-hover); color: var(--text); }
+.block-toggle svg { width: 18px; height: 18px; transition: transform var(--t-menu) var(--ease-menu); }
+.block.collapsed .block-toggle svg { transform: rotate(-90deg); }
+.collapsible { display: grid; grid-template-rows: 1fr; opacity: 1; transition: grid-template-rows var(--t-menu) var(--ease-menu), opacity 0.3s ease 0.12s; }
+.collapsible > .collapsible-inner { overflow: hidden; min-height: 0; }
+.block.collapsed .collapsible { grid-template-rows: 0fr; opacity: 0; transition: grid-template-rows var(--t-menu) var(--ease-menu), opacity 0.18s ease; }
+.block.collapsed .block-head { margin-bottom: 0; }
+@media (prefers-reduced-motion: reduce) { .collapsible, .block-toggle svg { transition: none; } }
+
+/* Блок "готовый файл" в форме нового кейса */
+.case-upload { margin: 0 0 16px; padding: 0 0 14px; border-bottom: 1px solid var(--line); }
+.case-upload h2 { margin-bottom: 4px; }
+.case-upload .dropzone { padding: 22px; margin: 10px 0 0; }

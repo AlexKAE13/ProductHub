@@ -9,7 +9,7 @@
     <div class="page-head">
         <h1 th:text="#{cases.title}">Кейсы</h1>
         <div class="actions">
-            <a class="btn primary" th:if="${canEdit}" th:href="@{/cases/new}" th:text="#{cases.create}">Добавить кейс</a>
+            <a class="btn primary" th:if="${canCreate}" th:href="@{/cases/new}" th:text="#{cases.create}">Добавить кейс</a>
         </div>
     </div>
     <form id="filters" class="filters" th:action="@{/cases}" method="get"

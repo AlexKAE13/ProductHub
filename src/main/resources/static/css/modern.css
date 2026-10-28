@@ -858,3 +858,11 @@ button.primary.primary:hover, button.fb-toggle.fb-toggle:hover, .btn.primary.pri
 /* Режим правки включен: кнопка в шапке становится акцентной ("Готово"), блоки показывают свои кнопки правки */
 .content.card.editing .edit-toggle { background-color: var(--accent-press); background-image: linear-gradient(180deg, color-mix(in srgb, var(--accent) 82%, #fff), var(--accent-press)); color: #fff; border-color: transparent; }
 .content.card.editing .block { box-shadow: var(--shadow), inset 0 0 0 1.5px color-mix(in srgb, var(--accent) 35%, transparent); transition: box-shadow 0.2s ease; }
+
+/* Стрелка сворачивания блока: маленькая и ровная, без стиля обычных кнопок */
+.block-toggle.block-toggle { width: 30px; height: 30px; min-width: 0; padding: 0; border: 0; border-radius: 9px; background: transparent; box-shadow: none; filter: none;
+    display: inline-grid; place-items: center; color: var(--text-2); transform: none; transition: background 0.16s ease, color 0.16s ease; }
+.block-toggle.block-toggle:hover { background: var(--hover-gray); color: var(--text); transform: none; box-shadow: none; }
+.block-toggle.block-toggle:active { background: rgba(120, 120, 128, 0.3); transform: scale(0.94); box-shadow: none; }
+.block-toggle.block-toggle::after { content: none; }
+.block-toggle svg { width: 18px; height: 18px; }

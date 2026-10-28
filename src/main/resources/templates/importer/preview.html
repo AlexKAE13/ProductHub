@@ -14,7 +14,7 @@
         <div class="form-actions">
             <button type="submit" class="primary" th:text="#{preview.confirm}">Подтвердить и импортировать</button>
             <button type="submit" name="dryRun" value="true" th:text="#{preview.dryRun}">Проверить без записи (dry-run)</button>
-            <a class="btn" th:href="@{/artifacts}" th:text="#{common.cancel}">Отмена</a>
+            <a class="btn" th:href="${plan.returnSku != null} ? @{/sku/{m}(m=${plan.returnSku})} : @{/artifacts}" th:text="#{common.cancel}">Отмена</a>
         </div>
         <div class="table-scroll">
         <table class="table dense preview">

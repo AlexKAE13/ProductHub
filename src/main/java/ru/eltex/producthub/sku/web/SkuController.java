@@ -41,6 +41,7 @@ public class SkuController {
     private final ru.eltex.producthub.firmware.service.FirmwareService firmwareService;
     private final ru.eltex.producthub.casestudy.service.CaseService caseService;
     private final ru.eltex.producthub.qa.service.QuestionService questionService;
+    private final ru.eltex.producthub.artifact.service.ArtifactPermissions artifactPermissions;
 
     @org.springframework.beans.factory.annotation.Autowired
     private org.springframework.context.ApplicationEventPublisher events;
@@ -50,7 +51,9 @@ public class SkuController {
                          ru.eltex.producthub.tag.service.TagService tagService,
                          ru.eltex.producthub.firmware.service.FirmwareService firmwareService,
                          ru.eltex.producthub.casestudy.service.CaseService caseService,
-                         ru.eltex.producthub.qa.service.QuestionService questionService) {
+                         ru.eltex.producthub.qa.service.QuestionService questionService,
+                         ru.eltex.producthub.artifact.service.ArtifactPermissions artifactPermissions) {
+        this.artifactPermissions = artifactPermissions;
         this.service = service;
         this.reference = reference;
         this.permissions = permissions;
@@ -70,6 +73,7 @@ public class SkuController {
         events.publishEvent(new ru.eltex.producthub.common.ObjectViewed("SKU", card.sku().getId(), user.getUsername()));
         fillCard(ui, card);
         ui.addAttribute("materials", materials.forSku(card.sku().getId(), card.sku().getLine().getId(), "ALL", user));
+        ui.addAttribute("canAddMaterials", artifactPermissions.canEdit(user));
         ui.addAttribute("fw", firmwareService.forSku(card.sku().getId(), user));
         ui.addAttribute("cs", caseService.forSku(card.sku().getId(), user));
         ui.addAttribute("qa", questionService.view(ru.eltex.producthub.qa.domain.TargetType.SKU, card.sku().getId(), user));
@@ -92,6 +96,7 @@ public class SkuController {
         SkuCard card = service.loadCard(id, user);
         fillCard(ui, card);
         ui.addAttribute("materials", materials.forSku(id, card.sku().getLine().getId(), lang, user));
+        ui.addAttribute("canAddMaterials", artifactPermissions.canEdit(user));
         return "sku/materials :: docs-compare";
     }
 

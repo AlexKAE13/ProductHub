@@ -15,6 +15,8 @@ public class ImportPlan {
     private final Path stagingDir;
     private final List<PlanRow> rows = new ArrayList<>();
     private final List<SkippedFile> skipped = new ArrayList<>();
+    /** Артикул карточки SKU, из которой начата загрузка: после импорта на нее ведет кнопка возврата. */
+    private String returnSku;
 
     public ImportPlan(String token, String source, String createdBy, Path stagingDir) {
         this.token = token;
@@ -65,5 +67,13 @@ public class ImportPlan {
 
     public long getSkipCount() {
         return countByAction(PlanRow.Action.SKIP);
+    }
+
+    public String getReturnSku() {
+        return returnSku;
+    }
+
+    public void setReturnSku(String returnSku) {
+        this.returnSku = returnSku;
     }
 }

@@ -13,6 +13,9 @@ import ru.eltex.producthub.artifact.domain.Language;
 import ru.eltex.producthub.artifact.event.ArtifactStale;
 import ru.eltex.producthub.artifact.event.ArtifactUpdated;
 import ru.eltex.producthub.artifact.repo.ArtifactRepository;
+import ru.eltex.producthub.casestudy.domain.CaseStudy;
+import ru.eltex.producthub.casestudy.event.CaseCreated;
+import ru.eltex.producthub.casestudy.repo.CaseRepository;
 import ru.eltex.producthub.firmware.event.FirmwarePublished;
 import ru.eltex.producthub.qa.domain.Question;
 import ru.eltex.producthub.qa.domain.QuestionKind;
@@ -45,9 +48,11 @@ public class TaskTriggers {
     private final ArtifactRepository artifacts;
     private final QuestionService questions;
     private final QuestionTargets targets;
+    private final CaseRepository cases;
 
     public TaskTriggers(TaskService tasks, SkuRepository skus, ArtifactRepository artifacts, QuestionService questions,
-                        QuestionTargets targets) {
+                        QuestionTargets targets, CaseRepository cases) {
+        this.cases = cases;
         this.tasks = tasks;
         this.skus = skus;
         this.artifacts = artifacts;
@@ -71,6 +76,29 @@ public class TaskTriggers {
                             sku.getOwner(), RelatedType.FIRMWARE, e.firmwareId(), "Прошивка " + e.version(),
                             "/firmware/" + e.firmwareId(), sku.getId(), "FirmwarePublished"));
                 }
+            });
+        }
+    }
+
+    /**
+     * Новый кейс (его обычно добавляют продажники): владелец каждого SKU кейса получает задачу проверить его.
+     * Если кейс добавил сам владелец, задача ему не нужна.
+     */
+    @EventListener
+    public void onCaseCreated(CaseCreated e) {
+        CaseStudy c = cases.findById(e.caseId()).orElse(null);
+        if (c == null) {
+            return;
+        }
+        for (Object[] row : cases.findSkusByCaseIds(List.of(e.caseId()))) {
+            Sku skuRef = (Sku) row[1];
+            skus.findCardById(skuRef.getId()).ifPresent(sku -> {
+                if (sku.getOwner() == null || sku.getOwner().getLogin().equals(c.getCreatedBy())) {
+                    return;
+                }
+                tasks.createIfAbsent(new TaskSpec(TaskType.REVIEW_CASE, "Проверить кейс: " + c.getTitle() + " (" + sku.getModel() + ")",
+                        "Кейс добавил " + c.getCreatedBy() + ". Проверьте данные, теги и разрешение на показ партнерам.",
+                        sku.getOwner(), RelatedType.CASE, c.getId(), c.getTitle(), "/cases/" + c.getId(), sku.getId(), "CaseCreated"));
             });
         }
     }

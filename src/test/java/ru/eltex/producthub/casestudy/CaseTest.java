@@ -102,6 +102,30 @@ class CaseTest {
 
     @Autowired
     ru.eltex.producthub.sku.service.SkuService skuService;
+    @Autowired
+    ru.eltex.producthub.task.service.TaskService taskService;
+
+    // ----------------------------------------------------------- проверка нового кейса владельцем SKU
+
+    @Test
+    @org.springframework.transaction.annotation.Transactional
+    void caseAddedBySalesCreatesReviewTaskForSkuOwnerButNotForOwnCase() {
+        CaseStudy bySales = service.create(form(unique("Кейс продажника"), "WEP-30L", false, false), sales);
+        var tasks = taskService.openOfType(ru.eltex.producthub.task.domain.TaskType.REVIEW_CASE).stream()
+                .filter(t -> bySales.getId().equals(t.getRelatedId())).toList();
+        assertFalse(bySales.isPublicationAllowed(), "продажник не может открыть кейс партнерам");
+        assertFalse(bySales.isCustomerVisible(), "продажник не может назвать заказчика");
+        assertEquals(1, tasks.size(), "владелец SKU получил одну задачу на проверку");
+        assertEquals(ru.eltex.producthub.task.domain.RelatedType.CASE, tasks.get(0).getRelatedType());
+        assertTrue(tasks.get(0).getTitle().startsWith("Проверить кейс"));
+        assertFalse(tasks.get(0).getAssignee().getLogin().equals("sales"), "задача не продажнику, а владельцу");
+
+        // кейс добавил сам владелец SKU: проверять нечего
+        HubUserDetails owner = users.loadUserByUsername(tasks.get(0).getAssignee().getLogin());
+        CaseStudy byOwner = service.create(form(unique("Кейс владельца"), "WEP-30L", false, false), owner);
+        assertTrue(taskService.openOfType(ru.eltex.producthub.task.domain.TaskType.REVIEW_CASE).stream()
+                .noneMatch(t -> byOwner.getId().equals(t.getRelatedId())), "своему кейсу задача не создается");
+    }
 
     private Long skuId(String model) {
         return skuService.findIdByModel(model);
@@ -150,8 +174,7 @@ class CaseTest {
     // ----------------------------------------------------------- права и контур
 
     @Test
-    void onlyProductAndAdminCreateAndEdit() {
-        assertThrows(AccessDeniedException.class, () -> service.create(form("x", "WEP-30L", true, false), sales));
+    void onlyProductAndAdminEditAndSalesOnlyCreate() {
         assertThrows(AccessDeniedException.class, () -> service.create(form("x", "WEP-30L", true, false), head));
         assertThrows(AccessDeniedException.class,
                 () -> service.create(form("x", "WEP-30L", true, false), users.loadUserByUsername("service")));
@@ -259,8 +282,16 @@ class CaseTest {
 
     @Test
     @WithUserDetails("sales")
-    void salesDoesNotSeeCreateButtonsAndCannotOpenForm() throws Exception {
-        mvc.perform(get("/cases")).andExpect(status().isOk()).andExpect(content().string(not(containsString("/cases/new"))));
+    void salesSeesCreateButtonAndOpensFormWithoutPublicationCheckboxes() throws Exception {
+        mvc.perform(get("/cases")).andExpect(status().isOk()).andExpect(content().string(containsString("/cases/new")));
+        mvc.perform(get("/cases/new")).andExpect(status().isOk())
+                .andExpect(content().string(containsString("upload-input")))
+                .andExpect(content().string(not(containsString("name=\"publicationAllowed\""))));
+    }
+
+    @Test
+    @WithUserDetails("partner")
+    void partnerCannotOpenCreateForm() throws Exception {
         mvc.perform(get("/cases/new")).andExpect(status().isForbidden());
     }
 

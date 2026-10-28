@@ -176,6 +176,35 @@ class ArtifactWebTest {
     }
 
     @Test
+    @WithUserDetails("product")
+    void uploadFromSkuCardPreselectsSkuAndTypeAndLinksAreEditOnly() throws Exception {
+        // ссылки на добавление материалов есть в карточке (в режиме правки их показывает скрипт) и несут артикул и тип
+        String card = mvc.perform(get("/sku/WEP-550K")).andReturn().getResponse().getContentAsString();
+        assertTrue(card.contains("/artifacts/upload?sku=WEP-550K"), "ссылка добавления документов");
+        assertTrue(card.contains("type=Battle%20card"), "ссылка добавления battle card");
+
+        var upload = new org.springframework.mock.web.MockMultipartFile("files", "Сравнение с конкурентом.pdf", "application/pdf", pdf());
+        String location = mvc.perform(multipart("/artifacts/upload").file(upload).param("sku", "WEP-550K").param("type", "Battle card").with(csrf()))
+                .andExpect(status().is3xxRedirection()).andReturn().getResponse().getRedirectedUrl();
+        String plan = mvc.perform(get(location)).andReturn().getResponse().getContentAsString();
+        assertTrue(plan.contains("value=\"WEP-550K\""), "артикул подставлен");
+        assertTrue(plan.contains("value=\"Battle card\" selected") || plan.contains("selected=\"selected\" value=\"Battle card\"")
+                || plan.matches("(?s).*<option value=\"Battle card\"[^>]*selected.*"), "тип выбран");
+        // после подтверждения страница результата ведет обратно в карточку SKU
+        String token = location.substring(location.lastIndexOf('/') + 1);
+        String resultUrl = mvc.perform(post("/artifacts/import/" + token + "/confirm").with(csrf()).param("dryRun", "true")
+                        .param("rows[0].include", "true").param("rows[0].title", "Тест возврата").param("rows[0].type", "Battle card")
+                        .param("rows[0].language", "RU").param("rows[0].status", "ACTUAL").param("rows[0].skus", "WEP-550K")
+                        .param("rows[0].contour", "INTERNAL").param("rows[0].ownerId", String.valueOf(sku("WEP-550K").getOwner().getId())))
+                .andExpect(status().is3xxRedirection()).andReturn().getResponse().getRedirectedUrl();
+        assertTrue(resultUrl.contains("/artifacts/import/runs/") && resultUrl.endsWith("?back=WEP-550K"), "возврат передан: " + resultUrl);
+        mvc.perform(get(resultUrl)).andExpect(content().string(containsString("href=\"/sku/WEP-550K\"")))
+                .andExpect(content().string(containsString("Вернуться к карточке WEP-550K")));
+        // вредные значения подсказок отбрасываются
+        mvc.perform(get("/artifacts/upload").param("sku", "<script>alert(1)</script>")).andExpect(content().string(not(containsString("<script>alert"))));
+    }
+
+    @Test
     @WithUserDetails("partner")
     void partnerCannotDownloadInternalFile() throws Exception {
         Artifact a = create(unique("Закрытый"), "Даташит", Language.RU, sku("WEP-550K"), "x.pdf", pdf());

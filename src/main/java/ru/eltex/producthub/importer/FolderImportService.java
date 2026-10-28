@@ -209,6 +209,37 @@ public class FolderImportService {
         return plan;
     }
 
+    /**
+     * Загрузка из блока карточки SKU: строки без артикула привязываются к этому SKU, а всем строкам ставится тип блока
+     * (например, battle card). Если материал с таким именем уже есть, но другого типа,
+     * загрузка создает отдельный материал, а не новую версию чужого. Остальное правится в предпросмотре как обычно.
+     */
+    public void applyHints(ImportPlan plan, String sku, String typeName) {
+        for (PlanRow row : plan.getRows()) {
+            if (row.getAction() == PlanRow.Action.SKIP) {
+                continue;
+            }
+            if (sku != null && (row.getSkus() == null || row.getSkus().isBlank())) {
+                row.setSkus(sku);
+                row.setSkuFound(true);
+            }
+            // загрузка из блока карточки SKU (например, "Добавить battle card") - явный выбор типа, он важнее догадки по имени файла;
+            // тип по-прежнему можно поменять в предпросмотре
+            if (typeName != null) {
+                row.setType(typeName);
+            }
+            if (row.getAction() == PlanRow.Action.NEW_VERSION && row.getExistingId() != null) {
+                Long wanted = types.byName(row.getType()).map(ArtifactType::getId).orElse(null);
+                boolean sameType = artifacts.findTypeId(row.getExistingId()).map(id -> id.equals(wanted)).orElse(false);
+                if (!sameType) {
+                    row.setAction(PlanRow.Action.CREATE);
+                    row.setExistingId(null);
+                    row.setNote("материал с таким именем есть, но другого типа: создается отдельный");
+                }
+            }
+        }
+    }
+
     private Candidate pickMain(List<Candidate> group) {
         List<String> priority = props.mainPriority();
         return group.stream().min(Comparator.comparingInt((Candidate c) -> {
@@ -352,6 +383,13 @@ public class FolderImportService {
             try {
                 Resolved r = resolve(row, lines);
                 warnings += r.warnings;
+                // файл другого типа никогда не становится новой версией чужого материала (battle card не затирает карточку продукта)
+                if (row.getAction() == PlanRow.Action.NEW_VERSION && row.getExistingId() != null
+                        && !artifacts.findTypeId(row.getExistingId()).map(id -> id.equals(r.type.getId())).orElse(false)) {
+                    row.setAction(PlanRow.Action.CREATE);
+                    row.setExistingId(null);
+                    row.setNote("материал с таким именем есть, но другого типа: создается отдельный");
+                }
                 if (dryRun) {
                     lines.add((row.getAction() == PlanRow.Action.NEW_VERSION ? "Будет новая версия: " : "Будет создан: ")
                             + label + " (" + r.type.getName() + ")");

@@ -48,6 +48,7 @@ public class CaseController {
         model.addAttribute("data", service.listData(result.items()));
         model.addAttribute("filter", filter);
         model.addAttribute("canEdit", service.canEdit(user));
+        model.addAttribute("canCreate", service.canCreate(user));
         model.addAttribute("activeMenu", "cases");
         if (htmx != null) {
             return "cases/index :: results";
@@ -68,24 +69,40 @@ public class CaseController {
     @GetMapping("/cases/new")
     public String newForm(@RequestParam(required = false) String sku, @AuthenticationPrincipal HubUserDetails user,
                           Model model) {
-        requireEdit(user);
+        if (!service.canCreate(user)) {
+            throw new org.springframework.security.access.AccessDeniedException("Нет прав добавлять кейсы");
+        }
         CaseForm form = new CaseForm();
         form.setOwnerId(user.getId());
         form.setSkus(sku);
         form.setYear(String.valueOf(java.time.LocalDate.now().getYear()));
         fillForm(model);
+        model.addAttribute("canManage", service.canEdit(user));
         model.addAttribute("form", form);
         return "cases/form";
     }
 
     @PostMapping("/cases")
-    public String create(@ModelAttribute("form") CaseForm form, @AuthenticationPrincipal HubUserDetails user,
-                         Model model) {
+    public String create(@ModelAttribute("form") CaseForm form,
+                         @RequestParam(value = "files", required = false) List<MultipartFile> files,
+                         @AuthenticationPrincipal HubUserDetails user, Model model) {
         try {
-            return "redirect:/cases/" + service.create(form, user).getId();
+            List<MultipartFile> real = files == null ? List.of() : files.stream().filter(f -> !f.isEmpty()).toList();
+            // название можно не писать, если приложен готовый файл: берется имя первого файла без расширения
+            if (!real.isEmpty() && (form.getTitle() == null || form.getTitle().isBlank())) {
+                String name = real.get(0).getOriginalFilename() == null ? "Кейс" : real.get(0).getOriginalFilename();
+                int dot = name.lastIndexOf('.');
+                form.setTitle(dot > 0 ? name.substring(0, dot) : name);
+            }
+            Long id = service.create(form, user).getId();
+            if (!real.isEmpty()) {
+                service.addAttachments(id, real, user);
+            }
+            return "redirect:/cases/" + id;
         } catch (FormValidationException e) {
             model.addAttribute("errors", e.getErrors());
             fillForm(model);
+            model.addAttribute("canManage", service.canEdit(user));
             return "cases/form";
         }
     }
@@ -94,6 +111,7 @@ public class CaseController {
     public String editForm(@PathVariable Long id, @AuthenticationPrincipal HubUserDetails user, Model model) {
         model.addAttribute("form", service.formFor(id, user));
         model.addAttribute("caseId", id);
+        model.addAttribute("canManage", true);
         fillForm(model);
         return "cases/form";
     }
@@ -107,6 +125,7 @@ public class CaseController {
         } catch (FormValidationException e) {
             model.addAttribute("errors", e.getErrors());
             model.addAttribute("caseId", id);
+            model.addAttribute("canManage", true);
             fillForm(model);
             return "cases/form";
         }

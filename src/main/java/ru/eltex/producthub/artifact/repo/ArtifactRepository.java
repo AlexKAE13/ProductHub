@@ -17,6 +17,9 @@ public interface ArtifactRepository extends JpaRepository<Artifact, Long> {
             + "left join fetch a.currentVersion where a.id = :id and a.deleted = false")
     Optional<Artifact> findCardById(@Param("id") Long id);
 
+    @Query("select a.type.id from Artifact a where a.id = :id")
+    Optional<Long> findTypeId(@Param("id") Long id);
+
     @Query("select a from Artifact a where a.sourceKey = :key and a.deleted = false")
     List<Artifact> findBySourceKey(@Param("key") String key);
 

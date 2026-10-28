@@ -60,6 +60,9 @@ public class CaseService {
     private final ArtifactService artifactService;
     private final ArtifactTypeService types;
     private final ArtifactFileRepository files;
+
+    @org.springframework.beans.factory.annotation.Autowired
+    private org.springframework.context.ApplicationEventPublisher events;
     private final AuditService audit;
 
     public CaseService(CaseRepository repository, CaseQueryRepository queries, SkuService skuService,
@@ -84,6 +87,11 @@ public class CaseService {
         return has(user, Role.PRODUCT, Role.ADMIN);
     }
 
+    /** Добавлять кейсы могут и продажники: такой кейс проверяет владелец SKU (ему приходит задача). */
+    public boolean canCreate(HubUserDetails user) {
+        return has(user, Role.PRODUCT, Role.ADMIN, Role.SALES);
+    }
+
     /** Имя заказчика: открыто для всех, если customerVisible, иначе только PRODUCT, HEAD, ADMIN. */
     public boolean canSeeCustomer(HubUserDetails user, CaseStudy c) {
         return c.isCustomerVisible() || has(user, Role.PRODUCT, Role.HEAD, Role.ADMIN);
@@ -100,6 +108,12 @@ public class CaseService {
             }
         }
         return false;
+    }
+
+    private void requireCreate(HubUserDetails user) {
+        if (!canCreate(user)) {
+            throw new AccessDeniedException("Кейсы добавляют PRODUCT, ADMIN и продажники");
+        }
     }
 
     private void requireEdit(HubUserDetails user) {
@@ -212,25 +226,34 @@ public class CaseService {
             repository.findTagsByCaseIds(list.stream().map(CaseStudy::getId).toList())
                     .forEach(r -> tagMap.computeIfAbsent((Long) r[0], k -> new ArrayList<>()).add((Tag) r[1]));
         }
-        return new SkuCases(list, tagMap, canEdit(user));
+        return new SkuCases(list, tagMap, canCreate(user));
     }
 
     // ------------------------------------------------------------------ создание и правка
 
     @Transactional
     public CaseStudy create(CaseForm form, HubUserDetails user) {
-        requireEdit(user);
+        requireCreate(user);
+        boolean manager = canEdit(user);
+        if (!manager) {
+            // продажник не решает, что показывать партнерам и называть ли заказчика: это решит владелец при проверке
+            form.setPublicationAllowed(false);
+            form.setCustomerVisible(false);
+        }
         Map<String, String> errors = new LinkedHashMap<>();
         Parsed p = parse(form, errors);
         if (!errors.isEmpty()) {
             throw new FormValidationException(errors);
         }
-        CaseStudy c = new CaseStudy(p.title, p.country, p.owner, user.getUsername());
+        // кейс продажника принадлежит владельцу первого SKU, чтобы он мог его править после проверки
+        User caseOwner = manager || p.skus.isEmpty() || p.skus.get(0).getOwner() == null ? p.owner : p.skus.get(0).getOwner();
+        CaseStudy c = new CaseStudy(p.title, p.country, caseOwner, user.getUsername());
         apply(c, form, p);
         c.getSkus().addAll(p.skus);
         c.getTags().addAll(p.tags);
         repository.save(c);
         audit.record(ENTITY, c.getId(), AuditAction.CREATE, null, null, c.getTitle(), user.getUsername(), null);
+        events.publishEvent(new ru.eltex.producthub.casestudy.event.CaseCreated(c.getId()));
         return c;
     }
 
@@ -293,8 +316,10 @@ public class CaseService {
     /** Файлы кейса (PDF, фото) сохраняются как артефакты типа "Кейс / референс внедрения" и привязываются к кейсу. */
     @Transactional
     public int addAttachments(Long id, List<MultipartFile> uploads, HubUserDetails user) {
-        requireEdit(user);
         CaseStudy c = load(id);
+        if (!canEdit(user) && !(canCreate(user) && user.getUsername().equals(c.getCreatedBy()))) {
+            throw new AccessDeniedException("Файлы к кейсу добавляет автор кейса, PRODUCT или ADMIN");
+        }
         List<MultipartFile> real = uploads == null ? List.of() : uploads.stream().filter(f -> !f.isEmpty()).toList();
         if (real.isEmpty()) {
             throw new FormValidationException(Map.of("files", "validation.required"));
