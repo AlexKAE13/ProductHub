@@ -8,9 +8,13 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriUtils;
+
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 
 import ru.eltex.producthub.dashboard.service.Dashboard.Count;
 import ru.eltex.producthub.dashboard.service.Dashboard.Item;
@@ -31,10 +35,16 @@ public class DashboardService {
     /** SKU владельца: он основной или совладелец. */
     private static final String SKU_OWNER = " and exists (select 1 from sku_owner so where so.sku_id = %s.id and so.user_id = ?)";
 
-    private final JdbcTemplate jdbc;
+    private static final long ALL_OWNERS = -1L;
 
-    public DashboardService(JdbcTemplate jdbc) {
+    private final JdbcTemplate jdbc;
+    /** Готовые цифры на короткое время: дашборд агрегирует журналы, а открывают его часто. Пусто, если кэш отключен. */
+    private final Cache<Long, Dashboard> cache;
+
+    public DashboardService(JdbcTemplate jdbc, @Value("${producthub.dashboard.cache-seconds:60}") long cacheSeconds) {
         this.jdbc = jdbc;
+        this.cache = cacheSeconds <= 0 ? null
+                : Caffeine.newBuilder().expireAfterWrite(Duration.ofSeconds(cacheSeconds)).maximumSize(50).build();
     }
 
     public boolean canView(HubUserDetails user) {
@@ -48,6 +58,13 @@ public class DashboardService {
     }
 
     public Dashboard build(Long owner) {
+        if (cache == null) {
+            return compute(owner);
+        }
+        return cache.get(owner == null ? ALL_OWNERS : owner, key -> compute(owner));
+    }
+
+    private Dashboard compute(Long owner) {
         Timestamp now = Timestamp.valueOf(LocalDateTime.now());
         Timestamp since = Timestamp.valueOf(LocalDateTime.now().minusDays(DAYS));
         java.sql.Date today = java.sql.Date.valueOf(LocalDate.now());

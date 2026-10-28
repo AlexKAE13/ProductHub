@@ -6,6 +6,8 @@ spring:
       hibernate:
         generate_statistics: true
 producthub:
+  dashboard:
+    cache-seconds: 0
   import:
     folder-roots: "${java.io.tmpdir}"
   search:
