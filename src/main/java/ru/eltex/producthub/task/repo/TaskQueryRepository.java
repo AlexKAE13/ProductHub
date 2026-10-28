@@ -24,10 +24,28 @@ public class TaskQueryRepository {
 
     /** Задачи доски одним запросом: исполнитель и SKU подгружаются сразу. Закрытые - только свежие. */
     public List<Task> board(Long assigneeId, TaskType type, String sku, Long line, LocalDateTime doneSince) {
+        return board(null, false, assigneeId, type, sku, line, doneSince);
+    }
+
+    /**
+     * Задачи доски: boardId пустой - системная доска "Входящие запросы". archived - показать архив вместо живых задач.
+     * doneSince пустой - закрытые показываются все (на своих досках их убирает архив, а не срок).
+     */
+    public List<Task> board(Long boardId, boolean archived, Long assigneeId, TaskType type, String sku, Long line,
+                            LocalDateTime doneSince) {
         List<String> where = new ArrayList<>();
         Map<String, Object> params = new HashMap<>();
-        where.add("(t.status <> ru.eltex.producthub.task.domain.TaskStatus.DONE or t.closedAt >= :since)");
-        params.put("since", doneSince);
+        if (boardId == null) {
+            where.add("t.board is null");
+        } else {
+            where.add("t.board.id = :board");
+            params.put("board", boardId);
+        }
+        where.add(archived ? "t.archived = true" : "t.archived = false");
+        if (doneSince != null && !archived) {
+            where.add("(t.status <> ru.eltex.producthub.task.domain.TaskStatus.DONE or t.closedAt >= :since)");
+            params.put("since", doneSince);
+        }
         if (assigneeId != null) {
             where.add("a.id = :assignee");
             params.put("assignee", assigneeId);
@@ -45,7 +63,7 @@ public class TaskQueryRepository {
             params.put("line", line);
         }
         TypedQuery<Task> query = em.createQuery("select t from Task t join fetch t.assignee a left join fetch t.sku s where "
-                + String.join(" and ", where) + " order by t.dueDate asc nulls last, t.id desc", Task.class);
+                + String.join(" and ", where) + " order by " + (archived ? "t.archivedAt desc nulls last, t.id desc" : "t.dueDate asc nulls last, t.id desc"), Task.class);
         params.forEach(query::setParameter);
         query.setMaxResults(1000);
         return query.getResultList();

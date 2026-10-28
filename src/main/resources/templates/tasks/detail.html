@@ -10,16 +10,23 @@
     <p class="error" th:if="${qaError != null}" th:text="#{${qaError}}"></p>
     <div class="page-head">
         <div>
-            <div class="crumbs"><a th:href="@{/tasks}" th:text="#{menu.tasks}">Задачи</a></div>
+            <div class="crumbs"><a th:href="@{${backUrl}}" th:text="${backLabel != null} ? ${backLabel} : #{tasks.tab.inbox}">Входящие запросы</a></div>
             <h1 th:text="${t.title}">Название</h1>
             <p class="muted"><span class="tag" th:text="#{'taskType.' + ${t.type}}">Тип</span>
-                <span class="st st-IN_PROGRESS" th:text="#{'taskStatus.' + ${t.status}}">Новые</span></p>
+                <span class="st st-IN_PROGRESS" th:text="${boardInfo != null and boardInfo.titles.get(t.status) != null} ? ${boardInfo.titles.get(t.status)} : #{'taskStatus.' + ${t.status}}">Новые</span>
+                <span class="tag" th:if="${t.archived}" th:text="#{tasks.archived}">в архиве</span></p>
         </div>
         <div class="actions" th:if="${canMove}">
             <form th:action="@{/tasks/{id}/move(id=${t.id})}" method="post" class="inline">
                 <select name="status" onchange="this.form.submit()" th:aria-label="#{artifacts.col.status}">
-                    <option th:each="s : ${statuses}" th:value="${s}" th:text="#{'taskStatus.' + ${s}}" th:selected="${s == t.status}"></option>
+                    <option th:each="s : ${statuses}" th:value="${s}" th:text="${boardInfo != null and boardInfo.titles.get(s) != null} ? ${boardInfo.titles.get(s)} : #{'taskStatus.' + ${s}}" th:selected="${s == t.status}"></option>
                 </select>
+            </form>
+            <form th:if="${canArchive}" th:action="@{/tasks/{id}/archive-page(id=${t.id})}" method="post" class="inline">
+                <button type="submit" th:text="#{tasks.archive.do}">В архив</button>
+            </form>
+            <form th:if="${canUnarchive}" th:action="@{/tasks/{id}/unarchive-page(id=${t.id})}" method="post" class="inline">
+                <button type="submit" th:text="#{tasks.archive.undo}">Вернуть</button>
             </form>
         </div>
     </div>

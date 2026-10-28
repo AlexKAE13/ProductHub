@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: page(~{::title}, ~{::main})}">
+<head>
+    <title th:text="#{boards.settings}">Настройки доски</title>
+</head>
+<body>
+<main class="content wide">
+    <div class="page-head">
+        <div>
+            <div class="crumbs"><a th:href="@{/boards/{id}(id=${boardInfo.id})}" th:text="${boardInfo.name}">Доска</a></div>
+            <h1 th:text="#{boards.settings}">Настройки доски</h1>
+        </div>
+    </div>
+    <nav th:replace="~{tasks/tabs :: tabs}"></nav>
+    <p class="notice" th:if="${param.saved != null}" th:text="#{boards.saved}">Сохранено</p>
+
+    <form class="block editing" th:action="@{/boards/{id}/settings(id=${boardInfo.id})}" method="post" th:if="${boardInfo.owner}">
+        <div class="block-head"><h2 th:text="#{boards.about}">О доске</h2></div>
+        <div class="field"><label for="name" th:text="#{boards.name}">Название</label>
+            <input type="text" id="name" name="name" maxlength="120" th:value="${boardInfo.name}" required>
+            <span class="error" th:if="${errors != null and errors.containsKey('name')}" th:text="#{${errors['name']}}"></span></div>
+        <div class="field"><label for="description" th:text="#{boards.description}">Описание</label>
+            <textarea id="description" name="description" rows="2" maxlength="500" th:text="${boardInfo.description}"></textarea></div>
+
+        <h3 th:text="#{boards.columns}">Колонки</h3>
+        <div class="col-edit" th:each="s : ${statuses}">
+            <input type="text" th:name="'title.' + ${s}" maxlength="60" th:value="${boardInfo.titles.get(s)}" required
+                   th:aria-label="#{boards.columns.name}">
+            <div class="col-swatches" role="radiogroup" th:aria-label="#{boards.columns.color}">
+                <label th:each="c : ${palette}" class="col-swatch" th:classappend="'tone-' + ${c}" th:title="#{'boardColor.' + ${c}}">
+                    <input type="radio" th:name="'color.' + ${s}" th:value="${c}" th:checked="${c == boardInfo.colors.get(s)}">
+                    <span></span>
+                </label>
+            </div>
+            <span class="error" th:if="${errors != null and errors.containsKey('title.' + s)}" th:text="#{${errors['title.' + s]}}"></span>
+        </div>
+        <div class="form-actions"><button type="submit" class="primary" th:text="#{common.save}">Сохранить</button></div>
+    </form>
+
+    <section class="block">
+        <div class="block-head"><h2 th:text="#{boards.members}">Участники</h2></div>
+        <ul class="member-list">
+            <li th:each="m : ${boardInfo.members}">
+                <span th:text="${m.fullName}">Имя</span>
+                <span class="muted small" th:if="${m.owner}" th:text="#{boards.owner}">владелец</span>
+                <form th:if="${boardInfo.owner and !m.owner}" th:action="@{/boards/{id}/members/{uid}/remove(id=${boardInfo.id}, uid=${m.id})}"
+                      method="post" class="inline">
+                    <button type="submit" class="link-btn" th:text="#{boards.members.remove}">Убрать</button>
+                </form>
+            </li>
+        </ul>
+        <form th:if="${boardInfo.owner and !candidates.isEmpty()}" th:action="@{/boards/{id}/members(id=${boardInfo.id})}" method="post" class="filters">
+            <select name="userId" th:aria-label="#{boards.members.invite}" required>
+                <option value="" hidden th:text="#{boards.members.invite}">Пригласить</option>
+                <option th:each="u : ${candidates}" th:value="${u.id}" th:text="${u.fullName}"></option>
+            </select>
+            <button type="submit" class="primary" th:text="#{boards.members.add}">Добавить</button>
+        </form>
+        <p class="muted small" th:if="${boardInfo.owner}" th:text="#{boards.members.hint}">Участники видят все карточки, создают, двигают и архивируют их. Правит доску только владелец.</p>
+    </section>
+
+    <section class="block" th:if="${boardInfo.owner}">
+        <div class="block-head"><h2 th:text="#{boards.danger}">Удаление</h2></div>
+        <form th:action="@{/boards/{id}/delete(id=${boardInfo.id})}" method="post" th:attr="data-confirm=#{boards.delete.confirm}">
+            <button type="submit" class="danger" th:text="#{boards.delete}">Удалить доску</button>
+        </form>
+    </section>
+</main>
+</body>
+</html>

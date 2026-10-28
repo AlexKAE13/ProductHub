@@ -85,6 +85,17 @@ public class Task {
     @Column(name = "closed_at")
     private LocalDateTime closedAt;
 
+    /** Своя доска; пусто - системная доска "Входящие запросы". */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "board_id")
+    private TaskBoard board;
+
+    @Column(nullable = false)
+    private boolean archived;
+
+    @Column(name = "archived_at")
+    private LocalDateTime archivedAt;
+
     protected Task() {
     }
 
@@ -101,6 +112,32 @@ public class Task {
         this.status = newStatus;
         this.updatedAt = LocalDateTime.now();
         this.closedAt = newStatus == TaskStatus.DONE ? this.updatedAt : null;
+    }
+
+    public void archive() {
+        this.archived = true;
+        this.archivedAt = LocalDateTime.now();
+    }
+
+    public void unarchive() {
+        this.archived = false;
+        this.archivedAt = null;
+    }
+
+    public TaskBoard getBoard() {
+        return board;
+    }
+
+    public void setBoard(TaskBoard board) {
+        this.board = board;
+    }
+
+    public boolean isArchived() {
+        return archived;
+    }
+
+    public LocalDateTime getArchivedAt() {
+        return archivedAt;
     }
 
     public boolean isOverdue(LocalDate today) {

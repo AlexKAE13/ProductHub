@@ -27,6 +27,55 @@
         });
     }
 
+    // В архив: кнопкой на закрытой карточке. Успех - карточка исчезает с доски.
+    function archive(id, card, revert) {
+        fetch('/tasks/' + id + '/archive', {method: 'POST', headers: csrfHeaders()})
+            .then(function (response) {
+                if (response.ok) {
+                    showMessage('');
+                    card.remove();
+                    updateCounts();
+                    return null;
+                }
+                return response.text().then(function (text) {
+                    if (revert) { revert(); }
+                    showMessage(response.status === 409 ? text : 'Не удалось убрать задачу в архив');
+                });
+            })
+            .catch(function () {
+                if (revert) { revert(); }
+                showMessage('Нет связи с сервером');
+            });
+    }
+
+    function unarchive(id, card) {
+        fetch('/tasks/' + id + '/unarchive', {method: 'POST', headers: csrfHeaders()})
+            .then(function (response) {
+                if (response.ok) {
+                    showMessage('');
+                    card.remove();
+                    updateCounts();
+                } else {
+                    showMessage('Не удалось вернуть задачу из архива');
+                }
+            })
+            .catch(function () { showMessage('Нет связи с сервером'); });
+    }
+
+    document.addEventListener('click', function (e) {
+        var a = e.target.closest && e.target.closest('[data-archive-id]');
+        if (a) {
+            e.preventDefault();
+            archive(a.getAttribute('data-archive-id'), a.closest('.task-card'), null);
+            return;
+        }
+        var u = e.target.closest && e.target.closest('[data-unarchive-id]');
+        if (u) {
+            e.preventDefault();
+            unarchive(u.getAttribute('data-unarchive-id'), u.closest('.task-card, .archive-row'));
+        }
+    });
+
     function init() {
         if (typeof Sortable === 'undefined') {
             return;
@@ -64,7 +113,7 @@
                 fallbackOnBody: true,
                 onEnd: function (evt) {
                     document.getElementById('board').classList.remove('is-dragging');
-                    document.querySelectorAll('.kanban .column.drop-over').forEach(function (c) { c.classList.remove('drop-over'); });
+                    document.querySelectorAll('.kanban .drop-over').forEach(function (c) { c.classList.remove('drop-over'); });
                     var from = evt.from.getAttribute('data-status');
                     var to = evt.to.getAttribute('data-status');
                     if (from === to) {

@@ -192,7 +192,7 @@ html[data-bgtype="photo"] #bg .layer { background-image: var(--wall); filter: bl
 a { color: var(--link); }
 
 /* Стеклянная подложка */
-.glass-surface, .sidebar, .topbar, .block, .hero, .filters, .table, .col-side, .column, .case-card, .qa-item, .ask-form, .dropzone, .task-card,
+.glass-surface, .sidebar, .topbar, .block, .hero, .filters, .table, .col-side, .column, .case-card, .qa-card, .ask-form, .dropzone, .task-card, .archive-row, .board-tile,
 .more-list, .hub-search-drop, .fb-panel, .notice, .warn, .choice, .bulk, .tag-picker, .similar {
     --_glass: 1;
 }
@@ -279,7 +279,7 @@ select:focus, input:focus, textarea:focus { outline: none; border-color: var(--a
 .link-btn { color: var(--link); }
 
 /* Блоки и таблицы на стекле */
-.block, .hero, .filters, .col-side, .column, .case-card, .qa-item, .ask-form, .dropzone, .bulk, .notice, .warn, .choice, .similar {
+.block, .hero, .filters, .col-side, .column, .case-card, .qa-card, .ask-form, .dropzone, .bulk, .notice, .warn, .choice, .similar {
     background: var(--surface); -webkit-backdrop-filter: blur(24px) saturate(1.7); backdrop-filter: blur(24px) saturate(1.7);
     border: 1px solid var(--edge); border-radius: 18px; box-shadow: var(--shadow), inset 0 1px 0 var(--hl); }
 .block { padding: 18px 20px; margin-bottom: 14px; }
@@ -608,8 +608,11 @@ dl.kv dt { color: var(--text-2); }
 .tl span { color: var(--text-2); font-size: 12.5px; }
 .lc-kv .tl-dup { display: none; }
 .ask-form, .similar { border-radius: 12px; }
-.qa-item { border-radius: 12px; }
-.faq-item { border-bottom-color: var(--hair); }
+.qa-card { border-radius: 14px; }
+.qa-card.qa-done { background: color-mix(in srgb, var(--surface, #fff) 55%, transparent); }
+.qa-answer { background: color-mix(in srgb, var(--accent) 6%, transparent); border-radius: 0 12px 12px 0; }
+.qa-tabs { border-radius: 12px; }
+.qa-tabs span { border-radius: 9px; }
 
 /* Доска задач */
 .column { padding: 12px; min-height: 460px; border-radius: 18px; background: var(--col); -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px); }
@@ -866,3 +869,16 @@ button.primary.primary:hover, button.fb-toggle.fb-toggle:hover, .btn.primary.pri
 .block-toggle.block-toggle:active { background: rgba(120, 120, 128, 0.3); transform: scale(0.94); box-shadow: none; }
 .block-toggle.block-toggle::after { content: none; }
 .block-toggle svg { width: 18px; height: 18px; }
+
+/* ---------- Доски: цвета колонок, зона архива, плитки (современная тема) ---------- */
+html[data-theme="dark"] .tone-blue { --col-c: #3d82e6; } html[data-theme="dark"] .tone-cyan { --col-c: #2fa8d4; }
+html[data-theme="dark"] .tone-green { --col-c: #2fae55; } html[data-theme="dark"] .tone-amber { --col-c: #d19a00; }
+html[data-theme="dark"] .tone-red { --col-c: #e0584f; } html[data-theme="dark"] .tone-violet { --col-c: #9473dc; }
+html[data-theme="dark"] .tone-grey { --col-c: #8793a1; }
+.board-tile { border-radius: 14px; border-color: var(--hair); }
+.board-tile:hover { border-color: color-mix(in srgb, var(--accent) 60%, transparent); }
+.card-act { border-radius: 8px; border-color: var(--hair-strong); background: transparent; }
+.col-swatch span { box-shadow: inset 0 0 0 2px var(--surface-solid); }
+.member-list li { border-bottom-color: var(--hair); }
+.archive-row { border-radius: 14px; border-color: var(--hair); }
+.archive-row:hover { border-color: color-mix(in srgb, var(--accent) 55%, transparent); }

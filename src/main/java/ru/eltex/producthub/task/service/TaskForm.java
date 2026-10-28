@@ -10,6 +10,7 @@ public class TaskForm {
     private String dueDate;
     private String priority = "NORMAL";
     private String sku;
+    private Long boardId;
 
     public String getTitle() {
         return title;
@@ -65,5 +66,13 @@ public class TaskForm {
 
     public void setSku(String sku) {
         this.sku = sku;
+    }
+
+    public Long getBoardId() {
+        return boardId;
+    }
+
+    public void setBoardId(Long boardId) {
+        this.boardId = boardId;
     }
 }

@@ -113,7 +113,7 @@ class TaskTest {
     }
 
     private List<Task> all() {
-        return tasks.board(new TaskFilter("all", null, null, null), product).columns().values().stream()
+        return tasks.board(new TaskFilter("all", null, null, null), admin).columns().values().stream()
                 .flatMap(List::stream).collect(Collectors.toList());
     }
 
@@ -185,7 +185,7 @@ class TaskTest {
         assertEquals("/sku/WEP-550K", t.getRelatedUrl());
 
         questions.answer(q.getId(), "Один порт", true, product);
-        Task after = tasks.detail(t.getId(), product);
+        Task after = tasks.detail(t.getId(), admin);
         assertEquals(TaskStatus.DONE, after.getStatus(), "ответ закрывает задачу");
         assertNotNull(after.getClosedAt());
     }
@@ -197,24 +197,24 @@ class TaskTest {
                 .findFirst().orElseThrow();
         assertEquals(TaskType.REVIEW_EDIT, t.getType());
         questions.resolveEdit(q.getId(), false, "нет", product);
-        assertEquals(TaskStatus.DONE, tasks.detail(t.getId(), product).getStatus());
+        assertEquals(TaskStatus.DONE, tasks.detail(t.getId(), admin).getStatus());
     }
 
     @Test
     void questionTaskCannotBeClosedWithoutAnswer() {
         var q = questions.ask(QuestionKind.QUESTION, TargetType.SKU, sku("WEP-550K").getId(), "Без ответа " + marker(), false, sales);
         Task t = all().stream().filter(x -> x.getRelatedType() == RelatedType.QUESTION && x.getRelatedId().equals(q.getId())).findFirst().orElseThrow();
-        var e = assertThrows(TaskRuleException.class, () -> tasks.move(t.getId(), TaskStatus.DONE, product));
+        var e = assertThrows(TaskRuleException.class, () -> tasks.move(t.getId(), TaskStatus.DONE, admin));
         assertEquals("tasks.rule.answerFirst", e.getMessageKey());
         // в работу и на проверку можно, вопрос при этом переходит в работу
-        tasks.move(t.getId(), TaskStatus.IN_PROGRESS, product);
+        tasks.move(t.getId(), TaskStatus.IN_PROGRESS, admin);
         assertEquals(ru.eltex.producthub.qa.domain.QuestionStatus.IN_PROGRESS, questions.get(q.getId()).getStatus());
-        tasks.move(t.getId(), TaskStatus.REVIEW, product);
+        tasks.move(t.getId(), TaskStatus.REVIEW, admin);
 
         var edit = questions.ask(QuestionKind.EDIT_PROPOSAL, TargetType.SKU, sku("WEP-550K").getId(), "Без решения " + marker(), false, sales);
         Task te = all().stream().filter(x -> x.getRelatedType() == RelatedType.QUESTION && x.getRelatedId().equals(edit.getId())).findFirst().orElseThrow();
         assertEquals("tasks.rule.resolveFirst", assertThrows(TaskRuleException.class,
-                () -> tasks.move(te.getId(), TaskStatus.DONE, product)).getMessageKey());
+                () -> tasks.move(te.getId(), TaskStatus.DONE, admin)).getMessageKey());
     }
 
     @Test
@@ -340,7 +340,7 @@ class TaskTest {
         assertEquals("kuznetsov", open.get(0).getAssignee().getLogin(), "владелец артефакта");
 
         datasheet(title + " EN", Language.EN, s);
-        assertEquals(TaskStatus.DONE, tasks.detail(open.get(0).getId(), product).getStatus(), "пара появилась - задача закрыта");
+        assertEquals(TaskStatus.DONE, tasks.detail(open.get(0).getId(), admin).getStatus(), "пара появилась - задача закрыта");
         assertTrue(withTitle(title + " EN").isEmpty(), "у EN теперь есть пара, задачи нет");
         assertNotNull(ru.getId());
     }
@@ -406,7 +406,7 @@ class TaskTest {
         Task t = tasks.createManual(f, product);
         assertTrue(tasks.board(new TaskFilter("me", null, null, null), product).columns().values().stream()
                 .flatMap(List::stream).noneMatch(x -> x.getId().equals(t.getId())));
-        assertTrue(tasks.board(new TaskFilter("all", null, null, null), product).columns().values().stream()
+        assertTrue(tasks.board(new TaskFilter("all", null, null, null), admin).columns().values().stream()
                 .flatMap(List::stream).anyMatch(x -> x.getId().equals(t.getId())));
         assertTrue(tasks.board(new TaskFilter(String.valueOf(t.getAssignee().getId()), null, null, null), head).columns().values()
                 .stream().flatMap(List::stream).anyMatch(x -> x.getId().equals(t.getId())));
@@ -424,7 +424,7 @@ class TaskTest {
         assertTrue(tasks.board(new TaskFilter("all", "TRANSLATE", s.getModel(), null), product).columns().get(TaskStatus.NEW).isEmpty());
         assertTrue(tasks.board(new TaskFilter("all", null, null, s.getLine().getId()), product).columns().get(TaskStatus.NEW).stream()
                 .anyMatch(x -> x.getId().equals(t.getId())));
-        assertTrue(tasks.board(new TaskFilter("all", null, "НЕТ-ТАКОГО-SKU", null), product).columns().get(TaskStatus.NEW).isEmpty());
+        assertTrue(tasks.board(new TaskFilter("all", null, "НЕТ-ТАКОГО-SKU", null), admin).columns().get(TaskStatus.NEW).isEmpty());
     }
 
     @Test
@@ -466,7 +466,7 @@ class TaskTest {
         Long smith = users.loadUserByUsername("smith").getId();
         assertThrows(AccessDeniedException.class, () -> tasks.reassign(t.getId(), smith, serviceCenter));
         tasks.reassign(t.getId(), smith, admin);
-        assertEquals("smith", tasks.detail(t.getId(), product).getAssignee().getLogin());
+        assertEquals("smith", tasks.detail(t.getId(), admin).getAssignee().getLogin());
     }
 
     @Test
@@ -493,7 +493,7 @@ class TaskTest {
         var first = tasks.createIfAbsent(spec);
         assertTrue(first.isPresent());
         assertFalse(tasks.createIfAbsent(spec).isPresent(), "пока первая открыта, вторая не создается");
-        tasks.move(first.get().getId(), TaskStatus.DONE, product);
+        tasks.move(first.get().getId(), TaskStatus.DONE, admin);
         assertTrue(tasks.createIfAbsent(spec).isPresent(), "после закрытия можно создать снова");
     }
 

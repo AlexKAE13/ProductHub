@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<body>
+<!-- Вкладки раздела "Задачи". Модель: tab (inbox, archive, board, board-archive, boards), tabBoards, tabBoardId, canInbox -->
+<nav class="tabs task-tabs" th:fragment="tabs">
+    <a th:if="${canInbox}" th:classappend="${tab == 'inbox' or tab == 'archive'} ? 'active'" th:href="@{/tasks}" th:text="#{tasks.tab.inbox}">Входящие запросы</a>
+    <a th:each="b : ${tabBoards}" class="board-tab"
+       th:classappend="${tabBoardId != null and tabBoardId == b.id and #strings.startsWith(tab, 'board')} ? 'active'"
+       th:href="@{/boards/{id}(id=${b.id})}" th:text="${b.name}">Моя доска</a>
+    <a th:classappend="${tab == 'boards'} ? 'active'" th:href="@{/boards}" th:text="#{boards.tab.all}">+ Доска</a>
+    <a th:href="@{/questions/my}" th:text="#{qa.my.title}">Мои вопросы</a>
+</nav>
+</body>
+</html>

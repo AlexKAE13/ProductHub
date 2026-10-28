@@ -55,6 +55,8 @@ class TaskWebTest {
     SeedImportService importer;
 
     HubUserDetails product;
+
+    HubUserDetails admin;
     HubUserDetails sales;
     Long skuId;
 
@@ -63,6 +65,7 @@ class TaskWebTest {
         importer.execute("test");
         product = users.loadUserByUsername("product");
         sales = users.loadUserByUsername("sales");
+        admin = users.loadUserByUsername("admin");
         skuId = skuService.findIdByModel("WEP-550K");
     }
 
@@ -71,7 +74,7 @@ class TaskWebTest {
     }
 
     private Task taskFor(Long questionId) {
-        List<Task> all = tasks.board(new TaskFilter("all", null, null, null), product).columns().values().stream()
+        List<Task> all = tasks.board(new TaskFilter("all", null, null, null), admin).columns().values().stream()
                 .flatMap(List::stream).collect(Collectors.toList());
         return all.stream().filter(t -> t.getRelatedType() == RelatedType.QUESTION && t.getRelatedId().equals(questionId))
                 .findFirst().orElseThrow();
@@ -82,13 +85,13 @@ class TaskWebTest {
     @Test
     @WithUserDetails("sales")
     void salesIsSentToMyQuestionsInsteadOfBoard() throws Exception {
-        mvc.perform(get("/tasks")).andExpect(status().is3xxRedirection()).andExpect(redirectedUrl("/questions/my"));
+        mvc.perform(get("/tasks")).andExpect(status().is3xxRedirection()).andExpect(redirectedUrl("/boards"));
         mvc.perform(get("/questions/my")).andExpect(status().isOk());
         mvc.perform(get("/tasks/new")).andExpect(status().isForbidden());
     }
 
     @Test
-    @WithUserDetails("product")
+    @WithUserDetails("admin")
     void productSeesFourColumnsAndCards() throws Exception {
         var q = questions.ask(QuestionKind.QUESTION, TargetType.SKU, skuId, "Для доски " + marker(), false, sales);
         Task t = taskFor(q.getId());
@@ -116,21 +119,21 @@ class TaskWebTest {
     }
 
     @Test
-    @WithUserDetails("product")
+    @WithUserDetails("admin")
     void dragRequestChangesStatusAndRuleReturnsConflictWithMessage() throws Exception {
         var q = questions.ask(QuestionKind.QUESTION, TargetType.SKU, skuId, "Перетащить " + marker(), false, sales);
         Task t = taskFor(q.getId());
         mvc.perform(post("/tasks/" + t.getId() + "/status").with(csrf()).param("status", "IN_PROGRESS")).andExpect(status().isNoContent());
-        assertEquals("IN_PROGRESS", tasks.detail(t.getId(), product).getStatus().name());
+        assertEquals("IN_PROGRESS", tasks.detail(t.getId(), admin).getStatus().name());
         mvc.perform(post("/tasks/" + t.getId() + "/status").with(csrf()).param("status", "DONE"))
                 .andExpect(status().isConflict())
                 .andExpect(content().string(containsString("Сначала ответьте на вопрос")));
-        assertEquals("IN_PROGRESS", tasks.detail(t.getId(), product).getStatus().name());
+        assertEquals("IN_PROGRESS", tasks.detail(t.getId(), admin).getStatus().name());
         mvc.perform(post("/tasks/" + t.getId() + "/status").param("status", "REVIEW")).andExpect(status().isForbidden());
     }
 
     @Test
-    @WithUserDetails("product")
+    @WithUserDetails("admin")
     void taskPageShowsQuestionAndAnswerFormThatClosesTask() throws Exception {
         var q = questions.ask(QuestionKind.QUESTION, TargetType.SKU, skuId, "Ответить из задачи " + marker(), false, sales);
         Task t = taskFor(q.getId());
@@ -278,7 +281,7 @@ class TaskWebTest {
         assertEquals("kuznetsov", task.getAssignee().getLogin());
         // 3. ответ закрывает задачу и попадает в FAQ
         questions.answer(asked.getId(), "Да, начиная с 2.0", true, product);
-        assertEquals("DONE", tasks.detail(task.getId(), product).getStatus().name());
+        assertEquals("DONE", tasks.detail(task.getId(), admin).getStatus().name());
         mvc.perform(get("/sku/WEP-550K")).andExpect(content().string(containsString("Да, начиная с 2.0")));
         // 4. при похожем вопросе подсказывается готовый ответ
         mvc.perform(get("/questions/similar").param("targetType", "SKU").param("targetId", String.valueOf(skuId))

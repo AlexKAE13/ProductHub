@@ -8,11 +8,14 @@
 <main class="content wide">
     <h1 th:text="#{tasks.create}">Новая задача</h1>
     <form class="block editing" th:action="@{/tasks}" method="post">
+        <input type="hidden" name="boardId" th:if="${boardInfo != null}" th:value="${boardInfo.id}">
+        <input type="hidden" name="type" th:if="${boardInfo != null}" value="MANUAL">
+        <p class="muted" th:if="${boardInfo != null}" th:text="#{boards.card.on(${boardInfo.name})}">Доска</p>
         <div class="field"><label for="title" th:text="#{tasks.title}">Название</label>
             <input type="text" id="title" name="title" th:value="${form.title}" required>
             <span class="error" th:if="${errors != null and errors.containsKey('title')}" th:text="#{${errors['title']}}"></span></div>
         <div class="field-row">
-            <div class="field"><label for="type" th:text="#{tasks.filter.type}">Тип</label>
+            <div class="field" th:if="${boardInfo == null}"><label for="type" th:text="#{tasks.filter.type}">Тип</label>
                 <select id="type" name="type">
                     <option th:each="t : ${types}" th:value="${t}" th:text="#{'taskType.' + ${t}}" th:selected="${t.name() == form.type}"></option></select></div>
             <div class="field"><label for="assigneeId" th:text="#{tasks.assignee}">Исполнитель</label>
@@ -26,14 +29,14 @@
                 <select id="priority" name="priority">
                     <option th:each="p : ${priorities}" th:value="${p}" th:text="#{'taskPriority.' + ${p}}" th:selected="${p.name() == form.priority}"></option></select></div>
         </div>
-        <div class="field"><label for="sku" th:text="#{tasks.skuOptional}">SKU (необязательно)</label>
+        <div class="field" th:if="${boardInfo == null}"><label for="sku" th:text="#{tasks.skuOptional}">SKU (необязательно)</label>
             <input type="text" id="sku" name="sku" data-suggest="sku" data-single autocomplete="off" th:value="${form.sku}" style="max-width:260px">
             <span class="error" th:if="${errors != null and errors.containsKey('sku')}" th:text="#{${errors['sku']}}"></span></div>
         <div class="field"><label for="description" th:text="#{tasks.description}">Описание</label>
             <textarea id="description" name="description" rows="4" th:text="${form.description}"></textarea></div>
         <div class="form-actions">
             <button type="submit" class="primary" th:text="#{common.create}">Создать</button>
-            <a class="btn" th:href="@{/tasks}" th:text="#{common.cancel}">Отмена</a>
+            <a class="btn" th:href="${boardInfo != null} ? @{/boards/{id}(id=${boardInfo.id})} : @{/tasks}" th:text="#{common.cancel}">Отмена</a>
         </div>
     </form>
 </main>

@@ -28,9 +28,11 @@ import ru.eltex.producthub.sku.repo.SkuRepository;
 import ru.eltex.producthub.sku.service.ModelNormalizer;
 import ru.eltex.producthub.task.domain.RelatedType;
 import ru.eltex.producthub.task.domain.Task;
+import ru.eltex.producthub.task.domain.TaskBoard;
 import ru.eltex.producthub.task.domain.TaskPriority;
 import ru.eltex.producthub.task.domain.TaskStatus;
 import ru.eltex.producthub.task.domain.TaskType;
+import ru.eltex.producthub.task.repo.TaskBoardRepository;
 import ru.eltex.producthub.task.repo.TaskQueryRepository;
 import ru.eltex.producthub.task.repo.TaskRepository;
 
@@ -49,9 +51,12 @@ public class TaskService {
     private final SkuRepository skus;
     private final QuestionService questions;
     private final TaskProperties props;
+    private final TaskBoardRepository boards;
 
     public TaskService(TaskRepository repository, TaskQueryRepository queries, UserRepository users,
-                       SkuRepository skus, QuestionService questions, TaskProperties props) {
+                       SkuRepository skus, QuestionService questions, TaskProperties props,
+                       TaskBoardRepository boards) {
+        this.boards = boards;
         this.repository = repository;
         this.queries = queries;
         this.users = users;
@@ -71,25 +76,46 @@ public class TaskService {
         return false;
     }
 
+    /** Администратор двигает и переназначает любые входящие задачи. */
     public boolean canManageAll(HubUserDetails user) {
-        return has(user, Role.PRODUCT, Role.ADMIN);
+        return has(user, Role.ADMIN);
     }
 
+    /** Входящие запросы видны целиком только руководителю и администратору, остальные видят свои. */
     public boolean canSeeAll(HubUserDetails user) {
-        return has(user, Role.PRODUCT, Role.ADMIN, Role.HEAD);
+        return has(user, Role.HEAD, Role.ADMIN);
     }
 
+    /** Системная доска "Входящие запросы" (SALES и RND ее не видят: у них "Мои вопросы"). */
     public boolean canUseBoard(HubUserDetails user) {
-        return canSeeAll(user) || has(user, Role.SERVICE_CENTER);
+        return has(user, Role.PRODUCT, Role.ADMIN, Role.HEAD, Role.SERVICE_CENTER);
+    }
+
+    /** Свои доски доступны всем внутренним ролям. */
+    public boolean canUseOwnBoards(HubUserDetails user) {
+        return has(user, Role.PRODUCT, Role.ADMIN, Role.HEAD, Role.SERVICE_CENTER, Role.SALES, Role.RND);
+    }
+
+    public boolean isBoardMember(Long boardId, Long userId) {
+        return boards.isMember(boardId, userId);
     }
 
     public boolean canMove(HubUserDetails user, Task task) {
-        return canManageAll(user)
-                || (has(user, Role.SERVICE_CENTER) && task.getAssignee().getId().equals(user.getId()));
+        if (task.getBoard() != null) {
+            return isBoardMember(task.getBoard().getId(), user.getId());
+        }
+        return canManageAll(user) || (canUseBoard(user) && !has(user, Role.HEAD)
+                && task.getAssignee().getId().equals(user.getId()));
     }
 
+    /** Создавать входящие задачи вручную. */
     public boolean canCreate(HubUserDetails user) {
         return has(user, Role.PRODUCT, Role.ADMIN, Role.SERVICE_CENTER);
+    }
+
+    /** Назначать входящую задачу любому исполнителю. */
+    public boolean canAssignAny(HubUserDetails user) {
+        return has(user, Role.PRODUCT, Role.ADMIN);
     }
 
     // ------------------------------------------------------------------ создание (триггеры)
@@ -130,10 +156,19 @@ public class TaskService {
         return repository.countOpenWithoutSku(spec.type(), spec.relatedType(), spec.relatedId()) > 0;
     }
 
-    /** Ручная задача: PRODUCT и ADMIN любому исполнителю, сервисный центр только себе. */
+    /**
+     * Ручная задача. На своей доске (boardId) создают участники доски, исполнитель выбирается среди участников.
+     * Входящие: PRODUCT и ADMIN любому исполнителю, сервисный центр только себе.
+     */
     @Transactional
     public Task createManual(TaskForm form, HubUserDetails user) {
-        if (!canCreate(user)) {
+        TaskBoard board = null;
+        if (form.getBoardId() != null) {
+            board = boards.findActiveWithMembers(form.getBoardId()).orElseThrow(() -> new TaskNotFoundException(form.getBoardId()));
+            if (!board.hasMember(user.getId())) {
+                throw new AccessDeniedException("Вы не участник этой доски");
+            }
+        } else if (!canCreate(user)) {
             throw new AccessDeniedException("Нет прав на создание задач");
         }
         Map<String, String> errors = new LinkedHashMap<>();
@@ -153,9 +188,9 @@ public class TaskService {
         } catch (IllegalArgumentException | NullPointerException ignored) {
             // по умолчанию обычный
         }
-        Long assigneeId = canManageAll(user) ? form.getAssigneeId() : user.getId();
+        Long assigneeId = board != null || canAssignAny(user) ? form.getAssigneeId() : user.getId();
         User assignee = assigneeId == null ? null : users.findById(assigneeId).filter(User::isActive).orElse(null);
-        if (assignee == null) {
+        if (assignee == null || (board != null && !board.hasMember(assignee.getId()))) {
             errors.put("assigneeId", "validation.required");
         }
         LocalDate due = null;
@@ -181,6 +216,7 @@ public class TaskService {
         t.setPriority(priority);
         t.setDueDate(due);
         t.setSourceEvent("MANUAL");
+        t.setBoard(board);
         if (sku != null) {
             t.setSku(sku);
             t.setRelated(RelatedType.SKU, sku.getId(), sku.getModel(), "/sku/" + sku.getModel());
@@ -192,6 +228,12 @@ public class TaskService {
 
     @Transactional(readOnly = true)
     public Board board(TaskFilter filter, HubUserDetails user) {
+        return board(filter, user, false);
+    }
+
+    /** Входящие запросы (или их архив). */
+    @Transactional(readOnly = true)
+    public Board board(TaskFilter filter, HubUserDetails user, boolean archived) {
         if (!canUseBoard(user)) {
             throw new AccessDeniedException("Доска задач недоступна");
         }
@@ -215,7 +257,7 @@ public class TaskService {
         } catch (IllegalArgumentException ignored) {
             // неизвестный тип игнорируем
         }
-        List<Task> tasks = queries.board(assigneeId, type, filter.sku(), filter.line(),
+        List<Task> tasks = queries.board(null, archived, assigneeId, type, filter.sku(), filter.line(),
                 LocalDateTime.now().minusDays(props.doneVisibleDays()));
         Map<TaskStatus, List<Task>> columns = new EnumMap<>(TaskStatus.class);
         for (TaskStatus s : TaskStatus.values()) {
@@ -224,13 +266,17 @@ public class TaskService {
         for (Task t : tasks) {
             columns.get(t.getStatus()).add(t);
         }
-        return new Board(columns, canManageAll(user), canSeeAll(user));
+        return new Board(columns, canManageAll(user), canSeeAll(user), null, null, Map.of(), Map.of(), !archived);
     }
 
     @Transactional(readOnly = true)
     public Task detail(Long id, HubUserDetails user) {
         Task t = repository.findDetailed(id).orElseThrow(() -> new TaskNotFoundException(id));
-        if (!canSeeAll(user) && !t.getAssignee().getId().equals(user.getId())) {
+        if (t.getBoard() != null) {
+            if (!isBoardMember(t.getBoard().getId(), user.getId())) {
+                throw new AccessDeniedException("Задача с чужой доски");
+            }
+        } else if (!canSeeAll(user) && !t.getAssignee().getId().equals(user.getId())) {
             throw new AccessDeniedException("Чужая задача");
         }
         return t;
@@ -259,12 +305,39 @@ public class TaskService {
         return t;
     }
 
+    /** В архив уходят только закрытые задачи: сначала закройте, потом архивируйте. */
+    @Transactional
+    public void archive(Long id, HubUserDetails user) {
+        Task t = repository.findDetailed(id).orElseThrow(() -> new TaskNotFoundException(id));
+        if (!canMove(user, t)) {
+            throw new AccessDeniedException("Нет прав менять эту задачу");
+        }
+        if (t.getStatus() != TaskStatus.DONE) {
+            throw new TaskRuleException("tasks.rule.archiveDone");
+        }
+        t.archive();
+    }
+
+    @Transactional
+    public void unarchive(Long id, HubUserDetails user) {
+        Task t = repository.findDetailed(id).orElseThrow(() -> new TaskNotFoundException(id));
+        if (!canMove(user, t)) {
+            throw new AccessDeniedException("Нет прав менять эту задачу");
+        }
+        t.unarchive();
+    }
+
     @Transactional
     public void reassign(Long id, Long assigneeId, HubUserDetails user) {
-        if (!canManageAll(user)) {
-            throw new AccessDeniedException("Переназначать задачи могут PRODUCT и ADMIN");
-        }
         Task t = repository.findDetailed(id).orElseThrow(() -> new TaskNotFoundException(id));
+        if (t.getBoard() != null) {
+            TaskBoard board = boards.findActiveWithMembers(t.getBoard().getId()).orElseThrow(() -> new TaskNotFoundException(id));
+            if (!board.hasMember(user.getId()) || !board.hasMember(assigneeId)) {
+                throw new AccessDeniedException("Исполнителем может быть только участник доски");
+            }
+        } else if (!canAssignAny(user) || !(canManageAll(user) || t.getAssignee().getId().equals(user.getId()))) {
+            throw new AccessDeniedException("Переназначать входящие задачи могут PRODUCT (свои) и ADMIN");
+        }
         User assignee = users.findById(assigneeId).filter(User::isActive).orElseThrow();
         t.setAssignee(assignee);
     }
@@ -290,7 +363,7 @@ public class TaskService {
 
     @Transactional(readOnly = true)
     public long newCount(Long userId) {
-        return repository.countByAssigneeIdAndStatus(userId, TaskStatus.NEW);
+        return repository.countNewInbox(userId, TaskStatus.NEW);
     }
 
     /** Пользователи, которых можно назначить исполнителем. */

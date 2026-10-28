@@ -28,6 +28,8 @@ import ru.eltex.producthub.task.domain.TaskPriority;
 import ru.eltex.producthub.task.domain.TaskStatus;
 import ru.eltex.producthub.task.domain.TaskType;
 import ru.eltex.producthub.task.service.Board;
+import ru.eltex.producthub.task.service.BoardInfo;
+import ru.eltex.producthub.task.service.BoardService;
 import ru.eltex.producthub.task.service.TaskFilter;
 import ru.eltex.producthub.task.service.TaskForm;
 import ru.eltex.producthub.task.service.TaskRuleException;
@@ -40,9 +42,11 @@ public class TaskController {
     private final QuestionService questions;
     private final ReferenceDataService reference;
     private final MessageSource messages;
+    private final BoardService boards;
 
     public TaskController(TaskService service, QuestionService questions, ReferenceDataService reference,
-                          MessageSource messages) {
+                          MessageSource messages, BoardService boards) {
+        this.boards = boards;
         this.service = service;
         this.questions = questions;
         this.reference = reference;
@@ -54,12 +58,26 @@ public class TaskController {
                         @RequestParam(required = false) String sku, @RequestParam(required = false) Long line,
                         @RequestHeader(value = "HX-Request", required = false) String htmx,
                         @AuthenticationPrincipal HubUserDetails user, Model model) {
-        // SALES и RND доски не видят: у них "Мои вопросы"
+        return inbox(assignee, type, sku, line, htmx, user, model, false);
+    }
+
+    /** Архив входящих запросов: закрытые задачи, убранные с доски. */
+    @GetMapping("/tasks/archive")
+    public String archive(@RequestParam(required = false) String assignee, @RequestParam(required = false) String type,
+                          @RequestParam(required = false) String sku, @RequestParam(required = false) Long line,
+                          @RequestHeader(value = "HX-Request", required = false) String htmx,
+                          @AuthenticationPrincipal HubUserDetails user, Model model) {
+        return inbox(assignee, type, sku, line, htmx, user, model, true);
+    }
+
+    private String inbox(String assignee, String type, String sku, Long line, String htmx, HubUserDetails user,
+                         Model model, boolean archived) {
+        // SALES и RND входящих не видят: у них "Мои вопросы" и свои доски
         if (!service.canUseBoard(user)) {
-            return "redirect:/questions/my";
+            return "redirect:/boards";
         }
         TaskFilter filter = new TaskFilter(assignee, type, sku, line);
-        Board board = service.board(filter, user);
+        Board board = service.board(filter, user, archived);
         model.addAttribute("board", board);
         model.addAttribute("filter", filter);
         model.addAttribute("statuses", TaskStatus.values());
@@ -68,6 +86,11 @@ public class TaskController {
         model.addAttribute("activeMenu", "tasks");
         model.addAttribute("canBoard", true);
         model.addAttribute("canCreate", service.canCreate(user));
+        model.addAttribute("base", archived ? "/tasks/archive" : "/tasks");
+        model.addAttribute("inbox", true);
+        model.addAttribute("archiveView", archived);
+        model.addAttribute("tab", archived ? "archive" : "inbox");
+        tabs(model, user);
         if (htmx != null) {
             return "tasks/board :: board";
         }
@@ -75,6 +98,12 @@ public class TaskController {
         model.addAttribute("lines", reference.lines());
         model.addAttribute("assignees", service.assignableUsers());
         return "tasks/board";
+    }
+
+    /** Вкладки над доской: входящие, архив, свои доски, мои вопросы. */
+    private void tabs(Model model, HubUserDetails user) {
+        model.addAttribute("tabBoards", boards.mine(user));
+        model.addAttribute("canInbox", service.canUseBoard(user));
     }
 
     private Set<Long> movable(Board board, HubUserDetails user) {
@@ -89,9 +118,23 @@ public class TaskController {
         Task t = service.detail(id, user);
         model.addAttribute("t", t);
         model.addAttribute("statuses", TaskStatus.values());
-        model.addAttribute("canMove", service.canMove(user, t));
-        model.addAttribute("canAssign", service.canManageAll(user));
-        model.addAttribute("assignees", service.assignableUsers());
+        boolean canMove = service.canMove(user, t);
+        model.addAttribute("canMove", canMove);
+        model.addAttribute("canArchive", canMove && t.getStatus() == TaskStatus.DONE && !t.isArchived());
+        model.addAttribute("canUnarchive", canMove && t.isArchived());
+        if (t.getBoard() != null) {
+            BoardInfo info = boards.info(t.getBoard().getId(), user);
+            model.addAttribute("boardInfo", info);
+            model.addAttribute("canAssign", true);
+            model.addAttribute("assignees", info.members());
+            model.addAttribute("backUrl", "/boards/" + info.id());
+            model.addAttribute("backLabel", info.name());
+        } else {
+            model.addAttribute("canAssign", service.canAssignAny(user)
+                    && (service.canManageAll(user) || t.getAssignee().getId().equals(user.getId())));
+            model.addAttribute("assignees", service.assignableUsers());
+            model.addAttribute("backUrl", "/tasks");
+        }
         model.addAttribute("today", java.time.LocalDate.now());
         model.addAttribute("activeMenu", "tasks");
         model.addAttribute("canBoard", service.canUseBoard(user));
@@ -128,6 +171,41 @@ public class TaskController {
         return "redirect:/tasks/" + id;
     }
 
+    /** В архив перетаскиванием или кнопкой на карточке. 204 - готово, 409 - правило, текст в теле. */
+    @PostMapping("/tasks/{id}/archive")
+    public ResponseEntity<String> archiveTask(@PathVariable Long id, @AuthenticationPrincipal HubUserDetails user) {
+        try {
+            service.archive(id, user);
+            return ResponseEntity.noContent().build();
+        } catch (TaskRuleException e) {
+            return ResponseEntity.status(409).body(messages.getMessage(e.getMessageKey(), null, Locale.forLanguageTag("ru")));
+        }
+    }
+
+    @PostMapping("/tasks/{id}/unarchive")
+    public ResponseEntity<Void> unarchiveTask(@PathVariable Long id, @AuthenticationPrincipal HubUserDetails user) {
+        service.unarchive(id, user);
+        return ResponseEntity.noContent().build();
+    }
+
+    /** То же со страницы задачи (обычная форма). */
+    @PostMapping("/tasks/{id}/archive-page")
+    public String archivePage(@PathVariable Long id, @AuthenticationPrincipal HubUserDetails user,
+                              RedirectAttributes redirect) {
+        try {
+            service.archive(id, user);
+        } catch (TaskRuleException e) {
+            redirect.addFlashAttribute("ruleError", e.getMessageKey());
+        }
+        return "redirect:/tasks/" + id;
+    }
+
+    @PostMapping("/tasks/{id}/unarchive-page")
+    public String unarchivePage(@PathVariable Long id, @AuthenticationPrincipal HubUserDetails user) {
+        service.unarchive(id, user);
+        return "redirect:/tasks/" + id;
+    }
+
     @PostMapping("/tasks/{id}/assign")
     public String assign(@PathVariable Long id, @RequestParam Long assigneeId,
                          @AuthenticationPrincipal HubUserDetails user) {
@@ -152,19 +230,30 @@ public class TaskController {
     public String create(@ModelAttribute("form") TaskForm form, @AuthenticationPrincipal HubUserDetails user,
                          Model model) {
         try {
-            return "redirect:/tasks/" + service.createManual(form, user).getId();
+            Long id = service.createManual(form, user).getId();
+            return form.getBoardId() != null ? "redirect:/boards/" + form.getBoardId() : "redirect:/tasks/" + id;
         } catch (FormValidationException e) {
             model.addAttribute("errors", e.getErrors());
             fillForm(model, user);
+            if (form.getBoardId() != null) {
+                boardForm(model, boards.info(form.getBoardId(), user));
+            }
             return "tasks/form";
         }
+    }
+
+    /** Форма карточки на своей доске: исполнитель выбирается среди участников. */
+    static void boardForm(Model model, BoardInfo info) {
+        model.addAttribute("boardInfo", info);
+        model.addAttribute("assignees", info.members());
+        model.addAttribute("canPickAssignee", true);
     }
 
     private void fillForm(Model model, HubUserDetails user) {
         model.addAttribute("types", TaskType.values());
         model.addAttribute("priorities", TaskPriority.values());
         model.addAttribute("assignees", service.assignableUsers());
-        model.addAttribute("canPickAssignee", service.canManageAll(user));
+        model.addAttribute("canPickAssignee", service.canAssignAny(user));
         model.addAttribute("activeMenu", "tasks");
         model.addAttribute("canBoard", service.canUseBoard(user));
     }

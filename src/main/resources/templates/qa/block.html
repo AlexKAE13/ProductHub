@@ -37,49 +37,73 @@
 </div>
 
 <!-- Блок 12: FAQ, открытые вопросы и форма. Параметры модели: qa (QaView), qaMessage, qaError, qaText -->
-<section class="block" id="block-qa" th:fragment="block" th:if="${qa.canAsk()}">
-    <div class="block-head"><h2 th:text="#{qa.title}">Вопросы и правки</h2></div>
+<section class="block qa-block" id="block-qa" th:fragment="block" th:if="${qa.canAsk()}" data-qa>
+    <div class="block-head">
+        <h2 th:text="#{qa.title}">Вопросы и правки</h2>
+        <span class="qa-count" th:if="${!qa.faq().isEmpty() or !qa.open().isEmpty()}"
+              th:text="#{qa.count(${qa.faq().size()}, ${qa.open().size()})}">Ответов: 3, ждут ответа: 1</span>
+    </div>
     <p class="notice" th:if="${qaMessage != null}" th:text="#{${qaMessage}}">Отправлено</p>
     <p class="error" th:if="${qaError != null and qaMessage == null}" th:text="#{${qaError}}"></p>
 
-    <div th:if="${!qa.faq().isEmpty()}">
-        <h3 th:text="#{qa.faq}">FAQ</h3>
-        <details class="faq-item" th:each="f : ${qa.faq()}">
-            <summary th:text="${f.text}">Вопрос</summary>
-            <p class="pre" th:text="${f.answer}">Ответ</p>
-            <p class="muted small" th:text="#{qa.answeredBy(${f.answeredBy != null} ? ${f.answeredBy.fullName} : '-', ${#temporals.format(f.answeredAt, 'dd.MM.yyyy')})}">Ответил</p>
-        </details>
+    <div th:if="${!qa.open().isEmpty()}" class="qa-section">
+        <h3 th:text="#{qa.open(${qa.open().size()})}">Ждут ответа</h3>
+        <article class="qa-card qa-wait" th:each="o : ${qa.open()}">
+            <header class="qa-head">
+                <span class="qa-ava" th:text="${#strings.substring(o.author.fullName, 0, 1)}">А</span>
+                <span class="qa-author" th:text="${o.author.fullName}">Автор</span>
+                <span class="qa-date" th:text="${#temporals.format(o.createdAt, 'dd.MM.yyyy HH:mm')}">дата</span>
+                <span class="qa-badges">
+                    <span class="tag" th:text="#{'qaKind.' + ${o.kind}}">вопрос</span>
+                    <span class="tag" th:if="${o.technical}" th:text="#{qa.technical}">технический</span>
+                    <span class="st st-DRAFT" th:text="#{qa.status.waiting}">Ждет ответа</span>
+                </span>
+            </header>
+            <p class="qa-q pre" th:text="${o.text}">Текст</p>
+            <th:block th:if="${qa.answerable().contains(o.id)}"><div th:replace="~{:: answer-form(${o}, ${qa.backUrl()})}"></div></th:block>
+        </article>
     </div>
 
-    <div th:if="${!qa.open().isEmpty()}">
-        <h3 th:text="#{qa.open}">Открытые вопросы</h3>
-        <div class="qa-item" th:each="o : ${qa.open()}">
-            <div>
-                <span class="tag" th:text="#{'qaKind.' + ${o.kind}}">вопрос</span>
-                <span class="tag" th:if="${o.technical}" th:text="#{qa.technical}">технический</span>
-                <span class="st st-IN_PROGRESS" th:text="#{'qaStatus.' + ${o.status}}">Новый</span>
-            </div>
-            <p class="pre" th:text="${o.text}">Текст</p>
-            <p class="muted small" th:text="${o.author.fullName} + ', ' + ${#temporals.format(o.createdAt, 'dd.MM.yyyy HH:mm')}">Автор</p>
-            <th:block th:if="${qa.answerable().contains(o.id)}"><div th:replace="~{:: answer-form(${o}, ${qa.backUrl()})}"></div></th:block>
+    <div th:if="${!qa.faq().isEmpty()}" class="qa-section">
+        <div class="qa-faq-head">
+            <h3 th:text="#{qa.faq}">FAQ</h3>
+            <input type="search" class="qa-search" th:if="${qa.faq().size() > 5}" data-qa-search autocomplete="off"
+                   th:placeholder="#{qa.search.placeholder}" th:aria-label="#{qa.search.placeholder}">
         </div>
+        <details class="qa-card qa-done" th:each="f : ${qa.faq()}" th:open="${qa.faq().size() <= 5}">
+            <summary>
+                <span class="qa-mark q" th:text="#{qa.label.question}">Вопрос</span>
+                <span class="qa-q" th:text="${f.text}">Вопрос</span>
+                <span class="st st-ACTUAL" th:text="#{qa.status.answered}">Отвечен</span>
+            </summary>
+            <div class="qa-answer">
+                <span class="qa-mark a" th:text="#{qa.label.answer}">Ответ</span>
+                <div>
+                    <p class="pre" th:text="${f.answer}">Ответ</p>
+                    <p class="muted small" th:text="#{qa.answeredBy(${f.answeredBy != null} ? ${f.answeredBy.fullName} : '-', ${#temporals.format(f.answeredAt, 'dd.MM.yyyy')})}">Ответил</p>
+                </div>
+            </div>
+        </details>
+        <p class="muted qa-none" hidden th:text="#{qa.search.none}">Ничего не найдено</p>
     </div>
 
     <form class="ask-form" th:attr="hx-post=@{/questions}" hx-target="#block-qa" hx-swap="outerHTML">
         <h3 th:text="#{qa.ask}">Задать вопрос или предложить правку</h3>
         <input type="hidden" name="targetType" th:value="${qa.targetType()}">
         <input type="hidden" name="targetId" th:value="${qa.targetId()}">
-        <div class="choice-inline">
-            <label class="check-line"><input type="radio" name="kind" value="QUESTION" checked><span th:text="#{qa.kind.question}">Вопрос</span></label>
-            <label class="check-line"><input type="radio" name="kind" value="EDIT_PROPOSAL"><span th:text="#{qa.kind.edit}">Правка</span></label>
+        <div class="qa-tabs" role="radiogroup">
+            <label><input type="radio" name="kind" value="QUESTION" checked><span th:text="#{qa.kind.question}">Вопрос</span></label>
+            <label><input type="radio" name="kind" value="EDIT_PROPOSAL"><span th:text="#{qa.kind.edit}">Предложить правку</span></label>
         </div>
-        <textarea name="text" rows="3" th:text="${qaText}" th:placeholder="#{qa.text.placeholder}"
+        <textarea name="text" rows="2" th:text="${qaText}" th:placeholder="#{qa.text.placeholder}"
                   th:attr="hx-get=@{/questions/similar}" hx-trigger="input changed delay:400ms" hx-target="#similar"
-                  hx-include="closest form"></textarea>
+                  hx-include="closest form" data-autogrow></textarea>
         <div id="similar"></div>
-        <div class="form-actions">
+        <div class="qa-actions">
+            <label class="check-line qa-tech"><input type="checkbox" name="technical" value="true">
+                <span><span th:text="#{qa.technical.label}">Технический вопрос</span>
+                    <span class="muted small" th:text="#{qa.technical.hint}">Увидит и сервисный центр</span></span></label>
             <button type="submit" class="primary" th:text="#{qa.submit}">Отправить</button>
-            <label class="check-line"><input type="checkbox" name="technical" value="true"><span th:text="#{qa.technical.label}">Технический вопрос</span></label>
         </div>
     </form>
 </section>

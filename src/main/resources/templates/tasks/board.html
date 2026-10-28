@@ -2,46 +2,78 @@
 <html lang="ru" xmlns:th="http://www.thymeleaf.org"
       th:replace="~{layout :: page(~{::title}, ~{::main})}">
 <head>
-    <title th:text="#{menu.tasks}">Задачи</title>
+    <title th:text="${boardInfo != null} ? ${boardInfo.name} : #{menu.tasks}">Задачи</title>
 </head>
 <body>
 <main class="content wide">
     <div class="page-head">
-        <h1 th:text="#{menu.tasks}">Задачи</h1>
+        <div>
+            <h1 th:if="${inbox and !archiveView}" th:text="#{tasks.tab.inbox}">Входящие запросы</h1>
+            <h1 th:if="${inbox and archiveView}" th:text="#{tasks.archive.inbox.title}">Архив входящих запросов</h1>
+            <h1 th:if="${!inbox}" th:text="${boardInfo.name} + (${archiveView} ? ' - ' + #{tasks.tab.archive} : '')">Доска</h1>
+            <p class="muted board-desc" th:if="${!inbox and boardInfo.description != null}" th:text="${boardInfo.description}"></p>
+            <p class="muted small board-members" th:if="${!inbox}"
+               th:text="#{boards.members.line(${#strings.listJoin(boardInfo.members.![fullName], ', ')})}">Участники</p>
+        </div>
         <div class="actions">
-            <a class="btn primary" th:if="${canCreate}" th:href="@{/tasks/new}" th:text="#{tasks.create}">Создать задачу</a>
+            <a class="btn" th:if="${inbox and !archiveView}" th:href="@{/tasks/archive}" th:text="#{tasks.tab.archive}">Архив</a>
+            <a class="btn" th:if="${inbox and archiveView}" th:href="@{/tasks}" th:text="#{boards.back}">К доске</a>
+            <a class="btn" th:if="${!inbox and !archiveView}" th:href="@{/boards/{id}/archive(id=${boardInfo.id})}" th:text="#{tasks.tab.archive}">Архив</a>
+            <a class="btn" th:if="${!inbox and archiveView}" th:href="@{/boards/{id}(id=${boardInfo.id})}" th:text="#{boards.back}">К доске</a>
+            <a class="btn" th:if="${!inbox and boardInfo.owner}" th:href="@{/boards/{id}/settings(id=${boardInfo.id})}" th:text="#{boards.settings}">Настройки</a>
+            <a class="btn primary" th:if="${canCreate and inbox and !archiveView}" th:href="@{/tasks/new}" th:text="#{tasks.create}">Создать задачу</a>
+            <a class="btn primary" th:if="${!inbox and !archiveView}" th:href="@{/boards/{id}/cards/new(id=${boardInfo.id})}" th:text="#{boards.card.create}">Новая карточка</a>
         </div>
     </div>
-    <nav class="tabs">
-        <a class="active" th:href="@{/tasks}" th:text="#{tasks.tab.board}">Доска</a>
-        <a th:href="@{/questions/my}" th:text="#{qa.my.title}">Мои вопросы</a>
-    </nav>
+    <nav th:replace="~{tasks/tabs :: tabs}"></nav>
 
-    <form id="filters" class="filters" th:action="@{/tasks}" method="get"
-          hx-get="/tasks" hx-target="#board" hx-push-url="true" hx-swap="outerHTML" hx-trigger="change, submit">
+    <form id="filters" class="filters" th:action="${base}" method="get"
+          th:attr="hx-get=${base}" hx-target="#board" hx-push-url="true" hx-swap="outerHTML" hx-trigger="change, submit">
         <select name="assignee" data-plain th:if="${board.canSeeAll()}" th:aria-label="#{tasks.filter.assignee}">
-            <option value="me" th:selected="${filter.assignee == null or filter.assignee == 'me'}" th:text="#{tasks.filter.mine}">Мои</option>
-            <option value="all" th:selected="${filter.assignee == 'all'}" th:text="#{tasks.filter.all}">Все</option>
+            <option th:if="${inbox}" value="me" th:selected="${filter.assignee == null or filter.assignee == 'me'}" th:text="#{tasks.filter.mine}">Мои</option>
+            <option value="all" th:selected="${inbox ? filter.assignee == 'all' : (filter.assignee == null or filter.assignee == 'all')}" th:text="#{tasks.filter.all}">Все</option>
+            <option th:if="${!inbox}" value="me" th:selected="${filter.assignee == 'me'}" th:text="#{tasks.filter.mine}">Мои</option>
             <option th:each="u : ${assignees}" th:value="${u.id}" th:text="${u.fullName}" th:selected="${#strings.equals(filter.assignee, u.id.toString())}"></option>
         </select>
-        <select name="type" th:classappend="${filter.type != null and !filter.type.isEmpty()} ? 'on'" th:aria-label="#{tasks.filter.type}">
-            <option value="" hidden th:text="#{tasks.filter.type}">Тип</option>
-            <option th:each="t : ${types}" th:value="${t}" th:text="#{'taskType.' + ${t}}" th:selected="${t.name() == filter.type}"></option>
-        </select>
-        <input type="text" name="sku" th:value="${filter.sku}" data-suggest="sku" data-single autocomplete="off" placeholder="SKU" style="width:150px" th:aria-label="SKU">
-        <select name="line" th:classappend="${filter.line != null} ? 'on'" th:aria-label="#{catalog.filter.line}">
-            <option value="" hidden th:text="#{catalog.filter.line}">Линейка</option>
-            <option th:each="l : ${lines}" th:value="${l.id}" th:text="${l.code}" th:selected="${l.id == filter.line}"></option>
-        </select>
+        <th:block th:if="${inbox}">
+            <select name="type" th:classappend="${filter.type != null and !filter.type.isEmpty()} ? 'on'" th:aria-label="#{tasks.filter.type}">
+                <option value="" hidden th:text="#{tasks.filter.type}">Тип</option>
+                <option th:each="t : ${types}" th:value="${t}" th:text="#{'taskType.' + ${t}}" th:selected="${t.name() == filter.type}"></option>
+            </select>
+            <input type="text" name="sku" th:value="${filter.sku}" data-suggest="sku" data-single autocomplete="off" placeholder="SKU" style="width:150px" th:aria-label="SKU">
+            <select name="line" th:classappend="${filter.line != null} ? 'on'" th:aria-label="#{catalog.filter.line}">
+                <option value="" hidden th:text="#{catalog.filter.line}">Линейка</option>
+                <option th:each="l : ${lines}" th:value="${l.id}" th:text="${l.code}" th:selected="${l.id == filter.line}"></option>
+            </select>
+        </th:block>
         <noscript><button type="submit" th:text="#{common.show}">Показать</button></noscript>
     </form>
 
     <p class="error" id="board-message" hidden></p>
 
-    <div id="board" class="kanban" th:fragment="board">
-        <div class="column" th:each="s : ${statuses}" th:classappend="'col-' + ${s}">
+    <div id="board" th:fragment="board" th:class="${archiveView} ? 'archive-list' : 'kanban'">
+        <th:block th:if="${archiveView}">
+            <p class="muted" th:if="${board.flat().isEmpty()}" th:text="#{tasks.archive.empty}">Архив пуст</p>
+            <div class="archive-row" th:each="t : ${board.flat()}">
+                <div class="ar-main">
+                    <a class="task-title" th:href="@{/tasks/{id}(id=${t.id})}" th:text="${t.title}">Название</a>
+                    <div class="small muted ar-sub">
+                        <span class="tag" th:if="${inbox}" th:text="#{'taskType.' + ${t.type}}">Тип</span>
+                        <a class="ar-rel" th:if="${t.relatedUrl != null}" th:href="${t.relatedUrl}" th:text="${t.relatedLabel}">объект</a>
+                    </div>
+                </div>
+                <span class="ar-when small muted" th:if="${t.archivedAt != null}"
+                      th:text="#{tasks.archive.when(${#temporals.format(t.archivedAt, 'dd.MM.yyyy')})}">В архиве с</span>
+                <span class="ar-who small muted" th:text="${t.assignee.fullName}">исполнитель</span>
+                <span class="av" th:attr="data-name=${t.assignee.fullName}" th:title="${t.assignee.fullName}" aria-hidden="true">&nbsp;</span>
+                <button type="button" class="card-act ar-undo" th:if="${movable.contains(t.id)}"
+                        th:attr="data-unarchive-id=${t.id}" th:text="#{tasks.archive.undo}">Вернуть</button>
+            </div>
+        </th:block>
+        <th:block th:unless="${archiveView}">
+        <div class="column" th:each="s : ${statuses}" th:classappend="'col-' + ${s} + (${board.colors().get(s) != null} ? ' tone-' + ${board.colors().get(s)} : '')">
             <div class="column-head">
-                <span th:text="#{'taskStatus.' + ${s}}">Новые</span>
+                <span th:text="${board.titles().get(s)} ?: #{'taskStatus.' + ${s}}">Новые</span>
                 <span class="count" th:text="${board.columns().get(s).size()}">0</span>
             </div>
             <div class="cards" th:attr="data-status=${s}">
@@ -49,7 +81,7 @@
                      th:classappend="${movable.contains(t.id)} ? 'movable'" th:attr="data-id=${t.id}">
                     <a class="task-title" th:href="@{/tasks/{id}(id=${t.id})}" th:text="${t.title}">Название</a>
                     <div class="task-meta">
-                        <span class="tag" th:text="#{'taskType.' + ${t.type}}">Тип</span>
+                        <span class="tag" th:if="${inbox}" th:text="#{'taskType.' + ${t.type}}">Тип</span>
                         <span class="tag overdue-tag" th:if="${t.isOverdue(today)}" th:text="#{tasks.overdue}">просрочено</span>
                         <span class="tag prio-high" th:if="${t.priority.name() == 'HIGH'}" th:text="#{'taskPriority.' + ${t.priority}}">Высокий</span>
                     </div>
@@ -57,11 +89,14 @@
                     <div class="small muted task-foot">
                         <span th:if="${t.dueDate != null}" th:text="#{tasks.due(${#temporals.format(t.dueDate, 'dd.MM')})}">срок</span>
                         <span th:if="${board.canSeeAll()}" th:text="${t.assignee.fullName}">исполнитель</span>
+                        <button type="button" class="card-act" th:if="${!archiveView and t.status.name() == 'DONE' and movable.contains(t.id)}"
+                                th:attr="data-archive-id=${t.id}" th:text="#{tasks.archive.do}">В архив</button>
                         <span class="av" th:attr="data-name=${t.assignee.fullName}" th:title="${t.assignee.fullName}" aria-hidden="true">&nbsp;</span>
                     </div>
                 </div>
             </div>
         </div>
+        </th:block>
     </div>
     <script th:src="@{/vendor/Sortable.min.js}" defer></script>
     <script th:src="@{/js/kanban.js}" defer></script>

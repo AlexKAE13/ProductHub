@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: page(~{::title}, ~{::main})}">
+<head>
+    <title th:text="#{boards.title}">Мои доски</title>
+</head>
+<body>
+<main class="content wide">
+    <div class="page-head"><h1 th:text="#{boards.title}">Мои доски</h1></div>
+    <nav th:replace="~{tasks/tabs :: tabs}"></nav>
+
+    <section class="block">
+        <div class="block-head"><h2 th:text="#{boards.mine}">Доски, где вы участвуете</h2></div>
+        <p class="muted" th:if="${boardsList.isEmpty()}" th:text="#{boards.empty}">Пока нет досок</p>
+        <div class="board-list" th:if="${!boardsList.isEmpty()}">
+            <a class="board-tile" th:each="b : ${boardsList}" th:href="@{/boards/{id}(id=${b.id})}">
+                <strong th:text="${b.name}">Доска</strong>
+                <span class="muted small" th:if="${b.description != null}" th:text="${b.description}">Описание</span>
+                <span class="muted small" th:text="${b.owner} ? #{boards.you.owner} : #{boards.owner.is(${b.ownerName})}">владелец</span>
+            </a>
+        </div>
+    </section>
+
+    <section class="block">
+        <div class="block-head"><h2 th:text="#{boards.new}">Новая доска</h2></div>
+        <form th:action="@{/boards}" method="post" class="editing">
+            <div class="field"><label for="name" th:text="#{boards.name}">Название</label>
+                <input type="text" id="name" name="name" maxlength="120" th:value="${name}" required>
+                <span class="error" th:if="${errors != null and errors.containsKey('name')}" th:text="#{${errors['name']}}"></span></div>
+            <div class="field"><label for="description" th:text="#{boards.description}">Описание</label>
+                <textarea id="description" name="description" rows="2" maxlength="500" th:text="${description}"></textarea></div>
+            <p class="muted small" th:text="#{boards.new.hint}">Колонки по умолчанию, их можно переименовать и перекрасить в настройках.</p>
+            <div class="form-actions"><button type="submit" class="primary" th:text="#{boards.create}">Создать доску</button></div>
+        </form>
+    </section>
+</main>
+</body>
+</html>
