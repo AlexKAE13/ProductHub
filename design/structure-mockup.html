@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Product HUB - мокап структуры v2</title>
+<style>
+:root{
+  --bg:#fff;--bg-soft:#f6f7f8;--bg-hover:#eef0f2;--line:#e4e7ea;--line-strong:#cfd4d9;
+  --text:#1c242b;--muted:#68737d;--accent:#2b5c8a;--accent-soft:#e8eff6;--radius:6px;
+  --st-ok:#2e7d4f;--st-ok-bg:#e6f3ea;--st-warn:#9a6700;--st-warn-bg:#fdf1d6;--st-bad:#b3261e;--st-bad-bg:#fbe7e5;--st-none:#68737d;--st-none-bg:#eef0f2;
+}
+*{box-sizing:border-box}
+body{margin:0;font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;color:var(--text);background:var(--bg)}
+a{color:var(--text);text-decoration:underline;text-decoration-color:var(--line-strong);text-underline-offset:2px;cursor:pointer}
+h1{font-size:20px;margin:0 0 2px;font-weight:600}
+h2{font-size:14px;margin:0 0 8px;font-weight:600}
+h3{font-size:11px;margin:16px 0 6px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:600}
+.muted{color:var(--muted)}.small{font-size:12px}
+.app{display:flex;min-height:100vh}
+/* sidebar */
+.side{width:232px;flex:none;border-right:1px solid var(--line);background:var(--bg-soft);padding:12px 8px;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow:auto}
+.brand{display:flex;align-items:center;gap:8px;padding:4px 8px 12px;font-weight:600}
+.brand b{width:24px;height:24px;border-radius:5px;background:var(--accent);color:#fff;display:grid;place-items:center;font-size:13px}
+.grp{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);padding:12px 8px 4px}
+.nav{display:flex;align-items:center;justify-content:space-between;padding:6px 8px;border-radius:var(--radius);color:var(--text);text-decoration:none;cursor:pointer}
+.nav:hover{background:var(--bg-hover)}
+.nav.on{background:var(--accent);color:#fff}
+.nav .cnt{font-size:11px;background:var(--st-bad);color:#fff;border-radius:9px;padding:0 6px}
+.nav .w{font-size:10px;color:var(--muted)}
+.nav.on .w{color:#cfe0ef}
+.hide{display:none!important}
+/* main */
+.main{flex:1;min-width:0}
+.top{display:flex;align-items:center;gap:10px;padding:0 20px;height:52px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--bg);z-index:5}
+.search{flex:1;max-width:420px;border:1px solid var(--line-strong);border-radius:var(--radius);padding:6px 10px;color:var(--muted);background:var(--bg)}
+.sel{border:1px solid var(--line-strong);border-radius:var(--radius);padding:5px 10px;background:var(--bg);font:inherit;color:var(--text)}
+.btn{border:1px solid var(--line-strong);background:var(--bg);border-radius:var(--radius);padding:5px 12px;font:inherit;cursor:pointer;color:var(--text)}
+.btn:hover{background:var(--bg-hover)}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.pri:hover{background:#234c73}
+.sp{flex:1}
+.page{padding:20px 24px 60px;max-width:1180px}
+.sub{color:var(--muted);margin-bottom:14px}
+.grid{display:grid;gap:12px}
+.g2{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(4,1fr)}
+@media(max-width:900px){.g2,.g3,.g4{grid-template-columns:1fr}.side{width:190px}}
+.card{border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px;background:var(--bg)}
+.kpi{font-size:26px;font-weight:600;line-height:1.1}
+.kpi small{display:block;font-size:12px;font-weight:400;color:var(--muted);margin-top:4px}
+table{border-collapse:collapse;width:100%}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);text-align:left;font-weight:600;padding:6px 8px;border-bottom:1px solid var(--line-strong);background:var(--bg-soft)}
+td{padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
+tr:hover td{background:var(--bg-soft)}
+.chip{display:inline-block;font-size:12px;padding:0 7px;border-radius:9px;white-space:nowrap}
+.ok{background:var(--st-ok-bg);color:var(--st-ok)}.warn{background:var(--st-warn-bg);color:var(--st-warn)}.bad{background:var(--st-bad-bg);color:var(--st-bad)}.none{background:var(--st-none-bg);color:var(--st-none)}
+.cell{display:inline-block;min-width:78px;text-align:center;border-radius:4px;padding:1px 6px;font-size:12px}
+.cell.empty{border:1px dashed var(--line-strong);color:var(--muted);cursor:pointer}
+.cell.empty:hover{background:var(--accent-soft)}
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);margin:12px 0 14px;overflow:auto}
+.tab{padding:7px 12px;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;white-space:nowrap}
+.tab.on{color:var(--text);border-bottom-color:var(--accent);font-weight:600}
+.feed .it{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}
+.feed .it:last-child{border:0}
+.tag{font-size:11px;background:var(--bg-soft);border:1px solid var(--line);border-radius:3px;padding:0 5px;color:var(--muted);white-space:nowrap}
+.pitch{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px}
+.pitch li{margin:3px 0}
+.note{border-left:3px solid var(--line-strong);padding:6px 12px;background:var(--bg-soft);color:var(--muted);margin:14px 0;font-size:12px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.cols{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.col{background:var(--bg-soft);border-radius:var(--radius);padding:8px;min-height:120px}
+.col .t{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:6px}
+.k{background:var(--bg);border:1px solid var(--line);border-radius:5px;padding:6px 8px;margin-bottom:6px;font-size:13px}
+/* modal */
+.ov{position:fixed;inset:0;background:rgba(20,26,32,.35);display:none;align-items:center;justify-content:center;z-index:20}
+.ov.on{display:flex}
+.modal{background:var(--bg);border-radius:8px;width:min(480px,92vw);padding:18px 20px}
+.modal label{display:block;font-size:12px;color:var(--muted);margin:10px 0 3px}
+.modal input,.modal textarea,.modal select{width:100%;border:1px solid var(--line-strong);border-radius:var(--radius);padding:6px 8px;font:inherit}
+.legend{position:fixed;right:14px;bottom:14px;background:var(--bg);border:1px solid var(--line-strong);border-radius:var(--radius);padding:8px 12px;font-size:12px;max-width:260px;z-index:6}
+.fab{position:fixed;right:14px;bottom:100px}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="brand"><b>P</b>Product HUB</div>
+    <div id="nav"></div>
+  </aside>
+  <div class="main">
+    <div class="top">
+      <div class="search">Поиск: артикул, модель конкурента, вопрос...</div>
+      <select class="sel" id="country" title="Фильтр по странам">
+        <option>Мои страны: Вьетнам, Египет</option><option>Все страны</option><option>Вьетнам</option><option>Египет</option>
+      </select>
+      <button class="btn pri" onclick="modal(true)">+ Запрос рынка</button>
+      <button class="btn">Спросить</button>
+      <span class="sp"></span>
+      <select class="sel" id="role" onchange="setRole(this.value)" title="Только для макета">
+        <option value="sales">Роль: менеджер по продажам</option>
+        <option value="pm">Роль: продакт</option>
+        <option value="head">Роль: руководитель</option>
+      </select>
+    </div>
+    <main class="page" id="page"></main>
+  </div>
+</div>
+
+<div class="ov" id="ov" onclick="if(event.target===this)modal(false)">
+  <div class="modal">
+    <h2>Запрос рынка</h2>
+    <div class="muted small">30 секунд. Попадет продакту, статус увидите в разделе "Мои запросы".</div>
+    <label>Что просит клиент</label><textarea rows="3" placeholder="Например: MESH между точками без кабеля"></textarea>
+    <div class="row" style="gap:10px">
+      <div style="flex:1"><label>Страна</label><select><option>Вьетнам</option><option>Египет</option></select></div>
+      <div style="flex:1"><label>Партнер</label><input placeholder="Название"></div>
+      <div style="flex:1"><label>Размер сделки</label><input placeholder="USD"></div>
+    </div>
+    <label>SKU или линейка (необязательно)</label><input placeholder="WEP-550K">
+    <div class="row" style="margin-top:14px;justify-content:flex-end"><button class="btn" onclick="modal(false)">Отмена</button><button class="btn pri" onclick="modal(false)">Отправить</button></div>
+  </div>
+</div>
+
+<div class="legend"><b>Мокап структуры v2</b><br><span class="muted">Меню и главная меняются по роли (выпадающий список справа вверху). Данные вымышленные. Метки W1 / W2 / W3 - волны внедрения.</span></div>
+
+<script>
+const NAV = [
+  {g:'',items:[['home','Главная','',['sales','pm','head']]]},
+  {g:'Страны',items:[['country','Страницы стран','W1',['sales','pm','head']],['matrix','Сертификация SKU x страна','W1',['pm','head']]]},
+  {g:'Продукты',items:[['sku','Каталог SKU','',['sales','pm','head']],['lines','Линейки','',['pm','head']],['roadmap','Роадмап','W2',['sales','pm','head']],['rivals','Конкуренты','W2',['sales','pm']]]},
+  {g:'Материалы',items:[['artifacts','Артефакты','',['sales','pm']],['fw','Прошивки','',['sales','pm']],['cases','Кейсы','W1',['sales','pm']],['faq','FAQ','W2',['sales','pm']],['bundles','Подборки для партнера','W2',['sales','pm']],['learn','Обучение','W2',['sales','pm']]]},
+  {g:'Рынок',items:[['voc','Запросы рынка','W1',['sales','pm']],['deals','Итоги сделок','W3',['sales','pm','head']],['tenders','Подборы и тендеры','W2',['pm']],['tests','Тесты оборудования','W3',['sales','pm']]]},
+  {g:'Работа продакта',items:[['tasks','Задачи','',['pm'],'4'],['briefs','Заказы дизайну','W1',['pm']],['coverage','Покрытие материалов','W1',['pm']],['launch','Запуск SKU','W1',['pm']],['events','Журнал событий','W1',['pm']]]},
+  {g:'Руководитель',items:[['released','Выпущено','W1',['head']],['barriers','Барьеры по странам','W1',['head']],['risks','Риски','W3',['head']],['decisions','Журнал решений','W3',['head']]]},
+  {g:'Система',items:[['dirs','Справочники','',['pm']],['set','Настройки','',['sales','pm','head']]]}
+];
+let role='sales', cur='home';
+const S = {};
+
+const chip=(c,t)=>`<span class="chip ${c}">${t}</span>`;
+const cell=(c,t)=>`<span class="cell ${c}">${t}</span>`;
+const empty=t=>`<span class="cell empty" title="Клик создает задачу или бриф">+ ${t}</span>`;
+
+S.home_sales=()=>`
+<h1>Здравствуйте, Кирилл</h1><div class="sub">Ваши страны: Вьетнам, Египет. Лента и счетчики показаны только по ним.</div>
+<div class="grid g2" style="grid-template-columns:2fr 1fr">
+  <div class="card"><h2>Что нового</h2><div class="feed">
+    <div class="it"><span class="tag">Сертификат</span><div><b>WEP-550K</b>: получен NBTC для Таиланда<br><span class="muted small">вчера, не ваша страна - скрыть такие?</span></div></div>
+    <div class="it"><span class="tag">Прошивка</span><div><b>WOP-30L</b> v1.28 - добавлен MESH. Закрыт запрос из Вьетнама<br><span class="muted small">2 дня назад</span></div></div>
+    <div class="it"><span class="tag">Кейс</span><div>Отель 120 ТД, Вьетнам. Можно называть заказчика: <b>да</b><br><span class="muted small">3 дня назад</span></div></div>
+    <div class="it"><span class="tag">EOL</span><div><b>WOP-30LI</b>: снятие с производства 2027. Преемник WOP-30L-V2<br><span class="muted small">неделю назад</span></div></div>
+    <div class="it"><span class="tag">Цена</span><div>Международный прайс обновлен (версия от 01.10)<br><span class="muted small">2 недели назад</span></div></div>
+  </div><div style="margin-top:8px"><a>Все новости</a> <span class="muted">·</span> <a>Настроить дайджест на почту</a></div></div>
+  <div class="grid" style="align-content:start">
+    <div class="card"><h2>Вьетнам</h2><div class="small muted">Продаваемо: 38 из 52 SKU</div><div class="row" style="margin-top:6px">${chip('bad','4 без сертификата')}${chip('warn','6 без цены')}${chip('ok','3 кейса')}</div><div style="margin-top:8px"><a onclick="go('country')">Открыть страну</a></div></div>
+    <div class="card"><h2>Египет</h2><div class="small muted">Продаваемо: 21 из 52 SKU</div><div class="row" style="margin-top:6px">${chip('bad','11 без сертификата')}${chip('warn','6 без цены')}${chip('none','0 кейсов')}</div><div style="margin-top:8px"><a>Открыть страну</a></div></div>
+    <div class="card"><h2>Мои запросы</h2><div class="small">MESH для WEP: <b>в плане</b></div><div class="small">FXS на ONT: <b>оценивается</b></div></div>
+  </div>
+</div>`;
+
+S.home_pm=()=>`
+<h1>Мой день</h1><div class="sub">Все, что требует действия, на одном экране. Каждый счетчик кликабелен.</div>
+<div class="grid g4">
+  <div class="card"><div class="kpi">7<small>новых вопросов</small></div></div>
+  <div class="card"><div class="kpi">4<small>задачи со сроком на неделе</small></div></div>
+  <div class="card"><div class="kpi" style="color:var(--st-bad)">12<small>материалов с просроченным ревью</small></div></div>
+  <div class="card"><div class="kpi">3<small>на согласовании у дизайна</small></div></div>
+</div>
+<div class="grid g2" style="margin-top:12px">
+  <div class="card"><h2>Запросы рынка (новые)</h2>
+    <table><tr><th>Что просят</th><th>Страна</th><th>Вес</th></tr>
+    <tr><td>MESH между точками</td><td>Вьетнам</td><td>5</td></tr>
+    <tr><td>FXS-порт на ONT</td><td>Египет</td><td>3</td></tr>
+    <tr><td>Облачное управление</td><td>Таиланд</td><td>2</td></tr></table></div>
+  <div class="card"><h2>Поиски без результата (неделя)</h2>
+    <table><tr><th>Запрос</th><th>Раз</th><th></th></tr>
+    <tr><td>802.11r roaming</td><td>9</td><td><a>Создать FAQ</a></td></tr>
+    <tr><td>лицензия WLC 3250</td><td>6</td><td><a>Создать FAQ</a></td></tr>
+    <tr><td>PoE бюджет WEP-30L</td><td>4</td><td><a>Создать FAQ</a></td></tr></table></div>
+</div>
+<div class="card" style="margin-top:12px"><h2>Истекает через 60 дней</h2>
+  <div class="row">${chip('warn','PTA WOP-30L, Пакистан - 42 дня')}${chip('warn','CE RED WEP-30L - 55 дней')}${chip('bad','Новые SKU без международного прайса: 4')}</div></div>`;
+
+S.home_head=()=>`
+<h1>Выпущено и риски</h1><div class="sub">Агрегаты по отделу и странам. Активность отдельных менеджеров здесь не показывается.</div>
+<div class="grid g4">
+  <div class="card"><div class="kpi">9<small>кейсов за октябрь</small></div></div>
+  <div class="card"><div class="kpi">14<small>карточек и battle cards</small></div></div>
+  <div class="card"><div class="kpi">6<small>подборов и таблиц соответствия</small></div></div>
+  <div class="card"><div class="kpi">18<small>ответов на вопросы</small></div></div>
+</div>
+<div class="grid g2" style="margin-top:12px">
+  <div class="card"><h2>Барьеры по странам (ключевые SKU)</h2>
+    <table><tr><th>Страна</th><th>Без серт.</th><th>Без цены</th><th>Без EN</th><th>Без кейсов</th></tr>
+    <tr><td>Вьетнам</td><td>${cell('warn','4')}</td><td>${cell('warn','6')}</td><td>${cell('ok','1')}</td><td>${cell('ok','0')}</td></tr>
+    <tr><td>Египет</td><td>${cell('bad','11')}</td><td>${cell('warn','6')}</td><td>${cell('ok','1')}</td><td>${cell('bad','5')}</td></tr>
+    <tr><td>Пакистан</td><td>${cell('bad','9')}</td><td>${cell('warn','6')}</td><td>${cell('ok','1')}</td><td>${cell('warn','3')}</td></tr></table></div>
+  <div class="card"><h2>Риски</h2>
+    <div class="feed"><div class="it">${chip('bad','Срок')}<div>2 сертификата истекают в течение 60 дней</div></div>
+    <div class="it">${chip('bad','EOL')}<div>WOP-30LI в активном предложении ЮАР</div></div>
+    <div class="it">${chip('warn','Прайс')}<div>4 новых SKU без цены и EN-даташита</div></div></div></div>
+</div>`;
+
+S.country=()=>`
+<div class="muted small">Страны / </div><h1>Вьетнам</h1>
+<div class="sub">Менеджер: Кирилл Зорин · Обновлено 10.10.2026 · Требования: CE или NBTC-аналог не обязателен, ISO по запросу заказчика</div>
+<div class="row" style="margin-bottom:6px">${chip('ok','38 SKU можно продавать')}${chip('bad','4 без сертификата')}${chip('warn','6 без цены')}<span class="sp"></span><button class="btn">Собрать подборку для партнера</button></div>
+<div class="tabs"><div class="tab on">SKU и сертификаты</div><div class="tab">Кейсы (3)</div><div class="tab">Конкуренты в стране</div><div class="tab">Партнеры</div><div class="tab">Требования и ограничения</div><div class="tab">Новости</div></div>
+<table><tr><th>SKU</th><th>Линейка</th><th>ЖЦ</th><th>Сертификат</th><th>Срок</th><th>Цена (Partner)</th><th>EN-даташит</th><th>Кейс</th></tr>
+<tr><td><a onclick="go('sku')">WEP-30L</a></td><td>WEP</td><td>${chip('ok','Серия')}</td><td>${cell('ok','CE RED')}</td><td>до 03.2028</td><td>$142</td><td>${cell('ok','v3.1')}</td><td>2</td></tr>
+<tr><td><a>WOP-30L</a></td><td>WOP</td><td>${chip('ok','Серия')}</td><td>${cell('ok','CE RED')}</td><td>до 11.2027</td><td>$168</td><td>${cell('ok','v2.4')}</td><td>1</td></tr>
+<tr><td><a>WEP-550K</a></td><td>WEP</td><td>${chip('warn','Новый')}</td><td>${cell('warn','в работе')}</td><td>-</td><td>${empty('нет в прайсе')}</td><td>${cell('warn','EN в работе')}</td><td>0</td></tr>
+<tr><td><a>WOP-30LI</a></td><td>WOP</td><td>${chip('bad','EOL 2027')}</td><td>${cell('ok','CE RED')}</td><td>до 06.2027</td><td>$155</td><td>${cell('ok','v1.9')}</td><td>1</td></tr>
+<tr><td><a>WLC-3250</a></td><td>WLC</td><td>${chip('warn','Новый')}</td><td>${empty('сертификат')}</td><td>-</td><td>${empty('нет в прайсе')}</td><td>${empty('EN-даташит')}</td><td>0</td></tr>
+</table>
+<div class="note">Пустая клетка с пунктиром - действие. Клик создает задачу или заказ дизайну (бриф). Скачивание сертификатов и пометка "можно отдать партнеру" - внутри клетки сертификата.</div>`;
+
+S.matrix=()=>`
+<h1>Сертификация: SKU x страна</h1><div class="sub">Мастер-источник: HUB (если у отдела сертификации нет своей системы). Срок сертификата за 60 дней создает задачу.</div>
+<div class="row" style="margin-bottom:8px"><select class="sel"><option>Семейство: Wi-Fi</option></select><select class="sel"><option>Линейка: все</option></select><select class="sel"><option>Статус: все</option></select></div>
+<table><tr><th>SKU</th><th>EU (CE RED)</th><th>Таиланд (NBTC)</th><th>Пакистан (PTA)</th><th>Египет</th><th>Индия</th></tr>
+<tr><td>WEP-30L</td><td>${cell('ok','есть')}</td><td>${cell('ok','есть')}</td><td>${cell('warn','истекает 42 д.')}</td><td>${cell('ok','есть')}</td><td>${cell('bad','заблокировано')}</td></tr>
+<tr><td>WOP-30L</td><td>${cell('ok','есть')}</td><td>${cell('warn','в работе')}</td><td>${cell('warn','истекает 42 д.')}</td><td>${cell('ok','есть')}</td><td>${cell('none','не требуется')}</td></tr>
+<tr><td>WOP-3ax-LR5</td><td>${cell('bad','блокер EN 18031')}</td><td>${empty('статус')}</td><td>${empty('статус')}</td><td>${empty('статус')}</td><td>${empty('статус')}</td></tr>
+<tr><td>WEP-550K</td><td>${cell('warn','в работе')}</td><td>${empty('статус')}</td><td>${empty('статус')}</td><td>${empty('статус')}</td><td>${empty('статус')}</td></tr></table>`;
+
+const sku_tabs=['Коротко для партнера','Экосистема','Сертификаты и цена','Материалы','Прошивки','Кейсы','Конкуренты','FAQ','План'];
+S.sku=()=>`
+<div class="muted small">Каталог / Wi-Fi / WEP / </div>
+<div class="row"><h1>WEP-550K</h1>${chip('warn','Новый')}${chip('ok','Заполненность 82%')}<span class="sp"></span><button class="btn">В подборку</button><button class="btn">Задать вопрос</button></div>
+<div class="sub">Точка доступа Wi-Fi 6, помещения · Владельцы: Кузнецов, Смит</div>
+<div class="tabs" id="skutabs">${sku_tabs.map((t,i)=>`<div class="tab ${i?'':'on'}" onclick="skuTab(this)">${t}</div>`).join('')}</div>
+<div id="skubody"></div>`;
+const skuBody={
+'Коротко для партнера':`<div class="grid g2" style="grid-template-columns:3fr 2fr"><div class="pitch"><div class="row"><b>Pitch EN</b><span class="sp"></span><button class="btn">Скопировать</button></div>
+<ul><li>Wi-Fi 6 AX3000, up to 512 clients per AP, PoE 802.3at</li><li>Built for hotels, schools and offices up to 150 APs per controller</li><li>Works with WLC-3250 / SoftWLC, no licence for the first 5 APs</li></ul>
+<div class="small muted">Согласовано продактом 12.10.2026 · Для объектов: гостиница, школа, офис</div></div>
+<div class="card"><h2>Прикрепить к письму</h2><table><tr><td>Datasheet EN v3.1</td>${'<td>'+chip('ok','актуален')+'</td>'}</tr><tr><td>Product card EN</td><td>${chip('ok','актуальна')}</td></tr><tr><td>Battle card vs UniFi U6</td><td>${chip('warn','ревью просрочено')}</td></tr></table><div class="small muted" style="margin-top:6px">Только материалы с пометкой "можно отдать партнеру"</div></div></div>`,
+'Экосистема':`<div class="card"><h2>С чем работает</h2><table><tr><th>Связь</th><th>SKU</th><th>Условие</th></tr><tr><td>Управляется</td><td>WLC-3250, SoftWLC</td><td>ПО от 1.24</td></tr><tr><td>Лицензия</td><td>WLC-LIC-AP-10</td><td>сверх первых 5 ТД</td></tr><tr><td>Питание</td><td>MES2308P (PoE)</td><td>бюджет 30 Вт на порт</td></tr><tr><td>Замена</td><td>WEP-30L</td><td>предшественник</td></tr></table></div>`,
+'Сертификаты и цена':`<div class="grid g2"><div class="card"><h2>Сертификаты</h2><table><tr><td>EU CE RED</td><td>${chip('warn','в работе')}</td></tr><tr><td>Таиланд NBTC</td><td>${chip('none','нет данных')}</td></tr><tr><td>Пакистан PTA</td><td>${chip('none','нет данных')}</td></tr></table></div><div class="card"><h2>Международный прайс</h2><div class="muted">SKU нет в прайсе (версия от 01.10.2026)</div><div class="row" style="margin-top:6px"><button class="btn">Запросить включение в прайс</button></div></div></div>`
+};
+function skuTab(el){document.querySelectorAll('#skutabs .tab').forEach(t=>t.classList.remove('on'));el.classList.add('on');const t=el.textContent;document.getElementById('skubody').innerHTML=skuBody[t]||`<div class="note">Вкладка "${t}": существующий блок карточки, переносится как есть.</div>`;}
+
+S.voc=()=>`<h1>Запросы рынка</h1><div class="sub">Одна очередь для продаж и продакта. Дубли объединяются, вес растет.</div>
+<div class="cols"><div class="col"><div class="t">Новые · 3</div><div class="k">MESH между точками<br><span class="muted small">Вьетнам · вес 5</span></div><div class="k">Облачное управление<br><span class="muted small">Таиланд · вес 2</span></div></div>
+<div class="col"><div class="t">Оценено · 2</div><div class="k">FXS на ONT<br><span class="muted small">Египет · вес 3</span></div></div>
+<div class="col"><div class="t">В плане · 1</div><div class="k">Больше портов в ONT<br><span class="muted small">Узбекистан · вес 4 · Q2</span></div></div>
+<div class="col"><div class="t">Выпущено / отклонено</div><div class="k">PoE passthrough<br><span class="muted small">выпущено в v1.28</span></div></div></div>`;
+
+S.briefs=()=>`<h1>Заказы дизайну</h1><div class="sub">Бриф: тип, язык, SKU, аудитория, дедлайн, приоритет. Стадии видны всем.</div><div class="row" style="margin-bottom:10px"><button class="btn pri">+ Новый бриф</button></div>
+<div class="cols"><div class="col"><div class="t">Бриф · 2</div><div class="k">Карточка WEP-550K RU/EN<br><span class="muted small">до 25.10 · P0</span></div></div>
+<div class="col"><div class="t">Дизайн · 3</div><div class="k">Кейс: отель, Вьетнам, A4<br><span class="muted small">до 22.10</span></div></div>
+<div class="col"><div class="t">Согласование · 3</div><div class="k">Battle card vs Ruijie<br><span class="muted small">Диана</span></div></div>
+<div class="col"><div class="t">Выпущено</div><div class="k">Карточка WOP-30L EN ${chip('ok','+ задача TRANSLATE')}</div></div></div>`;
+
+S.coverage=()=>`<h1>Покрытие материалов</h1><div class="sub">Какие обязательные материалы есть по SKU. Пустая клетка создает бриф.</div>
+<table><tr><th>SKU</th><th>Даташит RU</th><th>Даташит EN</th><th>Карточка</th><th>Battle card</th><th>Фото</th><th>QSG</th></tr>
+<tr><td>WEP-30L</td><td>${cell('ok','есть')}</td><td>${cell('ok','есть')}</td><td>${cell('ok','есть')}</td><td>${cell('ok','есть')}</td><td>${cell('ok','есть')}</td><td>${cell('ok','есть')}</td></tr>
+<tr><td>WEP-550K</td><td>${cell('ok','есть')}</td><td>${cell('warn','в работе')}</td><td>${empty('бриф')}</td><td>${empty('бриф')}</td><td>${cell('ok','есть')}</td><td>${empty('бриф')}</td></tr>
+<tr><td>WLC-3250</td><td>${cell('ok','есть')}</td><td>${empty('бриф')}</td><td>${empty('бриф')}</td><td>${cell('none','не нужен')}</td><td>${cell('ok','есть')}</td><td>${empty('бриф')}</td></tr></table>`;
+
+S.stub=(id,title,wave)=>`<h1>${title}</h1><div class="sub">Экран в плане${wave?', волна '+wave.slice(1):', уже есть в приложении'}.</div><div class="note">Содержимое этого раздела описано в ТЗ v2. В мокапе показаны ключевые экраны: главная по ролям, страна, матрица сертификации, карточка SKU, запросы рынка, заказы дизайну, покрытие.</div>`;
+
+function render(){
+  const nav=document.getElementById('nav');nav.innerHTML='';
+  NAV.forEach(g=>{
+    const items=g.items.filter(i=>i[3].includes(role));
+    if(!items.length)return;
+    if(g.g)nav.insertAdjacentHTML('beforeend',`<div class="grp">${g.g}</div>`);
+    items.forEach(i=>{nav.insertAdjacentHTML('beforeend',`<a class="nav ${cur===i[0]?'on':''}" onclick="go('${i[0]}')"><span>${i[1]}</span>${i[4]?`<span class="cnt">${i[4]}</span>`:i[2]?`<span class="w">${i[2]}</span>`:''}</a>`)});
+  });
+  let html;
+  if(cur==='home')html=S['home_'+role]();
+  else if(S[cur])html=S[cur]();
+  else{const it=NAV.flatMap(g=>g.items).find(i=>i[0]===cur);html=S.stub(cur,it?it[1]:cur,it?it[2]:'')}
+  document.getElementById('page').innerHTML=html;
+  if(cur==='sku')document.getElementById('skubody').innerHTML=skuBody['Коротко для партнера'];
+}
+function go(id){cur=id;render();window.scrollTo(0,0)}
+function setRole(r){role=r;cur='home';render()}
+function modal(v){document.getElementById('ov').classList.toggle('on',v)}
+render();
+</script>
+</body>
+</html>
