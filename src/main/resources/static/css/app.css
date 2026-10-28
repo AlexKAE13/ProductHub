@@ -723,3 +723,23 @@ td .inline .link-btn.danger { margin-left: 12px; }
 .case-upload { margin: 0 0 16px; padding: 0 0 14px; border-bottom: 1px solid var(--line); }
 .case-upload h2 { margin-bottom: 4px; }
 .case-upload .dropzone { padding: 22px; margin: 10px 0 0; }
+
+/* ---------- Полоса прогресса навигации (nav.js) ---------- */
+#nav-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 2px;
+    width: 0;
+    background: var(--accent);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 1000;
+}
+#nav-progress.run {
+    opacity: 1;
+    transition: width 1.2s cubic-bezier(.1, .7, .2, 1), opacity .2s;
+}
+@media (prefers-reduced-motion: reduce) {
+    #nav-progress.run { transition: none; }
+}

@@ -5,6 +5,19 @@ spring:
       max-request-size: 2GB
   application:
     name: product-hub
+  web:
+    resources:
+      # Статика версионируется по хэшу содержимого (/css/app-<хэш>.css) и кэшируется браузером надолго.
+      # Страницы приложения этой настройки не касаются: они остаются без кэша.
+      chain:
+        strategy:
+          content:
+            enabled: true
+            paths: /**
+      cache:
+        cachecontrol:
+          max-age: 365d
+          cache-public: true
   profiles:
     default: dev
   jpa:
