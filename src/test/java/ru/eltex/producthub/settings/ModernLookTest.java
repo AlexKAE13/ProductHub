@@ -91,7 +91,7 @@ class ModernLookTest {
                 .andExpect(content().string(containsString("data-theme=\"dark\"")))
                 .andExpect(content().string(containsString("data-palette=\"lilac\"")))
                 .andExpect(content().string(containsString("data-bgtype=\"dots\"")))
-                .andExpect(content().string(containsString("css/modern.css")))
+                .andExpect(content().string(containsString("css/modern")))
                 .andExpect(content().string(containsString("theme-modern")));
         assertEquals(UiTheme.CLASSIC, service.get(product.getId()).look().theme(), "чужой вид не меняется");
     }

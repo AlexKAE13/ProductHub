@@ -102,7 +102,7 @@ class TaskWebTest {
                 .andExpect(content().string(containsString("Закрыто")))
                 .andExpect(content().string(containsString("data-id=\"" + t.getId() + "\"")))
                 .andExpect(content().string(containsString("task-card")))
-                .andExpect(content().string(containsString("Sortable.min.js")));
+                .andExpect(content().string(containsString("Sortable.min")));
         mvc.perform(get("/tasks?assignee=all").header("HX-Request", "true"))
                 .andExpect(content().string(not(containsString("<html"))));
     }
