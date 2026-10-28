@@ -3,7 +3,7 @@ package ru.eltex.producthub.settings;
 /**
  * Внешний вид личного кабинета: тема, схема, фон и обои.
  *
- * @param wallpaper  "dunes", "peaks", "aurora" (встроенные) или "custom" (загруженные пользователем)
+ * @param wallpaper  "dunes", "peaks", "aurora", "firs", "sage", "slate" (встроенные) или "custom" (загруженные пользователем)
  * @param wallpaperKey ключ загруженного файла в хранилище, если он есть
  * @param blur       размытие обоев, 0-40 px
  * @param dim        затемнение (светлая тема - осветление) обоев, 0-80 %
@@ -21,7 +21,7 @@ public record Look(
     public static final Look DEFAULT = new Look(UiTheme.CLASSIC, ColorMode.AUTO, Palette.ELTEX, Background.MESH,
             "dunes", null, 18, 0);
 
-    public static final java.util.Set<String> BUILT_IN = java.util.Set.of("dunes", "peaks", "aurora");
+    public static final java.util.Set<String> BUILT_IN = java.util.Set.of("dunes", "peaks", "aurora", "firs", "sage", "slate");
 
     public boolean isModern() {
         return theme == UiTheme.MODERN;

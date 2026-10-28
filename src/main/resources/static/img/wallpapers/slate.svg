@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice">
+<defs>
+<linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8d9aa3"/><stop offset="1" stop-color="#4c5a64"/></linearGradient>
+<filter id="b" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="100"/></filter>
+</defs>
+<rect width="1600" height="1000" fill="url(#g)"/>
+<g filter="url(#b)">
+<ellipse cx="300" cy="260" rx="420" ry="240" fill="#b9c4cb" opacity=".6"/>
+<ellipse cx="1300" cy="720" rx="460" ry="260" fill="#33414b" opacity=".7"/>
+<ellipse cx="1180" cy="180" rx="260" ry="160" fill="#a4b5bd" opacity=".45"/>
+</g>
+</svg>

@@ -43,7 +43,7 @@ public class SettingsController {
         model.addAttribute("palettes", Palette.values());
         model.addAttribute("backgrounds", Background.values());
         model.addAttribute("look", service.get(user.getId()).look());
-        model.addAttribute("builtInWalls", java.util.List.of("dunes", "peaks", "aurora"));
+        model.addAttribute("builtInWalls", java.util.List.of("dunes", "peaks", "aurora", "firs", "sage", "slate"));
         model.addAttribute("activeMenu", "settings");
         return "settings/index";
     }
