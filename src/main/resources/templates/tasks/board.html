@@ -18,14 +18,12 @@
         <div class="actions">
             <a class="btn" th:if="${inbox and !archiveView}" th:href="@{/tasks/archive}" th:text="#{tasks.tab.archive}">Архив</a>
             <a class="btn" th:if="${inbox and archiveView}" th:href="@{/tasks}" th:text="#{boards.back}">К доске</a>
-            <a class="btn" th:if="${!inbox and !archiveView}" th:href="@{/boards/{id}/archive(id=${boardInfo.id})}" th:text="#{tasks.tab.archive}">Архив</a>
-            <a class="btn" th:if="${!inbox and archiveView}" th:href="@{/boards/{id}(id=${boardInfo.id})}" th:text="#{boards.back}">К доске</a>
-            <a class="btn" th:if="${!inbox and boardInfo.owner}" th:href="@{/boards/{id}/settings(id=${boardInfo.id})}" th:text="#{boards.settings}">Настройки</a>
             <a class="btn primary" th:if="${canCreate and inbox and !archiveView}" th:href="@{/tasks/new}" th:text="#{tasks.create}">Создать задачу</a>
             <a class="btn primary" th:if="${!inbox and !archiveView}" th:href="@{/boards/{id}/cards/new(id=${boardInfo.id})}" th:text="#{boards.card.create}">Новая карточка</a>
         </div>
     </div>
     <nav th:replace="~{tasks/tabs :: tabs}"></nav>
+    <th:block th:if="${!inbox}"><nav th:replace="~{tasks/tabs :: boardnav}"></nav></th:block>
 
     <form id="filters" class="filters" th:action="${base}" method="get"
           th:attr="hx-get=${base}" hx-target="#board" hx-push-url="true" hx-swap="outerHTML" hx-trigger="change, submit">

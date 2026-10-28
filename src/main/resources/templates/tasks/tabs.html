@@ -10,5 +10,14 @@
     <a th:classappend="${tab == 'boards'} ? 'active'" th:href="@{/boards}" th:text="#{boards.tab.all}">+ Доска</a>
     <a th:href="@{/questions/my}" th:text="#{qa.my.title}">Мои вопросы</a>
 </nav>
+
+<!-- Подвкладки своей доски. Модель: boardInfo, boardNav (board, chat, log, archive, settings) -->
+<nav class="board-nav" th:fragment="boardnav">
+    <a th:classappend="${boardNav == 'board'} ? 'active'" th:href="@{/boards/{id}(id=${boardInfo.id})}" th:text="#{boards.nav.board}">Доска</a>
+    <a th:classappend="${boardNav == 'chat'} ? 'active'" th:href="@{/boards/{id}/chat(id=${boardInfo.id})}" th:text="#{chat.title}">Чат</a>
+    <a th:classappend="${boardNav == 'log'} ? 'active'" th:href="@{/boards/{id}/log(id=${boardInfo.id})}" th:text="#{log.title}">История</a>
+    <a th:classappend="${boardNav == 'archive'} ? 'active'" th:href="@{/boards/{id}/archive(id=${boardInfo.id})}" th:text="#{tasks.tab.archive}">Архив</a>
+    <a th:if="${boardInfo.owner}" th:classappend="${boardNav == 'settings'} ? 'active'" th:href="@{/boards/{id}/settings(id=${boardInfo.id})}" th:text="#{boards.settings}">Настройки</a>
+</nav>
 </body>
 </html>

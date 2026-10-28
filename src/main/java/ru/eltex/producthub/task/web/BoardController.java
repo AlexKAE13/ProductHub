@@ -20,6 +20,8 @@ import ru.eltex.producthub.task.domain.BoardColor;
 import ru.eltex.producthub.task.domain.TaskPriority;
 import ru.eltex.producthub.task.domain.TaskStatus;
 import ru.eltex.producthub.task.service.Board;
+import ru.eltex.producthub.task.service.BoardActivity;
+import ru.eltex.producthub.task.service.BoardChatService;
 import ru.eltex.producthub.task.service.BoardInfo;
 import ru.eltex.producthub.task.service.BoardService;
 import ru.eltex.producthub.task.service.TaskFilter;
@@ -32,10 +34,14 @@ public class BoardController {
 
     private final BoardService boards;
     private final TaskService tasks;
+    private final BoardChatService chat;
+    private final BoardActivity activity;
 
-    public BoardController(BoardService boards, TaskService tasks) {
+    public BoardController(BoardService boards, TaskService tasks, BoardChatService chat, BoardActivity activity) {
         this.boards = boards;
         this.tasks = tasks;
+        this.chat = chat;
+        this.activity = activity;
     }
 
     private void tabs(Model model, HubUserDetails user, String tab, Long boardId) {
@@ -98,6 +104,7 @@ public class BoardController {
         model.addAttribute("canCreate", true);
         model.addAttribute("base", "/boards/" + id + (archived ? "/archive" : ""));
         model.addAttribute("inbox", false);
+        model.addAttribute("boardNav", archived ? "archive" : "board");
         model.addAttribute("archiveView", archived);
         tabs(model, user, archived ? "board-archive" : "board", id);
         if (htmx != null) {
@@ -105,6 +112,30 @@ public class BoardController {
         }
         model.addAttribute("assignees", info.members());
         return "tasks/board";
+    }
+
+    /** Чат доски. */
+    @GetMapping("/boards/{id}/chat")
+    public String chatPage(@PathVariable Long id, @AuthenticationPrincipal HubUserDetails user, Model model) {
+        BoardInfo info = boards.info(id, user);
+        tabs(model, user, "board", id);
+        model.addAttribute("boardInfo", info);
+        model.addAttribute("boardNav", "chat");
+        model.addAttribute("chatMessages", chat.boardMessages(id, user));
+        model.addAttribute("chatUrl", "/boards/" + id + "/chat");
+        model.addAttribute("chatId", "chat-board");
+        return "tasks/board-chat";
+    }
+
+    /** Журнал изменений доски. */
+    @GetMapping("/boards/{id}/log")
+    public String logPage(@PathVariable Long id, @AuthenticationPrincipal HubUserDetails user, Model model) {
+        BoardInfo info = boards.info(id, user);
+        tabs(model, user, "board", id);
+        model.addAttribute("boardInfo", info);
+        model.addAttribute("boardNav", "log");
+        model.addAttribute("events", activity.forBoard(id, user));
+        return "tasks/board-log";
     }
 
     @GetMapping("/boards/{id}/cards/new")
@@ -133,6 +164,7 @@ public class BoardController {
 
     private void fillSettings(Model model, HubUserDetails user, BoardInfo info) {
         tabs(model, user, "board", info.id());
+        model.addAttribute("boardNav", "settings");
         model.addAttribute("boardInfo", info);
         model.addAttribute("statuses", TaskStatus.values());
         model.addAttribute("palette", BoardColor.KEYS);

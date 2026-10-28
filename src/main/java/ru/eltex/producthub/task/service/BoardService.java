@@ -42,9 +42,11 @@ public class BoardService {
     private final TaskQueryRepository queries;
     private final UserRepository users;
     private final MessageSource messages;
+    private final BoardActivity activity;
 
     public BoardService(TaskBoardRepository boards, TaskRepository tasks, TaskQueryRepository queries,
-                        UserRepository users, MessageSource messages) {
+                        UserRepository users, MessageSource messages, BoardActivity activity) {
+        this.activity = activity;
         this.boards = boards;
         this.tasks = tasks;
         this.queries = queries;
@@ -110,7 +112,9 @@ public class BoardService {
         for (TaskStatus s : TaskStatus.values()) {
             b.getColumns().put(s, new ColumnStyle(messages.getMessage("taskStatus." + s, null, RU), BoardColor.defaultFor(s)));
         }
-        return boards.save(b).getId();
+        Long id = boards.save(b).getId();
+        activity.record(id, null, user.getId(), BoardActivity.BOARD_CREATED, title, null, null);
+        return id;
     }
 
     // ------------------------------------------------------------------ чтение
@@ -196,10 +200,34 @@ public class BoardService {
         if (!errors.isEmpty()) {
             throw new FormValidationException(errors);
         }
-        b.setName(title.length() > 120 ? title.substring(0, 120) : title);
+        String newName = title.length() > 120 ? title.substring(0, 120) : title;
+        String oldName = b.getName();
+        List<String> changes = new ArrayList<>();
+        for (TaskStatus st : TaskStatus.values()) {
+            ColumnStyle was = b.getColumns().get(st);
+            ColumnStyle now = styles.get(st);
+            if (was == null) {
+                continue;
+            }
+            if (!was.getTitle().equals(now.getTitle())) {
+                changes.add("«" + was.getTitle() + "» → «" + now.getTitle() + "»");
+            }
+            if (!was.getColor().equals(now.getColor())) {
+                changes.add(messages.getMessage("boardEvent.part.color", new Object[] {now.getTitle(),
+                        messages.getMessage("boardColor." + was.getColor(), null, was.getColor(), RU),
+                        messages.getMessage("boardColor." + now.getColor(), null, now.getColor(), RU)}, RU));
+            }
+        }
+        b.setName(newName);
         b.setDescription(blankToNull(description));
         b.getColumns().clear();
         b.getColumns().putAll(styles);
+        if (!oldName.equals(newName)) {
+            activity.record(id, null, user.getId(), BoardActivity.BOARD_RENAMED, null, oldName, newName);
+        }
+        if (!changes.isEmpty()) {
+            activity.record(id, null, user.getId(), BoardActivity.COLUMNS_CHANGED, null, String.join("; ", changes), null);
+        }
     }
 
     @Transactional
@@ -209,7 +237,9 @@ public class BoardService {
         if (u.getRoles().stream().noneMatch(r -> r != Role.PARTNER)) {
             throw new AccessDeniedException("Во внутренние доски приглашают только внутренних пользователей");
         }
-        b.getMembers().add(u);
+        if (b.getMembers().add(u)) {
+            activity.record(id, null, user.getId(), BoardActivity.MEMBER_ADDED, null, u.getFullName(), null);
+        }
     }
 
     /** Убирает участника; его карточки на этой доске переходят владельцу. Владельца убрать нельзя. */
@@ -219,7 +249,11 @@ public class BoardService {
         if (b.getOwner().getId().equals(userId)) {
             throw new AccessDeniedException("Владельца доски убрать нельзя");
         }
-        b.getMembers().removeIf(u -> u.getId().equals(userId));
+        String removedName = b.getMembers().stream().filter(u -> u.getId().equals(userId)).map(User::getFullName)
+                .findFirst().orElse(null);
+        if (b.getMembers().removeIf(u -> u.getId().equals(userId))) {
+            activity.record(id, null, user.getId(), BoardActivity.MEMBER_REMOVED, null, removedName, null);
+        }
         tasks.findOnBoardAssignedTo(id, userId).forEach(t -> t.setAssignee(b.getOwner()));
     }
 

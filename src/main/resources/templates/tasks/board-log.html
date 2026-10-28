@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: page(~{::title}, ~{::main})}">
+<head>
+    <title th:text="${boardInfo.name} + ' - ' + #{log.title}">История доски</title>
+</head>
+<body>
+<main class="content wide">
+    <div class="page-head">
+        <div>
+            <h1 th:text="${boardInfo.name}">Доска</h1>
+            <p class="muted small board-members" th:text="#{boards.members.line(${#strings.listJoin(boardInfo.members.![fullName], ', ')})}">Участники</p>
+        </div>
+    </div>
+    <nav th:replace="~{tasks/tabs :: tabs}"></nav>
+    <nav th:replace="~{tasks/tabs :: boardnav}"></nav>
+    <section class="block">
+        <div class="block-head"><h2 th:text="#{log.title}">История изменений</h2></div>
+        <p class="muted" th:if="${events.isEmpty()}" th:text="#{log.empty}">Пока ничего не менялось</p>
+        <th:block th:if="${!events.isEmpty()}"><div th:replace="~{tasks/chat :: events(${events}, true)}"></div></th:block>
+    </section>
+</main>
+</body>
+</html>

@@ -18,7 +18,7 @@ public record Look(
         int blur,
         int dim) {
 
-    public static final Look DEFAULT = new Look(UiTheme.CLASSIC, ColorMode.AUTO, Palette.ELTEX, Background.MESH,
+    public static final Look DEFAULT = new Look(UiTheme.MODERN, ColorMode.LIGHT, Palette.PINE, Background.MESH,
             "dunes", null, 18, 0);
 
     public static final java.util.Set<String> BUILT_IN = java.util.Set.of("dunes", "peaks", "aurora", "firs", "sage", "slate");
@@ -33,8 +33,8 @@ public record Look(
         if (wall == null || !(BUILT_IN.contains(wall) || ("custom".equals(wall) && wallpaperKey != null))) {
             wall = "dunes";
         }
-        return new Look(theme == null ? UiTheme.CLASSIC : theme, mode == null ? ColorMode.AUTO : mode,
-                palette == null ? Palette.ELTEX : palette, background == null ? Background.MESH : background, wall,
+        return new Look(theme == null ? DEFAULT.theme() : theme, mode == null ? DEFAULT.mode() : mode,
+                palette == null ? DEFAULT.palette() : palette, background == null ? Background.MESH : background, wall,
                 wallpaperKey, Math.max(0, Math.min(40, blur)), Math.max(0, Math.min(80, dim)));
     }
 

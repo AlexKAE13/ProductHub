@@ -62,6 +62,27 @@ class ModernLookTest {
         service.save(product.getId(), UserSettingsView.DEFAULTS);
     }
 
+    private void chooseClassic(Long userId) {
+        UserSettingsView d = UserSettingsView.DEFAULTS;
+        service.save(userId, new UserSettingsView(d.menuLayout(), d.sidebarCollapsed(), d.density(), d.startPage(),
+                d.catalogOnlyMine(), d.catalogIncludeEol(),
+                new Look(UiTheme.CLASSIC, ColorMode.AUTO, Palette.ELTEX, Background.MESH, "dunes", null, 18, 0)));
+    }
+
+    @Test
+    @WithUserDetails("sales")
+    void modernPineGradientIsTheDefault() throws Exception {
+        Look look = service.get(sales.getId()).look();
+        assertEquals(UiTheme.MODERN, look.theme());
+        assertEquals(Palette.PINE, look.palette());
+        assertEquals(Background.MESH, look.background());
+        assertEquals(ColorMode.LIGHT, look.mode(), "по умолчанию светлая");
+        mvc.perform(get("/catalog")).andExpect(content().string(containsString("data-ui=\"modern\"")))
+                .andExpect(content().string(containsString("data-mode=\"light\"")))
+                .andExpect(content().string(containsString("data-palette=\"pine\"")))
+                .andExpect(content().string(containsString("data-bgtype=\"mesh\"")));
+    }
+
     static byte[] png(int w, int h) throws Exception {
         BufferedImage img = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -71,7 +92,8 @@ class ModernLookTest {
 
     @Test
     @WithUserDetails("sales")
-    void classicIsDefaultAndLoadsNoModernStyles() throws Exception {
+    void classicLoadsNoModernStyles() throws Exception {
+        chooseClassic(sales.getId());
         mvc.perform(get("/catalog")).andExpect(status().isOk())
                 .andExpect(content().string(containsString("data-ui=\"classic\"")))
                 .andExpect(content().string(not(containsString("modern.css"))))
@@ -93,7 +115,7 @@ class ModernLookTest {
                 .andExpect(content().string(containsString("data-bgtype=\"dots\"")))
                 .andExpect(content().string(containsString("css/modern")))
                 .andExpect(content().string(containsString("theme-modern")));
-        assertEquals(UiTheme.CLASSIC, service.get(product.getId()).look().theme(), "чужой вид не меняется");
+        assertEquals(Look.DEFAULT.palette(), service.get(product.getId()).look().palette(), "чужой вид не меняется");
     }
 
     @Test
@@ -102,7 +124,7 @@ class ModernLookTest {
         assertEquals("dunes", bad.wallpaper());
         assertEquals(40, bad.blur());
         assertEquals(0, bad.dim());
-        assertEquals(UiTheme.CLASSIC, bad.theme());
+        assertEquals(Look.DEFAULT.theme(), bad.theme());
         Look custom = new Look(UiTheme.MODERN, ColorMode.AUTO, Palette.ELTEX, Background.PHOTO, "custom", null, 18, 0).sanitized();
         assertEquals("dunes", custom.wallpaper(), "custom без загруженного файла недопустим");
     }
@@ -161,6 +183,7 @@ class ModernLookTest {
     @Test
     @WithUserDetails("sales")
     void classicHasNoThemeToggle() throws Exception {
+        chooseClassic(sales.getId());
         mvc.perform(get("/catalog")).andExpect(content().string(not(containsString("themeToggle"))));
     }
 

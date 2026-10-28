@@ -53,13 +53,13 @@ class SettingsTest {
     }
 
     @Test
-    void defaultsAreTopMenuNormalDensity() {
+    void defaultsAreSideMenuNormalDensity() {
         UserSettingsView v = service.get(users.loadUserByUsername("head").getId());
-        assertEquals(MenuLayout.TOP, v.menuLayout());
+        assertEquals(MenuLayout.SIDE, v.menuLayout());
         assertEquals(Density.NORMAL, v.density());
         assertEquals(StartPage.HOME, v.startPage());
         assertFalse(v.sidebarCollapsed());
-        assertEquals("layout-top", v.bodyClasses());
+        assertEquals("layout-side theme-modern", v.bodyClasses());
     }
 
     @Test
@@ -68,8 +68,8 @@ class SettingsTest {
         UserSettingsView mine = service.get(sales.getId());
         assertEquals(MenuLayout.SIDE, mine.menuLayout());
         assertTrue(mine.sidebarCollapsed());
-        assertEquals("layout-side sidebar-collapsed density-compact", mine.bodyClasses());
-        assertEquals(MenuLayout.TOP, service.get(product.getId()).menuLayout(), "чужие настройки не меняются");
+        assertEquals("layout-side sidebar-collapsed density-compact theme-modern", mine.bodyClasses());
+        assertEquals(MenuLayout.SIDE, service.get(product.getId()).menuLayout(), "чужие настройки не меняются");
     }
 
     @Test
@@ -89,9 +89,18 @@ class SettingsTest {
 
     @Test
     @WithUserDetails("sales")
-    void topMenuByDefaultWithoutSidebar() throws Exception {
+    void sideMenuByDefault() throws Exception {
         mvc.perform(get("/catalog"))
-                .andExpect(content().string(containsString("class=\"layout-top\"")))
+                .andExpect(content().string(containsString("layout-side")))
+                .andExpect(content().string(containsString("class=\"sidebar\"")));
+    }
+
+    @Test
+    @WithUserDetails("sales")
+    void topMenuWhenChosenHasNoSidebar() throws Exception {
+        service.save(sales.getId(), new UserSettingsView(MenuLayout.TOP, false, Density.NORMAL, StartPage.HOME, false, false));
+        mvc.perform(get("/catalog"))
+                .andExpect(content().string(containsString("layout-top")))
                 .andExpect(content().string(containsString("class=\"topbar\"")))
                 .andExpect(content().string(not(containsString("class=\"sidebar\""))))
                 .andExpect(content().string(not(containsString("sidebarToggle"))));

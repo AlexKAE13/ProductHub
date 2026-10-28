@@ -20,7 +20,7 @@ public record UserSettingsView(
     }
 
 
-    public static final UserSettingsView DEFAULTS = new UserSettingsView(MenuLayout.TOP, false, Density.NORMAL,
+    public static final UserSettingsView DEFAULTS = new UserSettingsView(MenuLayout.SIDE, false, Density.NORMAL,
             StartPage.HOME, false, false, Look.DEFAULT);
 
     public boolean isSide() {

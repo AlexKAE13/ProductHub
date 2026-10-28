@@ -28,6 +28,8 @@ import ru.eltex.producthub.task.domain.TaskPriority;
 import ru.eltex.producthub.task.domain.TaskStatus;
 import ru.eltex.producthub.task.domain.TaskType;
 import ru.eltex.producthub.task.service.Board;
+import ru.eltex.producthub.task.service.BoardActivity;
+import ru.eltex.producthub.task.service.BoardChatService;
 import ru.eltex.producthub.task.service.BoardInfo;
 import ru.eltex.producthub.task.service.BoardService;
 import ru.eltex.producthub.task.service.TaskFilter;
@@ -43,10 +45,14 @@ public class TaskController {
     private final ReferenceDataService reference;
     private final MessageSource messages;
     private final BoardService boards;
+    private final BoardChatService chat;
+    private final BoardActivity activity;
 
     public TaskController(TaskService service, QuestionService questions, ReferenceDataService reference,
-                          MessageSource messages, BoardService boards) {
+                          MessageSource messages, BoardService boards, BoardChatService chat, BoardActivity activity) {
         this.boards = boards;
+        this.chat = chat;
+        this.activity = activity;
         this.service = service;
         this.questions = questions;
         this.reference = reference;
@@ -129,6 +135,10 @@ public class TaskController {
             model.addAttribute("assignees", info.members());
             model.addAttribute("backUrl", "/boards/" + info.id());
             model.addAttribute("backLabel", info.name());
+            model.addAttribute("chatMessages", chat.cardMessages(id, user));
+            model.addAttribute("chatUrl", "/tasks/" + id + "/chat");
+            model.addAttribute("chatId", "chat-card");
+            model.addAttribute("events", activity.forTask(id, user));
         } else {
             model.addAttribute("canAssign", service.canAssignAny(user)
                     && (service.canManageAll(user) || t.getAssignee().getId().equals(user.getId())));

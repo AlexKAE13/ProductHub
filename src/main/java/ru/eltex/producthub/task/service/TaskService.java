@@ -52,11 +52,13 @@ public class TaskService {
     private final QuestionService questions;
     private final TaskProperties props;
     private final TaskBoardRepository boards;
+    private final BoardActivity activity;
 
     public TaskService(TaskRepository repository, TaskQueryRepository queries, UserRepository users,
                        SkuRepository skus, QuestionService questions, TaskProperties props,
-                       TaskBoardRepository boards) {
+                       TaskBoardRepository boards, BoardActivity activity) {
         this.boards = boards;
+        this.activity = activity;
         this.repository = repository;
         this.queries = queries;
         this.users = users;
@@ -221,7 +223,12 @@ public class TaskService {
             t.setSku(sku);
             t.setRelated(RelatedType.SKU, sku.getId(), sku.getModel(), "/sku/" + sku.getModel());
         }
-        return repository.save(t);
+        Task saved = repository.save(t);
+        if (board != null) {
+            activity.record(board.getId(), saved.getId(), user.getId(), BoardActivity.CARD_CREATED, title,
+                    assignee.getFullName(), null);
+        }
+        return saved;
     }
 
     // ------------------------------------------------------------------ доска
@@ -298,7 +305,14 @@ public class TaskService {
                         ? "tasks.rule.answerFirst" : "tasks.rule.resolveFirst");
             }
         }
+        TaskStatus before = t.getStatus();
         t.moveTo(status);
+        if (t.getBoard() != null && before != status) {
+            var cols = t.getBoard().getColumns();
+            activity.record(t.getBoard().getId(), t.getId(), user.getId(), BoardActivity.CARD_MOVED, t.getTitle(),
+                    cols.containsKey(before) ? cols.get(before).getTitle() : before.name(),
+                    cols.containsKey(status) ? cols.get(status).getTitle() : status.name());
+        }
         if (status == TaskStatus.IN_PROGRESS && t.getRelatedType() == RelatedType.QUESTION) {
             questions.markInProgress(t.getRelatedId());
         }
@@ -316,6 +330,9 @@ public class TaskService {
             throw new TaskRuleException("tasks.rule.archiveDone");
         }
         t.archive();
+        if (t.getBoard() != null) {
+            activity.record(t.getBoard().getId(), t.getId(), user.getId(), BoardActivity.CARD_ARCHIVED, t.getTitle(), null, null);
+        }
     }
 
     @Transactional
@@ -325,6 +342,9 @@ public class TaskService {
             throw new AccessDeniedException("Нет прав менять эту задачу");
         }
         t.unarchive();
+        if (t.getBoard() != null) {
+            activity.record(t.getBoard().getId(), t.getId(), user.getId(), BoardActivity.CARD_RESTORED, t.getTitle(), null, null);
+        }
     }
 
     @Transactional
@@ -339,7 +359,12 @@ public class TaskService {
             throw new AccessDeniedException("Переназначать входящие задачи могут PRODUCT (свои) и ADMIN");
         }
         User assignee = users.findById(assigneeId).filter(User::isActive).orElseThrow();
+        boolean changed = !t.getAssignee().getId().equals(assignee.getId());
         t.setAssignee(assignee);
+        if (t.getBoard() != null && changed) {
+            activity.record(t.getBoard().getId(), t.getId(), user.getId(), BoardActivity.CARD_ASSIGNED, t.getTitle(),
+                    assignee.getFullName(), null);
+        }
     }
 
     /** Закрывает открытые задачи по вопросу (вызывается, когда вопрос решен). */

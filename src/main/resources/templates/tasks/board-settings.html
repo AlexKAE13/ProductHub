@@ -13,6 +13,7 @@
         </div>
     </div>
     <nav th:replace="~{tasks/tabs :: tabs}"></nav>
+    <nav th:replace="~{tasks/tabs :: boardnav}"></nav>
     <p class="notice" th:if="${param.saved != null}" th:text="#{boards.saved}">Сохранено</p>
 
     <form class="block editing" th:action="@{/boards/{id}/settings(id=${boardInfo.id})}" method="post" th:if="${boardInfo.owner}">

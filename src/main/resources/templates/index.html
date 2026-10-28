@@ -7,6 +7,7 @@
 <body>
 <main class="content">
     <img class="home-hero" th:src="@{/img/welcome.webp}" th:alt="#{home.hero.alt}" width="1552" height="672">
+    <section class="home-card">
     <h1 th:text="#{home.welcome(${#authentication.principal.fullName})}">Добро пожаловать</h1>
     <p th:text="#{app.tagline}">Единая база знаний</p>
     <p class="muted">
@@ -14,6 +15,7 @@
     </p>
     <p th:text="#{home.intro}">Описание</p>
     <p class="muted" th:text="#{home.stage}">Каркас</p>
+    </section>
 </main>
 </body>
 </html>

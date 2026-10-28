@@ -3,15 +3,15 @@ package ru.eltex.producthub.settings;
 /** Форма страницы "Настройки". */
 public class SettingsForm {
 
-    private MenuLayout menuLayout = MenuLayout.TOP;
+    private MenuLayout menuLayout = MenuLayout.SIDE;
     private boolean sidebarCollapsed;
     private Density density = Density.NORMAL;
     private StartPage startPage = StartPage.HOME;
     private boolean catalogOnlyMine;
     private boolean catalogIncludeEol;
-    private UiTheme uiTheme = UiTheme.CLASSIC;
-    private ColorMode colorMode = ColorMode.AUTO;
-    private Palette palette = Palette.ELTEX;
+    private UiTheme uiTheme = Look.DEFAULT.theme();
+    private ColorMode colorMode = Look.DEFAULT.mode();
+    private Palette palette = Look.DEFAULT.palette();
     private Background background = Background.MESH;
     private String wallpaper = "dunes";
     private int wallBlur = 18;

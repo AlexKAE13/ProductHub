@@ -20,4 +20,7 @@ public interface TaskBoardRepository extends JpaRepository<TaskBoard, Long> {
 
     @Query("select count(b) > 0 from TaskBoard b join b.members m where b.id = :boardId and m.id = :userId and b.deleted = false")
     boolean isMember(@Param("boardId") Long boardId, @Param("userId") Long userId);
+
+    @Query("select count(b) > 0 from TaskBoard b where b.id = :boardId and b.owner.id = :userId and b.deleted = false")
+    boolean isOwner(@Param("boardId") Long boardId, @Param("userId") Long userId);
 }

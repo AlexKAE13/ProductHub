@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<body>
+<!-- Список сообщений. Модель: chatMessages, chatUrl, chatId. Сам обновляется раз в несколько секунд. -->
+<div class="chat-list" th:fragment="list" th:attr="id=${chatId},hx-get=${chatUrl + '/messages'}"
+     hx-trigger="every 8s" hx-swap="outerHTML">
+    <p class="muted chat-empty" th:if="${chatMessages.isEmpty()}" th:text="#{chat.empty}">Сообщений пока нет</p>
+    <div class="chat-msg" th:each="m : ${chatMessages}" th:classappend="${m.mine} ? 'mine'">
+        <span class="av" th:attr="data-name=${m.author}" th:title="${m.author}" aria-hidden="true">&nbsp;</span>
+        <div class="chat-bubble">
+            <div class="chat-meta">
+                <strong th:text="${m.author}">Автор</strong>
+                <span class="muted small" th:text="${#temporals.format(m.at, 'dd.MM.yyyy HH:mm')}">дата</span>
+                <button type="button" class="link-btn chat-del" th:if="${m.canDelete}" th:text="#{chat.delete}"
+                        th:attr="hx-post=@{/chat/{id}/delete(id=${m.id})},hx-confirm=#{chat.delete.confirm},hx-target='#' + ${chatId}"
+                        hx-swap="outerHTML">Удалить</button>
+            </div>
+            <div class="chat-body" th:text="${m.body}">Текст</div>
+        </div>
+    </div>
+</div>
+
+<!-- Форма нового сообщения. Модель: chatUrl, chatId. Enter отправляет, Shift+Enter - новая строка (chat.js). -->
+<form class="chat-form" th:fragment="form" method="post" th:action="${chatUrl}"
+      th:attr="hx-post=${chatUrl},hx-target='#' + ${chatId}" hx-swap="outerHTML"
+      hx-on::after-request="if (event.detail.successful) this.reset()">
+    <textarea name="text" rows="2" maxlength="2000" required th:placeholder="#{chat.placeholder}"></textarea>
+    <button type="submit" class="primary" th:text="#{chat.send}">Отправить</button>
+</form>
+
+<!-- Журнал изменений. Параметры: список событий, показывать ли ссылку на карточку -->
+<ul class="event-list" th:fragment="events(list, withLinks)">
+    <li class="event-row" th:each="e : ${list}">
+        <span class="event-when muted small" th:text="${#temporals.format(e.at, 'dd.MM.yyyy HH:mm')}">дата</span>
+        <span class="event-who" th:text="${e.actor}">Автор</span>
+        <span class="event-what">
+            <span th:text="#{${'boardEvent.' + e.kind}(${e.subject}, ${e.arg1}, ${e.arg2})}">действие</span>
+            <a class="small" th:if="${withLinks and e.taskId != null}" th:href="@{/tasks/{id}(id=${e.taskId})}" th:text="#{log.open}">открыть</a>
+        </span>
+    </li>
+</ul>
+</body>
+</html>

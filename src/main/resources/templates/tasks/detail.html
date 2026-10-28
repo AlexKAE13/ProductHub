@@ -36,6 +36,16 @@
                 <div class="block-head"><h2 th:text="#{tasks.description}">Описание</h2></div>
                 <p class="pre" th:text="${t.description}">Описание</p>
             </section>
+            <section class="block chat-block" th:if="${boardInfo != null}">
+                <div class="block-head"><h2 th:text="#{chat.card.title}">Обсуждение</h2></div>
+                <div th:replace="~{tasks/chat :: list}"></div>
+                <div th:replace="~{tasks/chat :: form}"></div>
+            </section>
+            <section class="block" th:if="${boardInfo != null}">
+                <div class="block-head"><h2 th:text="#{log.card.title}">История карточки</h2></div>
+                <p class="muted" th:if="${events.isEmpty()}" th:text="#{log.empty}">Пока ничего не менялось</p>
+                <th:block th:if="${!events.isEmpty()}"><div th:replace="~{tasks/chat :: events(${events}, false)}"></div></th:block>
+            </section>
             <section class="block" th:if="${question != null}">
                 <div class="block-head"><h2 th:text="#{qa.question.title}">Вопрос</h2></div>
                 <p><span class="tag" th:text="#{'qaKind.' + ${question.kind}}">вопрос</span>

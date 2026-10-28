@@ -882,3 +882,30 @@ html[data-theme="dark"] .tone-grey { --col-c: #8793a1; }
 .member-list li { border-bottom-color: var(--hair); }
 .archive-row { border-radius: 14px; border-color: var(--hair); }
 .archive-row:hover { border-color: color-mix(in srgb, var(--accent) 55%, transparent); }
+
+/* ---------- Главная: матовый блок с текстом под фото ---------- */
+.home-card {
+    margin-top: 14px; padding: 18px 24px 8px; border-radius: 20px; border: 1px solid var(--edge);
+    background: color-mix(in srgb, var(--surface-solid) 62%, transparent);
+    -webkit-backdrop-filter: blur(26px) saturate(1.5); backdrop-filter: blur(26px) saturate(1.5);
+    box-shadow: var(--shadow-sm);
+}
+.home-card h1 { margin-top: 0; }
+@media (max-width: 700px) { .home-card { padding: 14px 16px 4px; border-radius: 16px; } }
+
+/* ---------- Поиск по центру страницы, на главной шире ---------- */
+.searchbar { justify-content: center; }
+.searchbar .hub-search { flex: 0 1 560px; }
+body[data-route="/"] .searchbar .hub-search { flex-basis: 860px; }
+.searchbar .hub-search-drop { left: 0; right: 0; width: auto; max-width: none; }
+
+/* ---------- Главная: фото на всю ширину блока ---------- */
+.home-hero { max-width: none; width: 100%; margin: 0; }
+
+/* ---------- Подвкладки доски, чат, журнал (современная тема) ---------- */
+.board-nav a { border-radius: 16px; }
+.board-nav a:hover { background: color-mix(in srgb, var(--text) 6%, transparent); }
+.chat-bubble { border-radius: 16px; background: color-mix(in srgb, var(--surface-solid) 70%, transparent); border-color: var(--hair); }
+.chat-msg.mine .chat-bubble { background: color-mix(in srgb, var(--accent) 14%, var(--surface-solid)); }
+.event-row { border-bottom-color: var(--hair); }
+

@@ -17,7 +17,7 @@ public class UserSetting {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "menu_layout", nullable = false)
-    private MenuLayout menuLayout = MenuLayout.TOP;
+    private MenuLayout menuLayout = MenuLayout.SIDE;
 
     @Column(name = "sidebar_collapsed", nullable = false)
     private boolean sidebarCollapsed;
@@ -38,15 +38,15 @@ public class UserSetting {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "ui_theme", nullable = false)
-    private UiTheme uiTheme = UiTheme.CLASSIC;
+    private UiTheme uiTheme = Look.DEFAULT.theme();
 
     @Enumerated(EnumType.STRING)
     @Column(name = "color_mode", nullable = false)
-    private ColorMode colorMode = ColorMode.AUTO;
+    private ColorMode colorMode = Look.DEFAULT.mode();
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Palette palette = Palette.ELTEX;
+    private Palette palette = Look.DEFAULT.palette();
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
