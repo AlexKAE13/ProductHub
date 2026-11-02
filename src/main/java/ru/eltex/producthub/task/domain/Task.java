@@ -114,6 +114,11 @@ public class Task {
         this.closedAt = newStatus == TaskStatus.DONE ? this.updatedAt : null;
     }
 
+    /** Отмечает, что карточку правили (название, описание, приоритет). */
+    public void touch() {
+        this.updatedAt = LocalDateTime.now();
+    }
+
     public void archive() {
         this.archived = true;
         this.archivedAt = LocalDateTime.now();

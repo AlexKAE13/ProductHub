@@ -32,6 +32,7 @@ import ru.eltex.producthub.task.service.BoardActivity;
 import ru.eltex.producthub.task.service.BoardChatService;
 import ru.eltex.producthub.task.service.BoardInfo;
 import ru.eltex.producthub.task.service.BoardService;
+import ru.eltex.producthub.task.service.TaskAttachmentService;
 import ru.eltex.producthub.task.service.TaskFilter;
 import ru.eltex.producthub.task.service.TaskForm;
 import ru.eltex.producthub.task.service.TaskRuleException;
@@ -47,9 +48,12 @@ public class TaskController {
     private final BoardService boards;
     private final BoardChatService chat;
     private final BoardActivity activity;
+    private final TaskAttachmentService attachments;
 
     public TaskController(TaskService service, QuestionService questions, ReferenceDataService reference,
-                          MessageSource messages, BoardService boards, BoardChatService chat, BoardActivity activity) {
+                          MessageSource messages, BoardService boards, BoardChatService chat, BoardActivity activity,
+                          TaskAttachmentService attachments) {
+        this.attachments = attachments;
         this.boards = boards;
         this.chat = chat;
         this.activity = activity;
@@ -123,9 +127,12 @@ public class TaskController {
     public String detail(@PathVariable Long id, @AuthenticationPrincipal HubUserDetails user, Model model) {
         Task t = service.detail(id, user);
         model.addAttribute("t", t);
+        model.addAttribute("attachments", attachments.list(id, user));
         model.addAttribute("statuses", TaskStatus.values());
         boolean canMove = service.canMove(user, t);
         model.addAttribute("canMove", canMove);
+        model.addAttribute("canEditCard", canMove && t.getBoard() != null);
+        model.addAttribute("priorities", TaskPriority.values());
         model.addAttribute("canArchive", canMove && t.getStatus() == TaskStatus.DONE && !t.isArchived());
         model.addAttribute("canUnarchive", canMove && t.isArchived());
         if (t.getBoard() != null) {
@@ -213,6 +220,27 @@ public class TaskController {
     @PostMapping("/tasks/{id}/unarchive-page")
     public String unarchivePage(@PathVariable Long id, @AuthenticationPrincipal HubUserDetails user) {
         service.unarchive(id, user);
+        return "redirect:/tasks/" + id;
+    }
+
+    /** Правка названия и описания карточки своей доски. */
+    @PostMapping("/tasks/{id}/edit")
+    public String editCard(@PathVariable Long id, @RequestParam String title,
+                           @RequestParam(required = false) String description,
+                           @AuthenticationPrincipal HubUserDetails user, RedirectAttributes redirect) {
+        try {
+            service.editCard(id, title, description, user);
+            redirect.addFlashAttribute("cardSaved", true);
+        } catch (FormValidationException e) {
+            redirect.addFlashAttribute("cardError", e.getErrors().values().iterator().next());
+        }
+        return "redirect:/tasks/" + id;
+    }
+
+    @PostMapping("/tasks/{id}/priority")
+    public String priority(@PathVariable Long id, @RequestParam TaskPriority priority,
+                           @AuthenticationPrincipal HubUserDetails user) {
+        service.setPriority(id, priority, user);
         return "redirect:/tasks/" + id;
     }
 

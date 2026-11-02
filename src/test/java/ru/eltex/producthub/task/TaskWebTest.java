@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
@@ -20,6 +21,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -33,6 +35,7 @@ import ru.eltex.producthub.security.HubUserDetailsService;
 import ru.eltex.producthub.sku.service.SkuService;
 import ru.eltex.producthub.task.domain.RelatedType;
 import ru.eltex.producthub.task.domain.Task;
+import ru.eltex.producthub.task.service.TaskAttachmentService;
 import ru.eltex.producthub.task.service.TaskFilter;
 import ru.eltex.producthub.task.service.TaskService;
 
@@ -53,6 +56,8 @@ class TaskWebTest {
     HubUserDetailsService users;
     @Autowired
     SeedImportService importer;
+    @Autowired
+    TaskAttachmentService attachments;
 
     HubUserDetails product;
 
@@ -83,6 +88,26 @@ class TaskWebTest {
     // ---------------------------------------------------------- доска
 
     @Test
+    @WithUserDetails("admin")
+    void uploadsMultipleAttachments() throws Exception {
+        var q = questions.ask(QuestionKind.QUESTION, TargetType.SKU, skuId, "Вложения " + marker(), false, sales);
+        Task task = taskFor(q.getId());
+        var first = new MockMultipartFile("file", "first.txt", "text/plain", "first".getBytes());
+        var second = new MockMultipartFile("file", "second.txt", "text/plain", "second".getBytes());
+        mvc.perform(multipart("/tasks/{id}/attachments", task.getId()).file(first).file(second).with(csrf()))
+                .andExpect(status().is3xxRedirection());
+        mvc.perform(get("/tasks/{id}", task.getId())).andExpect(status().isOk())
+                .andExpect(content().string(containsString("first.txt")))
+                .andExpect(content().string(containsString("second.txt")));
+        var files = attachments.list(task.getId(), admin);
+        assertEquals(2, files.size());
+        mvc.perform(get("/tasks/{id}/attachments/{fileId}", task.getId(), files.get(0).id()))
+                .andExpect(status().isOk()).andExpect(content().bytes(first.getBytes()));
+        mvc.perform(get("/tasks/{id}/attachments/{fileId}", task.getId(), files.get(1).id()))
+                .andExpect(status().isOk()).andExpect(content().bytes(second.getBytes()));
+    }
+
+    @Test
     @WithUserDetails("sales")
     void salesIsSentToMyQuestionsInsteadOfBoard() throws Exception {
         mvc.perform(get("/tasks")).andExpect(status().is3xxRedirection()).andExpect(redirectedUrl("/boards"));
@@ -101,6 +126,7 @@ class TaskWebTest {
                 .andExpect(content().string(containsString("На проверке")))
                 .andExpect(content().string(containsString("Закрыто")))
                 .andExpect(content().string(containsString("data-id=\"" + t.getId() + "\"")))
+                .andExpect(content().string(containsString("class=\"task-title task-card-link\" href=\"/tasks/" + t.getId() + "\"")))
                 .andExpect(content().string(containsString("task-card")))
                 .andExpect(content().string(containsString("Sortable.min")));
         mvc.perform(get("/tasks?assignee=all").header("HX-Request", "true"))

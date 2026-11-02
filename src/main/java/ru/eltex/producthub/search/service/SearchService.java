@@ -106,8 +106,61 @@ public class SearchService {
 
     // ------------------------------------------------------------ запрос
 
-    /** Запрос под введенный текст, либо null, если искать нечего. Публичный для тестов. */
+    /**
+     * Запрос под введенный текст, либо null, если искать нечего. Если текст набран в чужой раскладке ("цуз-30д" вместо
+     * "wep-30l" или "geiobdrf" вместо "прошивка"), ищется и он, и его вариант в другой раскладке.
+     */
     Query build(String text, boolean internal) {
+        Query main = buildOne(text, internal);
+        String alt = swapLayout(text);
+        if (alt == null) {
+            return main;
+        }
+        Query other = buildOne(alt, internal);
+        if (other == null) {
+            return main;
+        }
+        if (main == null) {
+            return other;
+        }
+        return new BooleanQuery.Builder().add(main, Occur.SHOULD).add(boost(other, 0.9f), Occur.SHOULD)
+                .setMinimumNumberShouldMatch(1).build();
+    }
+
+    private static final String RU_KEYS = "йцукенгшщзхъфывапролджэячсмитьбюё";
+    private static final String EN_KEYS = "qwertyuiop[]asdfghjkl;'zxcvbnm,.`";
+
+    /**
+     * Тот же текст, как если бы раскладка была другой: русские буквы становятся латинскими на тех же клавишах и
+     * наоборот. Цифры и дефисы не меняются. Пусто, если менять нечего. Латиница с цифрами (артикулы) не переводится.
+     */
+    public static String swapLayout(String text) {
+        if (text == null) {
+            return null;
+        }
+        String t = text.strip().toLowerCase();
+        boolean cyrillic = t.chars().anyMatch(c -> RU_KEYS.indexOf(c) >= 0);
+        boolean digits = t.chars().anyMatch(Character::isDigit);
+        boolean latin = t.chars().anyMatch(c -> c >= 'a' && c <= 'z');
+        StringBuilder out = new StringBuilder();
+        if (cyrillic && !latin) {
+            for (char c : t.toCharArray()) {
+                int i = RU_KEYS.indexOf(c);
+                out.append(i >= 0 ? EN_KEYS.charAt(i) : c);
+            }
+        } else if (latin && !cyrillic && !digits) {
+            for (char c : t.toCharArray()) {
+                int i = EN_KEYS.indexOf(c);
+                out.append(i >= 0 && Character.isLetter(RU_KEYS.charAt(i)) ? RU_KEYS.charAt(i) : c);
+            }
+        } else {
+            return null;
+        }
+        String result = out.toString();
+        return result.equals(t) ? null : result;
+    }
+
+    private Query buildOne(String text, boolean internal) {
         if (!acceptable(text)) {
             return null;
         }

@@ -311,10 +311,74 @@ public class TaskService {
             var cols = t.getBoard().getColumns();
             activity.record(t.getBoard().getId(), t.getId(), user.getId(), BoardActivity.CARD_MOVED, t.getTitle(),
                     cols.containsKey(before) ? cols.get(before).getTitle() : before.name(),
-                    cols.containsKey(status) ? cols.get(status).getTitle() : status.name());
+                    cols.containsKey(status) ? cols.get(status).getTitle() : status.name(),
+                    cols.containsKey(before) ? cols.get(before).getColor() : null,
+                    cols.containsKey(status) ? cols.get(status).getColor() : null);
         }
         if (status == TaskStatus.IN_PROGRESS && t.getRelatedType() == RelatedType.QUESTION) {
             questions.markInProgress(t.getRelatedId());
+        }
+        return t;
+    }
+
+    /**
+     * Правка названия и описания карточки своей доски (участниками доски). Системные входящие задачи так не правятся:
+     * их название собирает приложение.
+     */
+    @Transactional
+    public Task editCard(Long id, String title, String description, HubUserDetails user) {
+        Task t = repository.findDetailed(id).orElseThrow(() -> new TaskNotFoundException(id));
+        if (t.getBoard() == null || !isBoardMember(t.getBoard().getId(), user.getId())) {
+            throw new AccessDeniedException("Править можно только карточки своих досок, где вы участник");
+        }
+        String newTitle = title == null ? "" : title.strip();
+        if (newTitle.isEmpty()) {
+            throw new FormValidationException(Map.of("title", "validation.required"));
+        }
+        if (newTitle.length() > 500) {
+            newTitle = newTitle.substring(0, 500);
+        }
+        String newDescription = description == null || description.isBlank() ? null : description.strip();
+        if (newDescription != null && newDescription.length() > 4000) {
+            newDescription = newDescription.substring(0, 4000);
+        }
+        String oldTitle = t.getTitle();
+        boolean titleChanged = !oldTitle.equals(newTitle);
+        boolean descriptionChanged = !java.util.Objects.equals(t.getDescription(), newDescription);
+        if (titleChanged) {
+            t.setTitle(newTitle);
+        }
+        if (descriptionChanged) {
+            t.setDescription(newDescription);
+        }
+        if (titleChanged || descriptionChanged) {
+            t.touch();
+        }
+        Long boardId = t.getBoard().getId();
+        if (titleChanged) {
+            activity.record(boardId, t.getId(), user.getId(), BoardActivity.CARD_RENAMED, newTitle, oldTitle, newTitle);
+        }
+        if (descriptionChanged) {
+            activity.record(boardId, t.getId(), user.getId(), BoardActivity.CARD_DESCRIBED, t.getTitle(), null, null);
+        }
+        return t;
+    }
+
+    /** Смена приоритета: тем, кто может двигать карточку. */
+    @Transactional
+    public Task setPriority(Long id, TaskPriority priority, HubUserDetails user) {
+        Task t = repository.findDetailed(id).orElseThrow(() -> new TaskNotFoundException(id));
+        if (!canMove(user, t)) {
+            throw new AccessDeniedException("Нет прав менять эту задачу");
+        }
+        TaskPriority before = t.getPriority();
+        if (before != priority) {
+            t.setPriority(priority);
+            t.touch();
+            if (t.getBoard() != null) {
+                activity.record(t.getBoard().getId(), t.getId(), user.getId(), BoardActivity.CARD_PRIORITY, t.getTitle(),
+                        before.name(), priority.name());
+            }
         }
         return t;
     }

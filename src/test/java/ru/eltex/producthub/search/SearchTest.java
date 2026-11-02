@@ -115,6 +115,16 @@ class SearchTest {
     }
 
     @Test
+    void textTypedInWrongLayoutIsFoundToo() {
+        assertEquals("wep-30l", SearchService.swapLayout("цуз-30д"));
+        assertEquals("прошивка", SearchService.swapLayout("ghjibdrf"));
+        assertEquals(null, SearchService.swapLayout("WEP-550K"), "артикул латиницей с цифрами не переводится");
+        assertEquals(null, SearchService.swapLayout("123"));
+        assertTrue(found("цуз-550л", "SKU", "WEP-550K", true), "артикул, набранный русской раскладкой");
+        assertTrue(found("цуз 550л", "SKU", "WEP-550K", true));
+    }
+
+    @Test
     void modelPrefixFindsSku() {
         assertTrue(group("wep55", "SKU", true).hits().stream().anyMatch(h -> h.title().equals("WEP-550K")));
         assertTrue(found("wlc-32", "SKU", "WLC-3200", true));

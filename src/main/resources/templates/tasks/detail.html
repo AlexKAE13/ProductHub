@@ -10,13 +10,22 @@
     <p class="error" th:if="${qaError != null}" th:text="#{${qaError}}"></p>
     <div class="page-head">
         <div>
-            <div class="crumbs"><a th:href="@{${backUrl}}" th:text="${backLabel != null} ? ${backLabel} : #{tasks.tab.inbox}">Входящие запросы</a></div>
+            <div class="crumbs back-row">
+                <a class="back-btn" th:href="@{${backUrl}}" th:title="${backLabel != null} ? ${backLabel} : #{tasks.tab.inbox}"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span th:text="#{tasks.back}">Назад</span></a>
+                <span class="back-where muted small" th:text="${backLabel != null} ? ${backLabel} : #{tasks.tab.inbox}">Доска</span>
+            </div>
             <h1 th:text="${t.title}">Название</h1>
             <p class="muted"><span class="tag" th:text="#{'taskType.' + ${t.type}}">Тип</span>
                 <span class="st st-IN_PROGRESS" th:text="${boardInfo != null and boardInfo.titles.get(t.status) != null} ? ${boardInfo.titles.get(t.status)} : #{'taskStatus.' + ${t.status}}">Новые</span>
                 <span class="tag" th:if="${t.archived}" th:text="#{tasks.archived}">в архиве</span></p>
         </div>
         <div class="actions" th:if="${canMove}">
+            <form th:action="@{/tasks/{id}/priority(id=${t.id})}" method="post" class="inline prio-form">
+                <span th:replace="~{tasks/prio :: flag(${t.priority.name()})}"></span>
+                <select name="priority" onchange="this.form.submit()" th:aria-label="#{tasks.priority}">
+                    <option th:each="p : ${priorities}" th:value="${p}" th:text="#{'taskPriority.' + ${p}}" th:selected="${p == t.priority}"></option>
+                </select>
+            </form>
             <form th:action="@{/tasks/{id}/move(id=${t.id})}" method="post" class="inline">
                 <select name="status" onchange="this.form.submit()" th:aria-label="#{artifacts.col.status}">
                     <option th:each="s : ${statuses}" th:value="${s}" th:text="${boardInfo != null and boardInfo.titles.get(s) != null} ? ${boardInfo.titles.get(s)} : #{'taskStatus.' + ${s}}" th:selected="${s == t.status}"></option>
@@ -32,20 +41,50 @@
     </div>
     <div class="card-layout">
         <div class="col-main">
-            <section class="block" th:if="${t.description != null}">
+            <section class="block" th:if="${t.description != null or canEditCard}">
                 <div class="block-head"><h2 th:text="#{tasks.description}">Описание</h2></div>
-                <p class="pre" th:text="${t.description}">Описание</p>
+                <p class="notice" th:if="${cardSaved != null}" th:text="#{tasks.saved}">Сохранено</p>
+                <p class="error" th:if="${cardError != null}" th:text="#{${cardError}}"></p>
+                <p class="pre" th:if="${t.description != null}" th:text="${t.description}">Описание</p>
+                <p class="muted" th:if="${t.description == null}" th:text="#{tasks.description.empty}">Описание не заполнено</p>
+                <details class="edit-fold" th:if="${canEditCard}">
+                    <summary class="link-btn" th:text="#{tasks.edit}">Править название и описание</summary>
+                    <form th:action="@{/tasks/{id}/edit(id=${t.id})}" method="post" class="editing">
+                        <div class="field"><label for="cardTitle" th:text="#{tasks.edit.title}">Название</label>
+                            <input type="text" id="cardTitle" name="title" maxlength="500" th:value="${t.title}" required></div>
+                        <div class="field"><label for="cardDescription" th:text="#{tasks.description}">Описание</label>
+                            <textarea id="cardDescription" name="description" rows="5" maxlength="4000" th:text="${t.description}"></textarea></div>
+                        <div class="form-actions"><button type="submit" class="primary" th:text="#{common.save}">Сохранить</button></div>
+                    </form>
+                </details>
+            </section>
+            <section class="block">
+                <div class="block-head"><h2 th:text="#{tasks.attachments}">Файлы</h2></div>
+                <p class="error" th:if="${attachmentError}" th:text="#{tasks.attachments.empty}"></p>
+                <p class="muted" th:if="${attachments.isEmpty()}" th:text="#{tasks.attachments.none}"></p>
+                <ul class="task-attachments" th:if="${!attachments.isEmpty()}">
+                    <li th:each="file : ${attachments}"><span class="task-attachment-name" th:text="${file.name}">Файл</span>
+                        <span class="task-attachment-actions"><a th:if="${file.previewable}" th:href="@{/tasks/{id}/attachments/{fileId}(id=${t.id},fileId=${file.id},inline=true)}" target="_blank" rel="noopener" th:text="#{artifacts.preview}">Предпросмотр</a>
+                        <a th:href="@{/tasks/{id}/attachments/{fileId}(id=${t.id},fileId=${file.id})}" th:text="#{artifacts.download}">Скачать</a></span></li>
+                </ul>
+                <form th:if="${canMove}" th:action="@{/tasks/{id}/attachments(id=${t.id})}" method="post" enctype="multipart/form-data">
+                    <input class="task-file-input" type="file" id="taskFile" name="file" multiple required th:aria-label="#{tasks.attachments.choose}">
+                    <label class="btn task-file-label" for="taskFile" th:text="#{tasks.attachments.choose}">Выбрать файл</label>
+                    <button type="submit" class="task-file-submit" hidden th:text="#{tasks.attachments.add}">Прикрепить</button>
+                    <noscript><button type="submit" th:text="#{tasks.attachments.add}">Прикрепить</button></noscript>
+                    <ul class="task-file-names" aria-live="polite"></ul>
+                </form>
             </section>
             <section class="block chat-block" th:if="${boardInfo != null}">
                 <div class="block-head"><h2 th:text="#{chat.card.title}">Обсуждение</h2></div>
                 <div th:replace="~{tasks/chat :: list}"></div>
                 <div th:replace="~{tasks/chat :: form}"></div>
             </section>
-            <section class="block" th:if="${boardInfo != null}">
-                <div class="block-head"><h2 th:text="#{log.card.title}">История карточки</h2></div>
+            <details class="block log-fold" th:if="${boardInfo != null}">
+                <summary><h2 th:text="#{log.card.title} + ' (' + ${events.size()} + ')'">История карточки</h2></summary>
                 <p class="muted" th:if="${events.isEmpty()}" th:text="#{log.empty}">Пока ничего не менялось</p>
                 <th:block th:if="${!events.isEmpty()}"><div th:replace="~{tasks/chat :: events(${events}, false)}"></div></th:block>
-            </section>
+            </details>
             <section class="block" th:if="${question != null}">
                 <div class="block-head"><h2 th:text="#{qa.question.title}">Вопрос</h2></div>
                 <p><span class="tag" th:text="#{'qaKind.' + ${question.kind}}">вопрос</span>
@@ -70,7 +109,7 @@
                     <dt th:text="#{tasks.dueDate}">Срок</dt>
                     <dd><span th:text="${t.dueDate != null} ? ${#temporals.format(t.dueDate, 'dd.MM.yyyy')} : '-'">-</span>
                         <span class="overdue" th:if="${t.isOverdue(today)}" th:text="#{tasks.overdue}">просрочено</span></dd>
-                    <dt th:text="#{tasks.priority}">Приоритет</dt><dd th:text="#{'taskPriority.' + ${t.priority}}">Обычный</dd>
+                    <dt th:text="#{tasks.priority}">Приоритет</dt><dd class="prio-dd"><span th:replace="~{tasks/prio :: flag(${t.priority.name()})}"></span> <span th:text="#{'taskPriority.' + ${t.priority}}">Обычный</span></dd>
                     <dt th:text="#{tasks.related}">Объект</dt>
                     <dd><a th:if="${t.relatedUrl != null}" th:href="${t.relatedUrl}" th:text="${t.relatedLabel}">объект</a>
                         <span class="muted" th:if="${t.relatedUrl == null}" th:text="#{common.none}">-</span></dd>

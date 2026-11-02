@@ -18,6 +18,25 @@
         }
     }
 
+    // Кнопка "В архив" живет только на закрытых карточках: после перетаскивания добавляем или убираем ее без перезагрузки.
+    function syncArchiveButton(card, status) {
+        var board = document.getElementById('board');
+        var label = board && board.getAttribute('data-l-archive');
+        var existing = card.querySelector('[data-archive-id]');
+        if (status !== 'DONE') {
+            if (existing) { existing.remove(); }
+            return;
+        }
+        var foot = card.querySelector('.task-foot');
+        if (existing || !label || !foot || !card.classList.contains('movable')) { return; }
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'card-act';
+        b.setAttribute('data-archive-id', card.getAttribute('data-id'));
+        b.textContent = label;
+        foot.insertBefore(b, foot.querySelector('.av'));
+    }
+
     function updateCounts() {
         document.querySelectorAll('.kanban .column').forEach(function (column) {
             var count = column.querySelector('.count');
@@ -96,7 +115,10 @@
                 list.style.padding = up + 'px ' + padX + 'px ' + padBottom + 'px';
             }
             Sortable.create(list, {
-                emptyInsertThreshold: 40,
+                // зона колонки и так занимает всю ее высоту и ширину; порог вокруг пустых колонок заставлял карточку
+                // метаться между двумя соседними колонками
+                emptyInsertThreshold: 0,
+                swapThreshold: 0.65,
                 group: 'tasks',
                 onStart: function () { document.getElementById('board').classList.add('is-dragging'); },
                 onMove: function (evt) {
@@ -124,6 +146,7 @@
                         .then(function (response) {
                             if (response.ok) {
                                 showMessage('');
+                                syncArchiveButton(evt.item, to);
                                 updateCounts();
                                 return null;
                             }

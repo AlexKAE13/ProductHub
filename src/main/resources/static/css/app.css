@@ -829,3 +829,69 @@ td .inline .link-btn.danger { margin-left: 12px; }
 .event-who { font-weight: 600; }
 @media (max-width: 800px) { .event-row { grid-template-columns: 1fr; gap: 2px; } .chat-msg { max-width: 100%; } }
 
+/* Названия колонок в журнале в цвете колонок */
+.col-chip { display: inline-block; padding: 0 9px; border-radius: 10px; background: var(--col-c, #6b7785); color: #fff; font-size: 12.5px; font-weight: 600; line-height: 20px; white-space: nowrap; }
+.col-arrow { color: var(--muted); margin: 0 2px; }
+
+/* История карточки сворачивается */
+.log-fold > summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; cursor: pointer; list-style: none; }
+.log-fold > summary::-webkit-details-marker { display: none; }
+.log-fold > summary h2 { margin: 0; }
+.log-fold > summary::after { content: ""; flex: none; width: 9px; height: 9px; margin: 0 6px 3px 0; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); transform: rotate(45deg); transition: transform .2s ease, margin .2s ease; }
+.log-fold[open] > summary::after { transform: rotate(-135deg); margin-bottom: -3px; }
+.log-fold > summary:hover::after { border-color: var(--accent); }
+.log-fold[open] > summary { margin-bottom: 8px; }
+
+/* ---------- Приоритет: флажки и правка карточки ---------- */
+.prio-flag { display: inline-flex; vertical-align: middle; line-height: 0; }
+.prio-flag.prio-LOW { color: #2f6fd0; }
+.prio-flag.prio-NORMAL { color: #e0a100; }
+.prio-flag.prio-HIGH { color: #d6453d; }
+.prio-chip { display: inline-flex; align-items: center; gap: 4px; padding: 0 8px 0 5px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); font-size: 12.5px; line-height: 20px; }
+.prio-form { display: inline-flex; align-items: center; gap: 6px; }
+.prio-dd { display: flex; align-items: center; gap: 6px; }
+.edit-fold { margin-top: 10px; }
+.edit-fold > summary { cursor: pointer; list-style: none; color: var(--accent); width: fit-content; }
+.edit-fold > summary::-webkit-details-marker { display: none; }
+.edit-fold[open] > summary { margin-bottom: 10px; }
+.task-card { position: relative; }
+.task-card-link::after { content: ""; position: absolute; inset: 0; z-index: 1; }
+.task-card a:not(.task-title), .task-card button { position: relative; z-index: 2; }
+.task-card:not(.movable) { cursor: pointer; }
+.task-card:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
+.prio-corner { position: absolute; top: 10px; right: 12px; z-index: 2; line-height: 0; pointer-events: none; }
+.prio-corner .prio-flag svg { width: 22px; height: 22px; }
+.task-card:has(.prio-corner) .task-title { display: block; padding-right: 32px; }
+
+/* ---------- Кнопка "Назад" в карточке ---------- */
+.back-row { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.back-btn { display: inline-flex; align-items: center; gap: 4px; padding: 3px 12px 3px 8px; border: 1px solid var(--line-strong); border-radius: 16px; background: var(--bg); color: var(--text); font-weight: 500; }
+.back-btn:hover { text-decoration: none; border-color: var(--accent); color: var(--accent); }
+
+/* В списке поиска светится одна строка: от стрелок или от курсора, смотря кто двигался последним */
+.hub-search-drop.mode-mouse .sr-hit:focus:not(:hover) { background: transparent; }
+.hub-search-drop.mode-kbd .sr-hit:hover:not(:focus) { background: transparent; }
+
+/* ---------- Артикулы плашками ---------- */
+.chips-field { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; min-height: 34px; padding: 4px 8px; border: 1px solid var(--line-strong); border-radius: 6px; background: var(--bg); cursor: text; width: 100%; box-sizing: border-box; }
+.chips-field:focus-within { border-color: var(--accent); outline: 2px solid var(--accent-soft); }
+.chips-field.is-disabled { opacity: .6; cursor: default; }
+.chips-field .chips-input { flex: 1 1 90px; min-width: 90px; width: auto; border: 0; outline: none; background: transparent; padding: 3px 2px; box-shadow: none; }
+.chip { display: inline-flex; align-items: center; gap: 4px; padding: 1px 4px 1px 9px; border-radius: 12px; background: var(--accent-soft); color: var(--accent); font-weight: 500; line-height: 20px; }
+.chip-x { border: 0; background: transparent; color: inherit; cursor: pointer; font-size: 15px; line-height: 1; padding: 0 4px; border-radius: 50%; opacity: .7; }
+.chip-x:hover { opacity: 1; background: color-mix(in srgb, var(--accent) 16%, transparent); }
+.table.preview .chips-field { min-width: 240px; }
+
+.sr-recent .sr-head { display: flex; justify-content: space-between; align-items: center; }
+.sr-clear { font-size: 12px; color: var(--muted); }
+
+
+.task-file-input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.task-file-label { cursor: pointer; }
+.task-file-input:focus-visible + .task-file-label { outline: 2px solid var(--accent); outline-offset: 2px; }
+.task-file-submit[hidden] { display: none; }
+.task-attachments li { margin-bottom: 6px; }
+.task-attachment-name { color: var(--text); overflow-wrap: anywhere; }
+.task-attachment-actions { display: inline-flex; flex-wrap: wrap; gap: 12px; margin-left: 12px; }
+.task-file-names { margin: 10px 0 0; padding-left: 22px; overflow-wrap: anywhere; }
+.task-file-names:empty { display: none; }

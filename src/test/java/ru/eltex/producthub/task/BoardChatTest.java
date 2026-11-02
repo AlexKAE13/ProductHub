@@ -223,7 +223,8 @@ class BoardChatTest {
         mvc.perform(get("/tasks/" + t.getId())).andExpect(status().isOk())
                 .andExpect(content().string(containsString("Обсуждение")))
                 .andExpect(content().string(containsString("История карточки")))
-                .andExpect(content().string(containsString("Создана карточка")));
+                .andExpect(content().string(containsString("Карточка создана")))
+                .andExpect(content().string(not(containsString("Создана карточка"))));
         mvc.perform(get("/boards/" + id + "/log")).andExpect(status().isOk())
                 .andExpect(content().string(containsString("Доска создана")))
                 .andExpect(content().string(containsString("Создана карточка")));

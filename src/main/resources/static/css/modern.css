@@ -620,6 +620,8 @@ dl.kv dt { color: var(--text-2); }
 .column-head .count { min-width: 24px; height: 24px; padding: 0 8px; border-radius: 12px; background: rgba(120, 120, 128, 0.18); color: var(--text-2); font-size: 12.5px; font-weight: 500; display: grid; place-items: center; }
 .task-card { padding: 13px 14px; border-radius: 12px; }
 .task-title { font-weight: 600; margin-bottom: 8px; color: var(--text); }
+.task-card:has(.prio-corner) .task-title { padding-right: 32px; }
+.task-card:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
 .task-foot { display: flex; justify-content: space-between; align-items: center; gap: 8px; color: var(--text-2); font-size: 12.5px; }
 .task-foot .av { display: inline-grid; margin-left: auto; }
 .task-card.movable:hover { box-shadow: var(--shadow); }
@@ -908,4 +910,19 @@ body[data-route="/"] .searchbar .hub-search { flex-basis: 860px; }
 .chat-bubble { border-radius: 16px; background: color-mix(in srgb, var(--surface-solid) 70%, transparent); border-color: var(--hair); }
 .chat-msg.mine .chat-bubble { background: color-mix(in srgb, var(--accent) 14%, var(--surface-solid)); }
 .event-row { border-bottom-color: var(--hair); }
+
+/* Названия колонок в журнале в цвете колонок */
+.col-chip { border-radius: 11px; background: linear-gradient(90deg, color-mix(in srgb, var(--col-c, #6b7785) 82%, #fff), var(--col-c, #6b7785)); }
+
+html[data-theme="dark"] .prio-flag.prio-LOW { color: #5b97ee; } html[data-theme="dark"] .prio-flag.prio-NORMAL { color: #e8b020; } html[data-theme="dark"] .prio-flag.prio-HIGH { color: #ec6a62; }
+.prio-chip { background: color-mix(in srgb, var(--surface-solid) 70%, transparent); border-color: var(--hair); }
+
+.back-btn { border-color: var(--hair-strong); background: color-mix(in srgb, var(--surface-solid) 70%, transparent); }
+
+.hub-search-drop.mode-mouse .sr-hit:focus:not(:hover) { background: transparent; }
+.hub-search-drop.mode-kbd .sr-hit:hover:not(:focus) { background: transparent; }
+
+.chips-field { border-radius: 14px; background: var(--field); border-color: var(--hair-strong); }
+.chips-field:focus-within { border-color: color-mix(in srgb, var(--accent) 70%, transparent); outline: 3px solid color-mix(in srgb, var(--accent) 20%, transparent); }
+.chip { background: color-mix(in srgb, var(--accent) 14%, transparent); }
 

@@ -49,7 +49,7 @@
 
     <p class="error" id="board-message" hidden></p>
 
-    <div id="board" th:fragment="board" th:class="${archiveView} ? 'archive-list' : 'kanban'">
+    <div id="board" th:fragment="board" th:class="${archiveView} ? 'archive-list' : 'kanban'" th:attr="data-l-archive=#{tasks.archive.do}">
         <th:block th:if="${archiveView}">
             <p class="muted" th:if="${board.flat().isEmpty()}" th:text="#{tasks.archive.empty}">Архив пуст</p>
             <div class="archive-row" th:each="t : ${board.flat()}">
@@ -77,11 +77,11 @@
             <div class="cards" th:attr="data-status=${s}">
                 <div class="task-card" th:each="t : ${board.columns().get(s)}"
                      th:classappend="${movable.contains(t.id)} ? 'movable'" th:attr="data-id=${t.id}">
-                    <a class="task-title" th:href="@{/tasks/{id}(id=${t.id})}" th:text="${t.title}">Название</a>
+                    <span class="prio-corner" th:replace="~{tasks/prio :: corner(${t.priority.name()})}"></span>
+                    <a class="task-title task-card-link" th:href="@{/tasks/{id}(id=${t.id})}" th:text="${t.title}">Название</a>
                     <div class="task-meta">
                         <span class="tag" th:if="${inbox}" th:text="#{'taskType.' + ${t.type}}">Тип</span>
                         <span class="tag overdue-tag" th:if="${t.isOverdue(today)}" th:text="#{tasks.overdue}">просрочено</span>
-                        <span class="tag prio-high" th:if="${t.priority.name() == 'HIGH'}" th:text="#{'taskPriority.' + ${t.priority}}">Высокий</span>
                     </div>
                     <div class="small" th:if="${t.relatedUrl != null}"><a th:href="${t.relatedUrl}" th:text="${t.relatedLabel}">объект</a></div>
                     <div class="small muted task-foot">

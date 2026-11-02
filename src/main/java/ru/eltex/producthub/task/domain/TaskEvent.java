@@ -48,6 +48,12 @@ public class TaskEvent {
     @Column(length = 300)
     private String arg2;
 
+    @Column(length = 16)
+    private String color1;
+
+    @Column(length = 16)
+    private String color2;
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
@@ -63,6 +69,13 @@ public class TaskEvent {
         this.arg1 = cut(arg1, 300);
         this.arg2 = cut(arg2, 300);
         this.createdAt = LocalDateTime.now();
+    }
+
+    public TaskEvent(Long boardId, Long taskId, User actor, String kind, String subject, String arg1, String arg2,
+                     String color1, String color2) {
+        this(boardId, taskId, actor, kind, subject, arg1, arg2);
+        this.color1 = color1;
+        this.color2 = color2;
     }
 
     private static String cut(String s, int max) {
@@ -99,6 +112,14 @@ public class TaskEvent {
 
     public String getArg2() {
         return arg2;
+    }
+
+    public String getColor1() {
+        return color1;
+    }
+
+    public String getColor2() {
+        return color2;
     }
 
     public LocalDateTime getCreatedAt() {

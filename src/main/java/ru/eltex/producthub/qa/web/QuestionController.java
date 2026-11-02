@@ -23,7 +23,13 @@ public class QuestionController {
 
     private final QuestionService service;
 
-    public QuestionController(QuestionService service) {
+    private final ru.eltex.producthub.task.service.BoardService boards;
+    private final ru.eltex.producthub.task.service.TaskService tasks;
+
+    public QuestionController(QuestionService service, ru.eltex.producthub.task.service.BoardService boards,
+                              ru.eltex.producthub.task.service.TaskService tasks) {
+        this.boards = boards;
+        this.tasks = tasks;
         this.service = service;
     }
 
@@ -58,6 +64,10 @@ public class QuestionController {
         model.addAttribute("questions", service.myQuestions(user));
         model.addAttribute("activeMenu", "tasks");
         model.addAttribute("canBoard", false);
+        // общие вкладки раздела "Задачи": входящие, свои доски, мои вопросы
+        model.addAttribute("tab", "questions");
+        model.addAttribute("tabBoards", boards.mine(user));
+        model.addAttribute("canInbox", tasks.canUseBoard(user));
         return "qa/my";
     }
 

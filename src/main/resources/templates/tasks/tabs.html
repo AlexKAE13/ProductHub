@@ -8,7 +8,7 @@
        th:classappend="${tabBoardId != null and tabBoardId == b.id and #strings.startsWith(tab, 'board')} ? 'active'"
        th:href="@{/boards/{id}(id=${b.id})}" th:text="${b.name}">Моя доска</a>
     <a th:classappend="${tab == 'boards'} ? 'active'" th:href="@{/boards}" th:text="#{boards.tab.all}">+ Доска</a>
-    <a th:href="@{/questions/my}" th:text="#{qa.my.title}">Мои вопросы</a>
+    <a th:classappend="${tab == 'questions'} ? 'active'" th:href="@{/questions/my}" th:text="#{qa.my.title}">Мои вопросы</a>
 </nav>
 
 <!-- Подвкладки своей доски. Модель: boardInfo, boardNav (board, chat, log, archive, settings) -->

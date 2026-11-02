@@ -34,7 +34,19 @@
         <span class="event-when muted small" th:text="${#temporals.format(e.at, 'dd.MM.yyyy HH:mm')}">дата</span>
         <span class="event-who" th:text="${e.actor}">Автор</span>
         <span class="event-what">
-            <span th:text="#{${'boardEvent.' + e.kind}(${e.subject}, ${e.arg1}, ${e.arg2})}">действие</span>
+            <th:block th:if="${e.kind == 'CARD_MOVED'}">
+                <span th:if="${withLinks}" th:text="#{boardEvent.CARD_MOVED.lead(${e.subject})}">Карточка</span>
+                <span class="col-chip" th:classappend="${e.color1 != ''} ? 'tone-' + ${e.color1}" th:text="${e.arg1}">Из</span>
+                <span class="col-arrow" aria-hidden="true">→</span>
+                <span class="col-chip" th:classappend="${e.color2 != ''} ? 'tone-' + ${e.color2}" th:text="${e.arg2}">В</span>
+            </th:block>
+            <th:block th:if="${e.kind == 'CARD_PRIORITY'}">
+                <span th:text="${withLinks} ? #{boardEvent.CARD_PRIORITY.lead(${e.subject})} : #{boardEvent.card.CARD_PRIORITY.lead}">Приоритет</span>
+                <span class="prio-chip"><span th:replace="~{tasks/prio :: flag(${e.arg1})}"></span><span th:text="#{'taskPriority.' + ${e.arg1}}">Из</span></span>
+                <span class="col-arrow" aria-hidden="true">→</span>
+                <span class="prio-chip"><span th:replace="~{tasks/prio :: flag(${e.arg2})}"></span><span th:text="#{'taskPriority.' + ${e.arg2}}">В</span></span>
+            </th:block>
+            <span th:if="${e.kind != 'CARD_MOVED' and e.kind != 'CARD_PRIORITY'}" th:text="#{${(withLinks ? 'boardEvent.' : 'boardEvent.card.') + e.kind}(${e.subject}, ${e.arg1}, ${e.arg2})}">действие</span>
             <a class="small" th:if="${withLinks and e.taskId != null}" th:href="@{/tasks/{id}(id=${e.taskId})}" th:text="#{log.open}">открыть</a>
         </span>
     </li>

@@ -1,0 +1,9 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<body>
+<!-- Флажок приоритета: синий - низкий, желтый - обычный, красный - высокий. Параметр: имя приоритета (LOW, NORMAL, HIGH) -->
+<span th:fragment="flag(p)" class="prio-flag" th:classappend="'prio-' + ${p}" th:title="#{'taskPriority.' + ${p}}"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M5 3v18" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/><path d="M5 4h13l-3 4.5L18 13H5z" fill="currentColor"/></svg></span>
+<!-- Тот же флажок, но в правом верхнем углу карточки на доске -->
+<span th:fragment="corner(p)" class="prio-corner"><span th:replace="~{:: flag(${p})}"></span></span>
+</body>
+</html>

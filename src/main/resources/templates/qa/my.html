@@ -9,10 +9,7 @@
     <div class="page-head">
         <h1 th:text="#{menu.tasks}">Задачи</h1>
     </div>
-    <nav class="tabs">
-        <a th:href="@{/tasks}" th:text="#{tasks.tab.board}">Доска</a>
-        <a class="active" th:href="@{/questions/my}" th:text="#{qa.my.title}">Мои вопросы</a>
-    </nav>
+    <nav th:replace="~{tasks/tabs :: tabs}"></nav>
     <p class="empty-note" th:if="${questions.isEmpty()}" th:text="#{qa.my.empty}">Вы пока ничего не спрашивали.</p>
     <table class="table" th:if="${!questions.isEmpty()}">
         <thead><tr>
