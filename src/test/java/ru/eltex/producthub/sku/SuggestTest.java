@@ -55,10 +55,20 @@ class SuggestTest {
     }
 
     @Test
+    @WithUserDetails("sales")
+    void tagSuggestionsReturnActiveMatchingTags() throws Exception {
+        mvc.perform(get("/suggest/tags").param("q", "hua"))
+                .andExpect(status().isOk()).andExpect(content().string(containsString("Huawei")));
+        mvc.perform(get("/suggest/tags").param("q", "несуществующий-тег"))
+                .andExpect(content().json("[]"));
+    }
+
+    @Test
     @WithUserDetails("partner")
     void externalUserGetsNoSuggestions() throws Exception {
         mvc.perform(get("/suggest/skus").param("q", "wep")).andExpect(status().isForbidden());
         mvc.perform(get("/suggest/lines").param("q", "wep")).andExpect(status().isForbidden())
                 .andExpect(content().string(not(containsString("WEP"))));
+        mvc.perform(get("/suggest/tags").param("q", "hua")).andExpect(status().isForbidden());
     }
 }

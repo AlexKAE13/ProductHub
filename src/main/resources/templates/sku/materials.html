@@ -32,32 +32,37 @@
             </div>
         </div>
         <p class="muted" th:if="${materials.docs.isEmpty()}" th:text="#{sku.docs.empty}">Материалов пока нет.</p>
-        <div th:each="g : ${materials.docs}">
-            <h3 th:text="${g.type.name}">Тип</h3>
+        <details class="materials-group" th:each="g : ${materials.docs}" open>
+            <summary><h3 th:text="${g.type.name}">Тип</h3></summary>
+            <div class="materials-scroll">
             <table class="table dense materials" th:if="${!g.actual.isEmpty()}">
                 <th:block th:each="item : ${g.actual}"><tr th:replace="~{:: row(${item})}"></tr></th:block>
             </table>
+            </div>
             <details class="outdated" th:if="${!g.outdated.isEmpty()}">
                 <summary th:text="#{sku.docs.outdated(${g.outdated.size()})}">Устаревшие</summary>
-                <table class="table dense materials">
+                <div class="materials-scroll"><table class="table dense materials">
                     <th:block th:each="item : ${g.outdated}"><tr th:replace="~{:: row(${item})}"></tr></th:block>
-                </table>
+                </table></div>
             </details>
-        </div>
+        </details>
     </section>
 
     <section class="block" id="block-compare">
         <div class="block-head"><h2 th:text="#{sku.section.compare}">Сравнения и battle cards</h2>
             <a class="link-btn edit-only" th:if="${canAddMaterials}" th:href="@{/artifacts/upload(sku=${s.model},type='Battle card')}" th:text="#{sku.compare.add}">Добавить battle card</a></div>
         <p class="muted" th:if="${materials.compare.actual.isEmpty() and materials.compare.outdated.isEmpty()}" th:text="#{sku.compare.empty}">Нет материалов.</p>
-        <table class="table dense materials" th:if="${!materials.compare.actual.isEmpty()}">
+        <details class="materials-group" th:if="${!materials.compare.actual.isEmpty() or !materials.compare.outdated.isEmpty()}" open>
+        <summary th:text="#{sku.materials.toggle}">Показать или скрыть список</summary>
+        <div class="materials-scroll"><table class="table dense materials" th:if="${!materials.compare.actual.isEmpty()}">
             <th:block th:each="item : ${materials.compare.actual}"><tr th:replace="~{:: row(${item})}"></tr></th:block>
-        </table>
+        </table></div>
         <details class="outdated" th:if="${!materials.compare.outdated.isEmpty()}">
             <summary th:text="#{sku.docs.outdated(${materials.compare.outdated.size()})}">Устаревшие</summary>
-            <table class="table dense materials">
+            <div class="materials-scroll"><table class="table dense materials">
                 <th:block th:each="item : ${materials.compare.outdated}"><tr th:replace="~{:: row(${item})}"></tr></th:block>
-            </table>
+            </table></div>
+        </details>
         </details>
     </section>
 </div>

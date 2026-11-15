@@ -26,7 +26,7 @@
         return drop;
     }
 
-    function multi(input) { return input.getAttribute('data-suggest') === 'sku' && !input.hasAttribute('data-single'); }
+    function multi(input) { return (input.getAttribute('data-suggest') === 'sku' || input.getAttribute('data-suggest') === 'tag') && !input.hasAttribute('data-single'); }
 
     // Текущее слово: от последнего разделителя до курсора
     function token(input) {
@@ -42,9 +42,12 @@
     }
 
     function close() {
+        clearTimeout(timer);
+        seq++;
         if (drop) { drop.hidden = true; }
         items = [];
         active = -1;
+        current = null;
     }
 
     function place(input) {
@@ -80,6 +83,7 @@
     function pick(i) {
         var it = items[i];
         if (!it || !current) { return; }
+        var input = current;
         var t = token(current);
         var before = current.value.slice(0, t.start);
         var leading = before.length && !/\s$/.test(before) ? ' ' : '';
@@ -91,13 +95,13 @@
         current.dispatchEvent(new Event('input', {bubbles: true}));
         current.dispatchEvent(new Event('change', {bubbles: true}));
         close();
-        current.focus();
+        input.focus();
     }
 
     function query(input) {
         var t = token(input);
-        if (!t.text) { if (input.getAttribute('data-suggest') !== 'line') { close(); return; } }
-        var kind = input.getAttribute('data-suggest') === 'line' ? 'lines' : 'skus';
+        if (!t.text) { if (input.getAttribute('data-suggest') === 'sku') { close(); return; } }
+        var kind = input.getAttribute('data-suggest') === 'line' ? 'lines' : input.getAttribute('data-suggest') === 'tag' ? 'tags' : 'skus';
         var mine = ++seq;
         fetch('/suggest/' + kind + '?q=' + encodeURIComponent(t.text), {headers: {'Accept': 'application/json'}, credentials: 'same-origin'})
             .then(function (r) { return r.ok ? r.json() : []; })
@@ -108,7 +112,7 @@
                 active = items.length ? 0 : -1;
                 render();
             })
-            .catch(function () { close(); });
+            .catch(function () { if (mine === seq) { close(); } });
     }
 
     document.addEventListener('input', function (e) {
@@ -121,7 +125,7 @@
 
     document.addEventListener('focusin', function (e) {
         var el = e.target;
-        if (el.hasAttribute && el.hasAttribute('data-suggest') && el.getAttribute('data-suggest') === 'line' && !el.value) {
+        if (el.hasAttribute && el.hasAttribute('data-suggest') && (el.getAttribute('data-suggest') === 'line' || el.getAttribute('data-suggest') === 'tag') && !el.value) {
             current = el;
             query(el);
         }

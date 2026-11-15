@@ -105,10 +105,11 @@ public class ArtifactQueryRepository {
                 + "left join fetch a.line left join fetch a.currentVersion" + clause
                 + " order by " + sortExpr + " " + dir + ", a.id desc", Artifact.class);
         params.forEach(query::setParameter);
-        int page = Math.max(0, f.page());
-        query.setFirstResult(page * ArtifactFilter.PAGE_SIZE);
-        query.setMaxResults(ArtifactFilter.PAGE_SIZE);
-        return new ArtifactPage(query.getResultList(), total, page, ArtifactFilter.PAGE_SIZE);
+        int size = f.size() == 0 ? (int) Math.min(Integer.MAX_VALUE, Math.max(1, total)) : f.size();
+        int page = f.size() == 0 ? 0 : Math.min(Math.max(0, f.page()), (int) Math.max(0, (total - 1) / size));
+        query.setFirstResult(page * size);
+        query.setMaxResults(size);
+        return new ArtifactPage(query.getResultList(), total, page, size);
     }
 
     /** Материалы, показываемые в карточке SKU: привязанные к SKU и к его линейке целиком. */

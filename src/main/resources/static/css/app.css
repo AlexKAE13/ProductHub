@@ -641,6 +641,15 @@ details > summary { cursor: pointer; }
 
 /* Широкие таблицы прокручиваются внутри своей рамки, а не наезжают на соседние элементы */
 .table-scroll { overflow-x: auto; }
+.preview-actions { margin-bottom: 20px; flex-wrap: wrap; }
+.catalog-row { cursor: pointer; }
+.home-guide { margin-top: 1rem; }
+.materials-scroll { max-width: 100%; overflow-x: auto; }
+.materials-scroll table.materials { min-width: 650px; }
+#block-docs .block-head, #block-compare .block-head { flex-wrap: wrap; gap: 8px; }
+#block-docs, #block-compare { min-width: 0; }
+.materials-group > summary { cursor: pointer; }
+.materials-group > summary h3 { display: inline; }
 .table.preview { min-width: 1240px; }
 
 /* ---------- Выбор строк и массовые действия ---------- */

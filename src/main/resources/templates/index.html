@@ -14,7 +14,15 @@
         <span th:text="#{home.roles(${#strings.listJoin(#authentication.authorities.![authority.substring(5)], ', ')})}">Роли</span>
     </p>
     <p th:text="#{home.intro}">Описание</p>
-    <p class="muted" th:text="#{home.stage}">Каркас</p>
+    <details class="home-guide" open>
+        <summary th:text="#{home.guide.title}">Как начать работу</summary>
+        <ul>
+            <li th:text="#{home.guide.catalog}">Каталог</li>
+            <li th:text="#{home.guide.materials}">Артефакты</li>
+            <li th:text="#{home.guide.tasks}">Задачи</li>
+            <li th:text="#{home.guide.feedback}">Правки</li>
+        </ul>
+    </details>
     </section>
 </main>
 </body>

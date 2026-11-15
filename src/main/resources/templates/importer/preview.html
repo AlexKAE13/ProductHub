@@ -11,7 +11,7 @@
     <p th:text="#{preview.summary(${plan.createCount}, ${plan.versionCount}, ${plan.skipCount}, ${plan.skipped.size()})}">Итого</p>
 
     <form th:action="@{/artifacts/import/{t}/confirm(t=${plan.token})}" method="post">
-        <div class="form-actions">
+        <div class="form-actions preview-actions">
             <button type="submit" class="primary" th:text="#{preview.confirm}">Подтвердить и импортировать</button>
             <button type="submit" name="dryRun" value="true" th:text="#{preview.dryRun}">Проверить без записи (dry-run)</button>
             <a class="btn" th:href="${plan.returnSku != null} ? @{/sku/{m}(m=${plan.returnSku})} : @{/artifacts}" th:text="#{common.cancel}">Отмена</a>
@@ -45,7 +45,7 @@
                 <td><input type="text" th:name="|rows[${i.index}].skus|" th:value="${r.skus}" size="14" data-suggest="sku" autocomplete="off" th:disabled="${r.action.name() == 'SKIP'}">
                     <span class="muted small" th:if="${r.skus != null and !r.skus.isEmpty() and r.skuFound}" th:text="#{preview.skuFound}">найден</span></td>
                 <td><input type="text" th:name="|rows[${i.index}].line|" th:value="${r.line}" size="6" data-suggest="line" autocomplete="off" th:disabled="${r.action.name() == 'SKIP'}"></td>
-                <td><input type="text" th:name="|rows[${i.index}].tags|" th:value="${r.tags}" size="16" th:disabled="${r.action.name() == 'SKIP'}"></td>
+                <td><input type="text" th:name="|rows[${i.index}].tags|" th:value="${r.tags}" size="16" data-suggest="tag" autocomplete="off" th:disabled="${r.action.name() == 'SKIP'}"></td>
                 <td><select th:name="|rows[${i.index}].contour|" th:disabled="${r.action.name() == 'SKIP'}">
                     <option th:each="c : ${contours}" th:value="${c}" th:text="#{'contourShort.' + ${c}}" th:selected="${c.name() == r.contour}"></option></select></td>
                 <td><select th:name="|rows[${i.index}].ownerId|" th:disabled="${r.action.name() == 'SKIP'}">

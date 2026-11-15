@@ -77,6 +77,11 @@ public class Artifact implements ru.eltex.producthub.common.Indexable {
     private String title;
     @Column(name = "description")
     private String description;
+    @Column(name = "document_version", length = 100)
+    private String documentVersion;
+
+    public String getDocumentVersion() { return documentVersion; }
+    public void setDocumentVersion(String documentVersion) { this.documentVersion = documentVersion; }
     @Column(name = "external_url")
     private String externalUrl;
     @Column(name = "last_reviewed_at", nullable = false)

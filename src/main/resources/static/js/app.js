@@ -24,3 +24,28 @@ document.addEventListener('click', function (e) {
         e.stopPropagation();
     }
 }, true);
+
+// В каталоге открываем карточку по клику по свободному месту строки.
+document.addEventListener('click', function (e) {
+    if (e.defaultPrevented || e.button !== 0 || e.target.closest('a, button, input, select, textarea, label')) { return; }
+    if (window.getSelection && String(window.getSelection())) { return; }
+    var row = e.target.closest('.catalog-row[data-href]');
+    if (row) { window.location.assign(row.getAttribute('data-href')); }
+});
+
+document.addEventListener('DOMContentLoaded', function () {
+    var choice = document.getElementById('category-choice');
+    var input = document.getElementById('category');
+    if (!choice || !input) { return; }
+    if (input.value && !choice.value) { choice.value = '__other__'; }
+    function updateCategory() {
+        var other = choice.value === '__other__';
+        input.hidden = !other;
+        input.required = other;
+        if (!other) { input.value = choice.value; }
+        if (other) { input.focus(); }
+    }
+    choice.addEventListener('change', updateCategory);
+    input.hidden = choice.value !== '__other__';
+    input.required = choice.value === '__other__';
+});

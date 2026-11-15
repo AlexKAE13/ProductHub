@@ -67,7 +67,7 @@
             </tr>
             </thead>
             <tbody>
-            <tr th:each="s : ${page.items}">
+            <tr th:each="s : ${page.items}" class="catalog-row" th:attr="data-href=@{|/sku/${s.model}|}">
                 <td class="nowrap"><a th:href="@{|/sku/${s.model}|}" th:text="${s.model}"><strong>WEP-550K</strong></a></td>
                 <td>
                     <span th:text="${s.nameRu != null} ? ${s.nameRu} : ${s.category}">Наименование</span>

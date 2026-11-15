@@ -140,6 +140,7 @@
         </main>
 
         <footer class="footer">
+            <span th:text="#{app.version}">Beta 0.1.1</span>
             <span th:text="#{footer.responseTime(${@requestTiming.elapsedMs()})}">Время ответа: 0 мс</span>
             <span th:if="${@environment.matchesProfiles('dev')}" th:text="#{footer.devProfile}">профиль dev</span>
         </footer>

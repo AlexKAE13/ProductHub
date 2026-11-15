@@ -37,6 +37,9 @@
             <span class="error" th:if="${errors != null and errors.containsKey('externalUrl')}" th:text="#{${errors['externalUrl']}}"></span></div>
         <div class="field"><label for="description" th:text="#{field.description}">Описание</label>
             <textarea id="description" name="description" rows="3" th:text="${form.description}"></textarea></div>
+        <div class="field" th:if="${artifactId != null}"><label for="documentVersion" th:text="#{artifacts.documentVersion}">Версия документа</label>
+            <input type="text" id="documentVersion" name="documentVersion" maxlength="100" th:value="${form.documentVersion}">
+            <span class="error" th:if="${errors != null and errors.containsKey('documentVersion')}" th:text="#{${errors['documentVersion']}}"></span></div>
         <div class="field-row">
             <div class="field"><label for="skus" th:text="#{artifacts.skusHint}">SKU через запятую</label>
                 <textarea id="skus" name="skus" data-suggest="sku" autocomplete="off" rows="2" th:text="${form.skus}"></textarea>

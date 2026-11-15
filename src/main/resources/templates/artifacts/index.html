@@ -36,6 +36,11 @@
         <select name="tag" th:classappend="${filter.tag != null} ? 'on'" th:aria-label="#{artifacts.filter.tag}">
             <option value="" hidden th:text="#{artifacts.filter.tag}">Тег</option>
             <option th:each="t : ${allTags}" th:value="${t.id}" th:text="#{'tagCategory.' + ${t.category}} + ': ' + ${t.value}" th:selected="${t.id == filter.tag}"></option></select>
+        <select name="size" th:aria-label="#{artifacts.pageSize}">
+            <option value="50" th:selected="${filter.size == 50}">50</option>
+            <option value="100" th:selected="${filter.size == 100}">100</option>
+            <option value="0" th:selected="${filter.size == 0}" th:text="#{common.all}">Все</option>
+        </select>
         <details class="more-filters-box" th:open="${(filter.owner != null) or (filter.line != null) or (filter.sku != null and !filter.sku.isEmpty()) or (filter.contour != null and !filter.contour.isEmpty()) or filter.reviewDue}">
             <summary th:text="#{catalog.filter.more}">Еще фильтры</summary>
             <div class="more-filters">
@@ -137,13 +142,13 @@
 
         <div class="pager" th:if="${view.page().totalPages() > 1}">
             <a th:if="${view.page().hasPrev()}" class="btn"
-               th:href="@{/artifacts(type=${filter.type},language=${filter.language},status=${filter.status},owner=${filter.owner},sku=${filter.sku},line=${filter.line},family=${filter.family},tag=${filter.tag},contour=${filter.contour},reviewDue=${filter.reviewDue ? true : null},q=${filter.q},sort=${filter.sort},dir=${filter.dir},page=${view.page().page() - 1})}"
-               th:attr="hx-get=@{/artifacts(type=${filter.type},language=${filter.language},status=${filter.status},owner=${filter.owner},sku=${filter.sku},line=${filter.line},family=${filter.family},tag=${filter.tag},contour=${filter.contour},reviewDue=${filter.reviewDue ? true : null},q=${filter.q},sort=${filter.sort},dir=${filter.dir},page=${view.page().page() - 1})}"
+               th:href="@{/artifacts(type=${filter.type},language=${filter.language},status=${filter.status},owner=${filter.owner},sku=${filter.sku},line=${filter.line},family=${filter.family},tag=${filter.tag},contour=${filter.contour},reviewDue=${filter.reviewDue ? true : null},q=${filter.q},sort=${filter.sort},dir=${filter.dir},size=${filter.size},page=${view.page().page() - 1})}"
+               th:attr="hx-get=@{/artifacts(type=${filter.type},language=${filter.language},status=${filter.status},owner=${filter.owner},sku=${filter.sku},line=${filter.line},family=${filter.family},tag=${filter.tag},contour=${filter.contour},reviewDue=${filter.reviewDue ? true : null},q=${filter.q},sort=${filter.sort},dir=${filter.dir},size=${filter.size},page=${view.page().page() - 1})}"
                hx-target="#results" hx-push-url="true" hx-swap="innerHTML" th:text="#{catalog.prev}">Назад</a>
             <span class="muted" th:text="#{catalog.page(${view.page().page() + 1}, ${view.page().totalPages()})}">Страница</span>
             <a th:if="${view.page().hasNext()}" class="btn"
-               th:href="@{/artifacts(type=${filter.type},language=${filter.language},status=${filter.status},owner=${filter.owner},sku=${filter.sku},line=${filter.line},family=${filter.family},tag=${filter.tag},contour=${filter.contour},reviewDue=${filter.reviewDue ? true : null},q=${filter.q},sort=${filter.sort},dir=${filter.dir},page=${view.page().page() + 1})}"
-               th:attr="hx-get=@{/artifacts(type=${filter.type},language=${filter.language},status=${filter.status},owner=${filter.owner},sku=${filter.sku},line=${filter.line},family=${filter.family},tag=${filter.tag},contour=${filter.contour},reviewDue=${filter.reviewDue ? true : null},q=${filter.q},sort=${filter.sort},dir=${filter.dir},page=${view.page().page() + 1})}"
+               th:href="@{/artifacts(type=${filter.type},language=${filter.language},status=${filter.status},owner=${filter.owner},sku=${filter.sku},line=${filter.line},family=${filter.family},tag=${filter.tag},contour=${filter.contour},reviewDue=${filter.reviewDue ? true : null},q=${filter.q},sort=${filter.sort},dir=${filter.dir},size=${filter.size},page=${view.page().page() + 1})}"
+               th:attr="hx-get=@{/artifacts(type=${filter.type},language=${filter.language},status=${filter.status},owner=${filter.owner},sku=${filter.sku},line=${filter.line},family=${filter.family},tag=${filter.tag},contour=${filter.contour},reviewDue=${filter.reviewDue ? true : null},q=${filter.q},sort=${filter.sort},dir=${filter.dir},size=${filter.size},page=${view.page().page() + 1})}"
                hx-target="#results" hx-push-url="true" hx-swap="innerHTML" th:text="#{catalog.next}">Вперед</a>
         </div>
     </div>

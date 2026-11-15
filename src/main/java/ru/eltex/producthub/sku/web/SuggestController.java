@@ -28,9 +28,11 @@ public class SuggestController {
     private EntityManager em;
 
     private final ReferenceDataService reference;
+    private final ru.eltex.producthub.tag.service.TagService tags;
 
-    public SuggestController(ReferenceDataService reference) {
+    public SuggestController(ReferenceDataService reference, ru.eltex.producthub.tag.service.TagService tags) {
         this.reference = reference;
+        this.tags = tags;
     }
 
     public record Item(String value, String hint) {
@@ -70,6 +72,14 @@ public class SuggestController {
                 .limit(LIMIT)
                 .map(l -> new Item(l.getCode(), hint(l.getName(), l.getFamily(), null)))
                 .toList();
+    }
+
+    @GetMapping("/suggest/tags")
+    @ResponseBody
+    public List<Item> tags(@RequestParam String q) {
+        String text = q == null ? "" : q.strip().toLowerCase(Locale.ROOT);
+        return tags.active().stream().filter(t -> text.isEmpty() || t.getValue().toLowerCase(Locale.ROOT).contains(text))
+                .limit(LIMIT).map(t -> new Item(t.getValue(), t.getCategory().name())).toList();
     }
 
     private static String hint(String name, String a, String b) {

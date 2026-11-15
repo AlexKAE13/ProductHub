@@ -38,6 +38,11 @@
         </div>
         <div class="field">
             <label for="category" th:text="#{field.category}">Категория</label>
+            <select id="category-choice" th:aria-label="#{field.category}" required>
+                <option value="" th:text="#{sku.category.choose}">Выберите категорию</option>
+                <option th:each="c : ${categories}" th:value="${c}" th:text="${c}" th:selected="${c == form.category}"></option>
+                <option value="__other__" th:text="#{sku.category.other}">Другая категория</option>
+            </select>
             <input type="text" id="category" name="category" th:value="${form.category}" list="category-list" required>
             <datalist id="category-list"><option th:each="c : ${categories}" th:value="${c}"></option></datalist>
             <span class="error" th:if="${errors != null and errors.containsKey('category')}" th:text="#{${errors['category']}}"></span>

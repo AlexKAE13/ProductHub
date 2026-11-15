@@ -109,6 +109,34 @@ class TaskWebTest {
 
     @Test
     @WithUserDetails("sales")
+    void outsiderCannotReadOrUploadAttachments() throws Exception {
+        var q = questions.ask(QuestionKind.QUESTION, TargetType.SKU, skuId, "Права на файлы " + marker(), false, sales);
+        Task task = taskFor(q.getId());
+        var file = new MockMultipartFile("file", "private.txt", "text/plain", "secret".getBytes());
+        attachments.upload(task.getId(), file, admin);
+        var uploaded = attachments.list(task.getId(), admin).get(0);
+        mvc.perform(get("/tasks/{id}/attachments/{fileId}", task.getId(), uploaded.id()))
+                .andExpect(status().isForbidden());
+        mvc.perform(multipart("/tasks/{id}/attachments", task.getId()).file(file))
+                .andExpect(status().isForbidden());
+        mvc.perform(multipart("/tasks/{id}/attachments", task.getId()).file(file).with(csrf()))
+                .andExpect(status().isForbidden());
+        assertEquals(1, attachments.list(task.getId(), admin).size());
+    }
+
+    @Test
+    @WithUserDetails("admin")
+    void attachmentUploadRequiresCsrfEvenForAdmin() throws Exception {
+        var q = questions.ask(QuestionKind.QUESTION, TargetType.SKU, skuId, "CSRF " + marker(), false, sales);
+        Task task = taskFor(q.getId());
+        var file = new MockMultipartFile("file", "file.txt", "text/plain", "data".getBytes());
+        mvc.perform(multipart("/tasks/{id}/attachments", task.getId()).file(file))
+                .andExpect(status().isForbidden());
+        assertTrue(attachments.list(task.getId(), admin).isEmpty());
+    }
+
+    @Test
+    @WithUserDetails("sales")
     void salesIsSentToMyQuestionsInsteadOfBoard() throws Exception {
         mvc.perform(get("/tasks")).andExpect(status().is3xxRedirection()).andExpect(redirectedUrl("/boards"));
         mvc.perform(get("/questions/my")).andExpect(status().isOk());

@@ -76,10 +76,11 @@ public class ArtifactController {
                        @RequestParam(defaultValue = "false") boolean reviewDue,
                        @RequestParam(required = false) String q, @RequestParam(defaultValue = "updated") String sort,
                        @RequestParam(defaultValue = "desc") String dir, @RequestParam(defaultValue = "0") int page,
+                       @RequestParam(defaultValue = "50") int size,
                        @RequestHeader(value = "HX-Request", required = false) String htmx,
                        @AuthenticationPrincipal HubUserDetails user, Model model) {
         ArtifactFilter filter = new ArtifactFilter(type, language, status, owner, sku, line, family, tag, contour, reviewDue, q,
-                sort, dir, page);
+                sort, dir, page, size);
         model.addAttribute("view", listService.search(filter, user));
         model.addAttribute("filter", filter);
         model.addAttribute("activeMenu", "artifacts");

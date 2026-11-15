@@ -43,6 +43,7 @@
                 <dd><a th:href="${d.artifact.externalUrl}" target="_blank" rel="noopener noreferrer" th:text="${d.artifact.externalUrl}">url</a></dd></div>
         </dl>
         <p class="pre" th:if="${d.artifact.description != null}" th:text="${d.artifact.description}">Описание</p>
+        <p th:if="${d.artifact.documentVersion != null}"><strong th:text="#{artifacts.documentVersion}">Версия документа</strong>: <span th:text="${d.artifact.documentVersion}"></span></p>
         <p>
             <span class="muted" th:text="#{artifacts.col.sku} + ':'">SKU:</span>
             <span th:each="s, st : ${d.skus}"><a th:href="@{|/sku/${s.model}|}" th:text="${s.model}">SKU</a><span th:if="${!st.last}">, </span></span>

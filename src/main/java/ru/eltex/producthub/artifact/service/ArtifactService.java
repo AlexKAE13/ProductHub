@@ -126,6 +126,7 @@ public class ArtifactService {
         ArtifactForm f = new ArtifactForm();
         f.setTitle(a.getTitle());
         f.setDescription(a.getDescription());
+        f.setDocumentVersion(a.getDocumentVersion());
         f.setTypeId(a.getType().getId());
         f.setLanguage(a.getLanguage().name());
         f.setStatus(a.getStatus().name());
@@ -281,6 +282,10 @@ public class ArtifactService {
         Artifact a = load(id);
         Map<String, String> errors = new LinkedHashMap<>();
         String title = blankToNull(form.getTitle());
+        String documentVersion = blankToNull(form.getDocumentVersion());
+        if (documentVersion != null && documentVersion.length() > 100) {
+            errors.put("documentVersion", "validation.artifact.versionTooLong");
+        }
         if (title == null) {
             errors.put("title", "validation.required");
         }
@@ -333,6 +338,8 @@ public class ArtifactService {
 
         String login = user.getUsername();
         change(a, "title", a.getTitle(), title, login, () -> a.setTitle(title));
+        change(a, "documentVersion", a.getDocumentVersion(), documentVersion, login,
+                () -> a.setDocumentVersion(documentVersion));
         change(a, "description", a.getDescription(), blankToNull(form.getDescription()), login,
                 () -> a.setDescription(blankToNull(form.getDescription())));
         change(a, "type", a.getType().getName(), type.getName(), login, () -> a.setType(type));

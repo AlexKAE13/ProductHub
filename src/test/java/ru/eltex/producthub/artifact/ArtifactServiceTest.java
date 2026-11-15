@@ -129,6 +129,19 @@ class ArtifactServiceTest {
     }
 
     @Test
+    void documentVersionIsSavedAndAuditedWithoutReplacingFiles() {
+        Artifact a = create(unique("Версия документа"), "Даташит", Language.RU, sku("WEP-550K"));
+        var originalFile = service.detail(a.getId(), product).currentFiles().get(0).getId();
+        ArtifactForm form = service.formFor(a.getId(), product);
+        form.setDocumentVersion("2.14.0");
+        service.update(a.getId(), form, product);
+        ArtifactDetail detail = service.detail(a.getId(), product);
+        assertEquals("2.14.0", detail.artifact().getDocumentVersion());
+        assertEquals(originalFile, detail.currentFiles().get(0).getId());
+        assertTrue(detail.history().stream().anyMatch(h -> "documentVersion".equals(h.getField())));
+    }
+
+    @Test
     void newVersionGoesToHistoryOldStaysDownloadable() {
         Artifact a = create(unique("Версии"), "Даташит", Language.RU, sku("WEP-550K"));
         var firstFile = service.detail(a.getId(), product).currentFiles().get(0);

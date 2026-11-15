@@ -8,6 +8,10 @@ public class ArtifactForm {
 
     private String title;
     private String description;
+    private String documentVersion;
+
+    public String getDocumentVersion() { return documentVersion; }
+    public void setDocumentVersion(String documentVersion) { this.documentVersion = documentVersion; }
     private Long typeId;
     private String language;
     private String status;
