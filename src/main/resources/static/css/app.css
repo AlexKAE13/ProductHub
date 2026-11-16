@@ -44,6 +44,7 @@ code { font: 12px ui-monospace, Menlo, monospace; background: var(--bg-soft); pa
 .inline { display: inline; }
 form.inline { display: inline; margin: 0; }
 .pre { white-space: pre-wrap; margin: 4px 0; }
+#block-text .pre a { overflow-wrap: anywhere; }
 
 /* ---------- Шапка ---------- */
 .topbar {
