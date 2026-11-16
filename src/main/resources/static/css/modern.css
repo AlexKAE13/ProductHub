@@ -893,6 +893,7 @@ html[data-theme="dark"] .tone-grey { --col-c: #8793a1; }
     box-shadow: var(--shadow-sm);
 }
 .home-card h1 { margin-top: 0; }
+.home-onboarding { border-color: var(--edge); background: color-mix(in srgb, var(--surface-solid) 70%, transparent); -webkit-backdrop-filter: blur(26px) saturate(1.5); backdrop-filter: blur(26px) saturate(1.5); box-shadow: var(--shadow-sm); border-radius: 20px; }
 @media (max-width: 700px) { .home-card { padding: 14px 16px 4px; border-radius: 16px; } }
 
 /* ---------- Поиск по центру страницы, на главной шире ---------- */

@@ -14,15 +14,47 @@
         <span th:text="#{home.roles(${#strings.listJoin(#authentication.authorities.![authority.substring(5)], ', ')})}">Роли</span>
     </p>
     <p th:text="#{home.intro}">Описание</p>
-    <details class="home-guide" open>
-        <summary th:text="#{home.guide.title}">Как начать работу</summary>
-        <ul>
-            <li th:text="#{home.guide.catalog}">Каталог</li>
-            <li th:text="#{home.guide.materials}">Артефакты</li>
-            <li th:text="#{home.guide.tasks}">Задачи</li>
-            <li th:text="#{home.guide.feedback}">Правки</li>
-        </ul>
-    </details>
+    </section>
+    <section class="home-onboarding" id="home-onboarding" th:attr="data-user=${#authentication.name}" aria-labelledby="onboarding-title">
+        <div class="onboarding-heading">
+            <div><p class="onboarding-eyebrow" th:text="#{onboarding.eyebrow}">Знакомство с системой</p>
+                <h2 id="onboarding-title" th:text="#{onboarding.title}">Начнем с главного</h2></div>
+            <button type="button" class="onboarding-close" data-onboarding-close hidden th:text="#{onboarding.close}">Закрыть</button>
+        </div>
+        <div data-onboarding-content>
+            <section class="onboarding-step" data-onboarding-step>
+                <h3 th:text="#{onboarding.purpose.title}">Зачем нужен Product HUB</h3>
+                <p th:text="#{onboarding.purpose.text}">О системе</p>
+                <p th:text="#{onboarding.sandbox}">Песочница</p>
+                <p th:text="#{onboarding.future}">Планы</p>
+            </section>
+            <section class="onboarding-step" data-onboarding-step>
+                <h3 th:text="#{onboarding.catalog.title}">Каталог продуктов</h3>
+                <p th:text="#{onboarding.catalog.text}">Каталог</p>
+                <a th:href="@{/catalog}" th:text="#{onboarding.catalog.link}">Открыть каталог</a>
+            </section>
+            <section class="onboarding-step" data-onboarding-step>
+                <h3 th:text="#{onboarding.materials.title}">Документы и материалы</h3>
+                <p th:text="#{onboarding.materials.text}">Материалы</p>
+                <div class="onboarding-links"><a th:href="@{/artifacts}" th:text="#{menu.artifacts}">Артефакты</a><a th:href="@{/firmware}" th:text="#{menu.firmware}">Прошивки</a><a th:href="@{/cases}" th:text="#{menu.cases}">Кейсы</a></div>
+            </section>
+            <section class="onboarding-step" data-onboarding-step>
+                <h3 th:text="#{onboarding.tasks.title}">Задачи и совместная работа</h3>
+                <p th:text="#{onboarding.tasks.text}">Задачи</p>
+                <a th:href="@{/tasks}" th:text="#{onboarding.tasks.link}">Открыть задачи</a>
+            </section>
+            <section class="onboarding-step" data-onboarding-step>
+                <h3 th:text="#{onboarding.feedback.title}">Ваши идеи и замечания</h3>
+                <p th:text="#{onboarding.feedback.text}">Обратная связь</p>
+                <a th:href="@{/feedback}" sec:authorize="hasAnyRole('PRODUCT','ADMIN')" th:text="#{onboarding.feedback.link}">Открыть правки</a>
+            </section>
+            <div class="onboarding-controls" data-onboarding-controls hidden>
+                <span class="muted small" data-onboarding-progress aria-live="polite" th:attr="data-label=#{onboarding.progress}"></span>
+                <div class="onboarding-buttons"><button type="button" data-onboarding-prev th:text="#{onboarding.prev}">Назад</button>
+                    <button type="button" class="primary" data-onboarding-next th:attr="data-next=#{onboarding.next},data-finish=#{onboarding.finish}" th:text="#{onboarding.next}">Далее</button></div>
+            </div>
+        </div>
+        <button type="button" data-onboarding-open hidden th:text="#{onboarding.open}">Открыть знакомство</button>
     </section>
 </main>
 </body>

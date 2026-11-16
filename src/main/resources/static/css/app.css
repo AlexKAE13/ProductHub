@@ -644,6 +644,17 @@ details > summary { cursor: pointer; }
 .preview-actions { margin-bottom: 20px; flex-wrap: wrap; }
 .catalog-row { cursor: pointer; }
 .home-guide { margin-top: 1rem; }
+.home-onboarding { margin: 20px 0; padding: 22px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg-soft); }
+.onboarding-heading { display: flex; align-items: start; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.onboarding-heading h2 { margin: 0 0 14px; }
+.onboarding-eyebrow { margin: 0 0 6px; color: var(--muted); font-size: 13px; }
+.onboarding-step h3 { margin: 0 0 10px; }
+.onboarding-step p { max-width: 76ch; line-height: 1.6; }
+.onboarding-links { display: flex; flex-wrap: wrap; gap: 16px; }
+.onboarding-controls { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-top: 20px; }
+.onboarding-controls[hidden], .onboarding-step[hidden], [data-onboarding-content][hidden], [data-onboarding-open][hidden], [data-onboarding-close][hidden], [data-onboarding-prev][hidden] { display: none; }
+.onboarding-buttons { display: flex; gap: 8px; }
+@media (max-width: 600px) { .home-onboarding { padding: 16px; } .onboarding-controls { align-items: start; } }
 .materials-scroll { max-width: 100%; overflow-x: auto; }
 .materials-scroll table.materials { min-width: 650px; }
 #block-docs .block-head, #block-compare .block-head { flex-wrap: wrap; gap: 8px; }
