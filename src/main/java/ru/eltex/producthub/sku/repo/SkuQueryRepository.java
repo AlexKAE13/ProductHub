@@ -89,8 +89,14 @@ public class SkuQueryRepository {
 
         String sortExpr = SORTS.getOrDefault(f.sort() == null ? "model" : f.sort(), "s.model");
         String dir = "desc".equalsIgnoreCase(f.dir()) ? "desc" : "asc";
+        String lifecycleOrder = "case s.lifecycleStatus"
+                + " when ru.eltex.producthub.sku.domain.LifecycleStatus.NEW then 0"
+                + " when ru.eltex.producthub.sku.domain.LifecycleStatus.PRODUCTION then 1"
+                + " when ru.eltex.producthub.sku.domain.LifecycleStatus.DEVELOPMENT then 2"
+                + " when ru.eltex.producthub.sku.domain.LifecycleStatus.EOL_ANNOUNCED then 3"
+                + " when ru.eltex.producthub.sku.domain.LifecycleStatus.EOL then 4 else 5 end";
         TypedQuery<Sku> query = em.createQuery("select s from Sku s join fetch s.line l join fetch s.owner o"
-                + clause + " order by " + sortExpr + " " + dir + ", s.id", Sku.class);
+                + clause + " order by " + lifecycleOrder + ", " + sortExpr + " " + dir + ", s.id", Sku.class);
         params.forEach(query::setParameter);
         int page = Math.max(0, f.page());
         query.setFirstResult(page * CatalogFilter.PAGE_SIZE);

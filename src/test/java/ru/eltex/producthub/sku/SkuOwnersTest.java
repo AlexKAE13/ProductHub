@@ -13,12 +13,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 
 import ru.eltex.producthub.common.AuditService;
 import ru.eltex.producthub.dashboard.service.DashboardService;
 import ru.eltex.producthub.importer.SeedImportService;
 import ru.eltex.producthub.security.HubUserDetails;
 import ru.eltex.producthub.security.HubUserDetailsService;
+import ru.eltex.producthub.security.UserRepository;
+import ru.eltex.producthub.sku.domain.LifecycleStatus;
+import ru.eltex.producthub.sku.domain.Sku;
+import ru.eltex.producthub.sku.repo.ProductLineRepository;
 import ru.eltex.producthub.sku.repo.SkuRepository;
 import ru.eltex.producthub.sku.service.CatalogFilter;
 import ru.eltex.producthub.sku.service.CatalogService;
@@ -50,6 +55,10 @@ class SkuOwnersTest {
     AuditService audit;
     @Autowired
     HubUserDetailsService users;
+    @Autowired
+    ProductLineRepository lines;
+    @Autowired
+    UserRepository userRepository;
 
     HubUserDetails product;
 
@@ -106,6 +115,32 @@ class SkuOwnersTest {
     }
 
     // ----------------------------------------------------------- права, каталог, дашборд
+
+    @Test
+    @Transactional
+    void catalogOrdersLifecycleBeforeSelectedSortAndAcrossFilters() {
+        var line = lines.findByCode("WEP").orElseThrow();
+        var owner = userRepository.findByLogin("product").orElseThrow();
+        for (var pair : List.of(
+                new Object[]{"ORDERTEST-A-EOL", LifecycleStatus.EOL},
+                new Object[]{"ORDERTEST-B-ANNOUNCED", LifecycleStatus.EOL_ANNOUNCED},
+                new Object[]{"ORDERTEST-C-DEV", LifecycleStatus.DEVELOPMENT},
+                new Object[]{"ORDERTEST-D-PROD", LifecycleStatus.PRODUCTION},
+                new Object[]{"ORDERTEST-E-NEW", LifecycleStatus.NEW},
+                new Object[]{"ORDERTEST-F-NEW", LifecycleStatus.NEW})) {
+            var model = (String) pair[0];
+            skus.save(new Sku(model, model.replace("-", ""), line, "test", owner, (LifecycleStatus) pair[1]));
+        }
+        skus.flush();
+        var filter = new CatalogFilter("Wi-Fi", "WEP", null, null, null, null, false, true,
+                "ORDERTEST", "model", "desc", 0);
+        var result = catalog.search(filter, product).items().stream().map(Sku::getModel).toList();
+        assertEquals(List.of("ORDERTEST-F-NEW", "ORDERTEST-E-NEW", "ORDERTEST-D-PROD", "ORDERTEST-C-DEV",
+                "ORDERTEST-B-ANNOUNCED", "ORDERTEST-A-EOL"), result);
+        var hiddenEol = new CatalogFilter("Wi-Fi", "WEP", null, null, null, null, false, false,
+                "ORDERTEST", "model", "asc", 0);
+        assertFalse(catalog.search(hiddenEol, product).items().stream().anyMatch(s -> s.getLifecycleStatus() == LifecycleStatus.EOL));
+    }
 
     @Test
     void coOwnerIsNotForeignButOutsiderIs() {
